@@ -1,0 +1,1 @@
+char* createUser(char* username, char* email, char* password);

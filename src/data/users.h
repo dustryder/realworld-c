@@ -1,0 +1,1 @@
+void insertUser(char* email, char* username, char* password);
