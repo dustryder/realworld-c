@@ -50,7 +50,7 @@ MAIN_SUBFOLDERS=handlers services data lib
 LIB_ROOT=lib
 
 # publicly used subfolders in the lib root
-LIB_PUBLIC_SUBFOLDERS=facil facil/tls facil/fiobj facil/cli facil/http facil/http/parsers facil/redis
+LIB_PUBLIC_SUBFOLDERS=facil facil/tls facil/fiobj facil/cli facil/http facil/http/parsers facil/redis cjson
 
 # privately used subfolders in the lib root (this distinction is only relevant for CMake)
 LIB_PRIVATE_SUBFOLDERS=
@@ -60,7 +60,7 @@ LIB_PRIVATE_SUBFOLDERS=
 #############################################################################
 
 # any libraries required (only names, ommit the "-l" at the begining)
-LINKER_LIBS=pthread m pq
+LINKER_LIBS=pthread m pq jwt
 # optimization level.
 OPTIMIZATION=-O2
 # Warnings... i.e. -Wpedantic -Weverything -Wno-format-pedantic

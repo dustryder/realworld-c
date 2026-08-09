@@ -1,20 +1,25 @@
 #include "fio_cli.h"
 #include "main.h"
 #include "handlers/user_handler.h"
+#include "../lib/router.h"
 
-/* TODO: edit this function to handle HTTP data and answer Websocket requests.*/
+void _set_header(http_s *h, char *key, char *value) {
+  http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
+}
+
 static void on_http_request(http_s *h) {
-
-  printf("%s\n", fiobj_obj2cstr(h->method).data);
-  printf("%s\n", fiobj_obj2cstr(h->path).data);
 
   if (http_parse_body(h) == -1) {
       http_send_error(h, 400);
       return;
   }
 
-  handle_post_user(h);
-  http_send_body(h, "Hello World!", 12);
+  http_parse_query(h);
+  _set_header(h, "content-type", "application/json");
+
+  http_route_post(h, "/api/users", handle_post_user);
+
+  http_send_error(h, 404);
 }
 
 /* starts a listeninng socket for HTTP connections. */
