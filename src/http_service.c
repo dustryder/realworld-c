@@ -9,15 +9,14 @@ void _set_header(http_s *h, char *key, char *value) {
 
 static void on_http_request(http_s *h) {
 
-  if (http_parse_body(h) == -1) {
-      http_send_error(h, 400);
-      return;
-  }
-
+  http_parse_body(h);
   http_parse_query(h);
+
   _set_header(h, "content-type", "application/json");
 
   http_route_post(h, "/api/users", handle_post_user);
+  http_route_post(h, "/api/users/login", handle_post_login);
+  http_route_get(h, "/api/user", handle_get_user);
 
   http_send_error(h, 404);
 }

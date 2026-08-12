@@ -9,12 +9,22 @@ typedef struct {
     char* password;
 } PostUserPayload;
 
+typedef struct {
+    char* email;
+    char* password;
+} PostLoginRequestPayload;
+
 enum PostUserResult {
     POST_USER_SUCCESS,
     POST_USER_DUPLICATE,
 };
 
-HttpResult handle_post_user(http_s* h);
+void handle_post_user(http_s* h);
+void handle_post_login(http_s* h);
+void handle_get_user(http_s* h);
+
 char* create_post_user_success();
 char* create_post_user_failure();
+char* create_user_success_response(char *email, char *username, char *token, char *image, char *bio);
 PostUserPayload parse_post_user_body(FIOBJ *raw_body);
+PostLoginRequestPayload parse_post_login_body(FIOBJ *body);

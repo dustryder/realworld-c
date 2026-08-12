@@ -1,8 +1,9 @@
 typedef enum {
-    DataStatusSuccess,
-    DataStatusDuplicate,
-    DataStatusConstraint,
-    DataStatusUnknown
+    DATA_SUCCESS,
+    DATA_DUPLICATE,
+    DATA_CONSTRAINT,
+    DATA_NOT_FOUND,
+    DATA_UNKNOWN,
 } DataStatus;
 
 typedef struct {
@@ -18,3 +19,5 @@ typedef struct {
 } UserDataResult;
 
 UserDataResult insertUser(char* email, char* username, char* password);
+UserDataResult get_user_by_email(char* email);
+UserDataResult get_user_data_by_id(int id);
