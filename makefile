@@ -50,7 +50,7 @@ MAIN_SUBFOLDERS=handlers services data lib
 LIB_ROOT=lib
 
 # publicly used subfolders in the lib root
-LIB_PUBLIC_SUBFOLDERS=facil facil/tls facil/fiobj facil/cli facil/http facil/http/parsers facil/redis cjson
+LIB_PUBLIC_SUBFOLDERS=facil facil/tls facil/fiobj facil/cli facil/http facil/http/parsers facil/redis cjson dotenv
 
 # privately used subfolders in the lib root (this distinction is only relevant for CMake)
 LIB_PRIVATE_SUBFOLDERS=
@@ -84,7 +84,7 @@ endif
 
 # c standard
 ifndef CSTD
-	CSTD:=c11
+	CSTD:=gnu11
 endif
 # c++ standard
 ifndef CPPSTD

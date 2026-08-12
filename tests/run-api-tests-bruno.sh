@@ -2,7 +2,7 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-HOST="${HOST:-http://localhost:8000}"
+HOST="${HOST:-http://api:3000}"
 BRUNO_SANDBOX="${BRUNO_SANDBOX:-safe}"
 
 echo "Running Bruno tests against $HOST"

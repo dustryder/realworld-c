@@ -6,6 +6,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      - DATABASE_URL=postgres://postgres:p@ssw0rd@db:5432/realworld?sslmode=disable
 
   db:
     image: postgres:17.4
@@ -21,3 +25,27 @@ services:
       start_period: 30s
     ports:
       - "5433:5432"
+
+  migrations:
+    image: amacneil/dbmate:latest
+    volumes:
+      - ./db/migrations:/db/migrations
+    environment:
+      - DATABASE_URL=postgres://postgres:p@ssw0rd@db:5432/realworld?sslmode=disable
+    command: ["up"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  test:
+    image: usebruno/cli:latest-debian
+    volumes:
+      - ./tests:/tests
+    entrypoint: sh -c "/tests/run-api-tests-bruno.sh" 
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
