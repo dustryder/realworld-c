@@ -1,3 +1,7 @@
+#include "main.h"
+
+#ifndef USER_HANDLERS_H
+#define USER_HANDLERS_H
 typedef struct {
     int status;
     char* body;
@@ -8,6 +12,14 @@ typedef struct {
     char* email;
     char* password;
 } PostUserPayload;
+
+typedef struct {
+    char* username;
+    char* email;
+    char* password;
+    char* bio;
+    char* image;
+} PutUserPayload;
 
 typedef struct {
     char* email;
@@ -22,9 +34,12 @@ enum PostUserResult {
 void handle_post_user(http_s* h);
 void handle_post_login(http_s* h);
 void handle_get_user(http_s* h);
+void handle_put_user(http_s* h);
 
 char* create_post_user_success();
 char* create_post_user_failure();
 char* create_user_success_response(char *email, char *username, char *token, char *image, char *bio);
 PostUserPayload parse_post_user_body(FIOBJ *raw_body);
+PutUserPayload parse_put_user_body(FIOBJ *raw_body);
 PostLoginRequestPayload parse_post_login_body(FIOBJ *body);
+#endif

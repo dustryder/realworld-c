@@ -1,6 +1,6 @@
 #include "fio_cli.h"
 #include "main.h"
-#include "handlers/user_handler.h"
+#include "handlers/user/user_handlers.h"
 #include "../lib/router.h"
 
 void _set_header(http_s *h, char *key, char *value) {
@@ -17,6 +17,7 @@ static void on_http_request(http_s *h) {
   http_route_post(h, "/api/users", handle_post_user);
   http_route_post(h, "/api/users/login", handle_post_login);
   http_route_get(h, "/api/user", handle_get_user);
+  http_route_put(h, "/api/user", handle_put_user);
 
   http_send_error(h, 404);
 }

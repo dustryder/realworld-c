@@ -1,3 +1,7 @@
+#include <stddef.h>
+
+#ifndef USER_DATA_H
+#define USER_DATA_H
 typedef enum {
     DATA_SUCCESS,
     DATA_DUPLICATE,
@@ -11,6 +15,8 @@ typedef struct {
     char* email;
     char* username;
     char* password;
+    char* bio;
+    char* image;
 } UserData;
 
 typedef struct {
@@ -18,6 +24,13 @@ typedef struct {
     UserData data;
 } UserDataResult;
 
-UserDataResult insertUser(char* email, char* username, char* password);
+typedef struct {
+    char* key;
+    char* value;
+} UpdateValue;
+
+UserDataResult insert_user(char* email, char* username, char* password);
+UserDataResult update_user_data(int id, UpdateValue *update_values, size_t value_count);
 UserDataResult get_user_by_email(char* email);
 UserDataResult get_user_data_by_id(int id);
+#endif

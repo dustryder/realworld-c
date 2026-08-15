@@ -9,13 +9,13 @@ services:
       migrations:
         condition: service_completed_successfully
     environment:
-      - DATABASE_URL=postgres://postgres:p@ssw0rd@db:5432/realworld?sslmode=disable
+      - DATABASE_URL=postgres://postgres:password@db:5432/realworld?sslmode=disable
 
   db:
     image: postgres:17.4
     environment: 
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: p@ssw0rd
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: realworld
     healthcheck:
       test: pg_isready -U postgres
@@ -31,7 +31,7 @@ services:
     volumes:
       - ./db/migrations:/db/migrations
     environment:
-      - DATABASE_URL=postgres://postgres:p@ssw0rd@db:5432/realworld?sslmode=disable
+      - DATABASE_URL=postgres://postgres:password@db:5432/realworld?sslmode=disable
     command: ["up"]
     depends_on:
       db:
@@ -41,6 +41,7 @@ services:
     image: usebruno/cli:latest-debian
     volumes:
       - ./tests:/tests
+    # entrypoint: sh -c "/tests/run-api-tests-bruno.sh" 
     entrypoint: sh -c "/tests/run-api-tests-bruno.sh" 
     depends_on:
       db:
