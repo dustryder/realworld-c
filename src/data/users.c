@@ -31,6 +31,7 @@ UserDataResult get_result(const PGresult *res) {
     } else if (command_status == PGRES_TUPLES_OK && PQntuples(res) == 0) {
         result.status = DATA_NOT_FOUND;
     } else if (command_status == PGRES_FATAL_ERROR) {
+        printf("%s\n", PQerrorMessage(res));
         result.status = DATA_DUPLICATE;
     } else {
         result.status = DATA_UNKNOWN;

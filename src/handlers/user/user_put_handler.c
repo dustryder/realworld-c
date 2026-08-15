@@ -51,6 +51,32 @@ void handle_put_user(http_s* h) {
     http_send_body(h, body, strlen(body));
 }
 
+OptionalValue parse_optional_value(FIOBJ obj, char* key) {
+  FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
+  OptionalValue optional_value;
+
+  if (!fiobj_hash_haskey(obj, fiobj_key)) {
+    optional_value.is_present = 0;
+    return optional_value;
+  }
+
+  FIOBJ value = fiobj_hash_get(obj, fiobj_key);
+
+  if (FIOBJ_TYPE_IS(value, FIOBJ_T_NULL)) {
+    optional_value.is_present = 1;
+    optional_value.value = NULL;
+    return optional_value;
+  }
+
+  char *json_value = fiobj_obj2cstr(fiobj_hash_get(obj, fiobj_key)).data;
+  optional_value.is_present = 1;
+  optional_value.value = json_value;
+
+  fiobj_free(fiobj_key);
+
+  return optional_value;
+}
+
 PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
 
   FIOBJ user_key = fiobj_str_new("user", 4);
@@ -70,18 +96,13 @@ PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
 
   PutUserPayload values;
 
-  values.email = fiobj_hash_haskey(user_body, email_key) ? fiobj_obj2cstr(fiobj_hash_get(user_body, email_key)).data : NULL;
-  values.password = fiobj_hash_haskey(user_body, password_key) ? fiobj_obj2cstr(fiobj_hash_get(user_body, password_key)).data : NULL;
-  values.username = fiobj_hash_haskey(user_body, username_key) ? fiobj_obj2cstr(fiobj_hash_get(user_body, username_key)).data : NULL;
-  values.bio = fiobj_hash_haskey(user_body, bio_key) ? fiobj_obj2cstr(fiobj_hash_get(user_body, bio_key)).data : NULL;
-  values.image = fiobj_hash_haskey(user_body, image_key) ? fiobj_obj2cstr(fiobj_hash_get(user_body, image_key)).data : NULL;
+  values.email = parse_optional_value(user_body, "email");
+  values.password = parse_optional_value(user_body, "password");
+  values.username = parse_optional_value(user_body, "username");
+  values.bio = parse_optional_value(user_body, "bio");
+  values.image = parse_optional_value(user_body, "image");
 
   fiobj_free(user_key);
-  fiobj_free(username_key);
-  fiobj_free(email_key);
-  fiobj_free(password_key);
-  fiobj_free(bio_key);
-  fiobj_free(image_key);
 
   return values;
 }

@@ -1,5 +1,5 @@
 #include "../../data/users.h"
-
+#include "../../lib/http_helpers.h"
 #ifndef USER_SERVICES_H
 #define USER_SERVICES_H
 typedef struct {
@@ -62,5 +62,5 @@ typedef struct {
     UserServiceResultData result;
 } UpdateUserResult;
 
-UpdateUserResult update_user(int id, char* email, char* password, char* username, char* bio, char* image);
+UpdateUserResult update_user(int id, OptionalValue email, OptionalValue password, OptionalValue username, OptionalValue bio, OptionalValue image);
 #endif

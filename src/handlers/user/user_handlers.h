@@ -1,4 +1,5 @@
 #include "main.h"
+#include "../../lib/http_helpers.h"
 
 #ifndef USER_HANDLERS_H
 #define USER_HANDLERS_H
@@ -14,11 +15,11 @@ typedef struct {
 } PostUserPayload;
 
 typedef struct {
-    char* username;
-    char* email;
-    char* password;
-    char* bio;
-    char* image;
+    OptionalValue username;
+    OptionalValue email;
+    OptionalValue password;
+    OptionalValue bio;
+    OptionalValue image;
 } PutUserPayload;
 
 typedef struct {
