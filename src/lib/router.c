@@ -56,6 +56,7 @@ bool http_path_matches(http_s *request, char *__route) {
     char *path_next_part  = strtok_r(path,  "/", &path_remaining);
 
     while (route_next_part && path_next_part) {
+
         // if the route part is an inline variable, extract the variable name and its value
         if (route_next_part[0] == ':') {
             route_parts[matches]  = route_next_part + 1;
@@ -72,12 +73,16 @@ bool http_path_matches(http_s *request, char *__route) {
         path_next_part  = strtok_r(NULL, "/", &path_remaining);
     }
 
-    free(route);
+    if (!FIOBJ_TYPE_IS(request->params, FIOBJ_T_HASH)) {
+        request->params = fiobj_hash_new();
+    }
 
     // add the inline path variable names and values to the request params
     for (int i = 0; i < matches; i++) {
         http_add2hash(request->params, route_parts[i], strlen(route_parts[i]), path_parts[i], strlen(path_parts[i]), 1);
     }
+
+    free(route);
 
     return true;
 }
