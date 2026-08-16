@@ -21,6 +21,7 @@ typedef enum {
 typedef struct {
     CreateUserStatus status;
     char* result;
+    ErrorValue error;
 } RegisterUserStatus;
 
 RegisterUserStatus register_user(char* username, char* email, char* password);
@@ -35,6 +36,7 @@ typedef enum {
 typedef struct {
     LoginUserStatus status;
     UserServiceResultData result;
+    ErrorValue error;
 } LoginUserResult;
 
 LoginUserResult login(char* email, char* password);

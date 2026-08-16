@@ -1,5 +1,6 @@
 
 #include "users.h"
+#include "main.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -19,6 +20,18 @@ UserData map_user_data(const PGresult *res) {
     return data;
 }
 
+char *map_constraint(const PGresult *res) {
+    char* error = PQresultErrorField(res, PG_DIAG_CONSTRAINT_NAME);
+
+    if (strcmp(error, "user_username_key") == 0) {
+        return "username";
+    }
+
+    if (strcmp(error, "user_email_key") == 0) {
+        return "email";
+    }
+}
+
 UserDataResult get_result(const PGresult *res) {
     UserDataResult result;
     ExecStatusType command_status = PQresultStatus(res);
@@ -31,8 +44,14 @@ UserDataResult get_result(const PGresult *res) {
     } else if (command_status == PGRES_TUPLES_OK && PQntuples(res) == 0) {
         result.status = DATA_NOT_FOUND;
     } else if (command_status == PGRES_FATAL_ERROR) {
-        printf("%s\n", PQerrorMessage(res));
+        FIO_LOG_DEBUG("Database request failed: %s\n", PQresultErrorMessage(res));
         result.status = DATA_DUPLICATE;
+        ErrorValue error;
+        error.error = PQresultErrorMessage(res);
+
+        error.property = map_constraint(res);
+
+        result.error = error;
     } else {
         result.status = DATA_UNKNOWN;
     }
@@ -75,7 +94,7 @@ UserDataResult get_user_by_email(char* email) {
 }
 
 UserDataResult insert_user(char* email, char* username, char* password) {
-
+    FIO_LOG_DEBUG("insert_user: email: %s, user: %s, password: %s", email, username, password);
     PGconn *connection = get_connection();
 
     char* command = "INSERT INTO \"user\" (username, email, password) VALUES"

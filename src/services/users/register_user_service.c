@@ -4,6 +4,7 @@
 #include <string.h>
 
 RegisterUserStatus register_user(char* email, char* username, char* password) {
+    FIO_LOG_DEBUG("register_user: email: %s, user: %s, password: %s", email, username, password);
 
     RegisterUserStatus result;
     UserDataResult data_result = insert_user(email, username, password);
@@ -14,6 +15,8 @@ RegisterUserStatus register_user(char* email, char* username, char* password) {
         result.result = jwt;
     } else if (data_result.status == DATA_DUPLICATE) {
         result.status = CREATE_USER_DUPLICATE;
+        result.error.property = data_result.error.property;
+        result.error.error = "has already been taken";
     } else {
         result.status = CREATE_USER_UNKNOWN;
     }

@@ -5,8 +5,12 @@ char* get_bearer_token(http_s* h) {
 
   FIOBJ authorization_header_key = fiobj_str_new("authorization", 13);
   FIOBJ auth = fiobj_hash_get(h->headers, authorization_header_key);
-  char *token = fiobj_obj2cstr(auth).data;
 
+  if (FIOBJ_TYPE_IS(auth, FIOBJ_T_NULL)) {
+    return NULL;
+  }
+
+  char *token = fiobj_obj2cstr(auth).data;
  
   char *buffer = malloc((strlen(token) - BEARER_PREFIX_LENGTH + 1) * sizeof(char));
 

@@ -8,4 +8,9 @@ typedef struct {
     char* value;
     int is_present;
 } OptionalValue;
+
+typedef struct {
+    char* property;
+    char* error;
+} ErrorValue;
 #endif

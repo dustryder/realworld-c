@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "../../lib/http_helpers.h"
 
 #ifndef USER_DATA_H
 #define USER_DATA_H
@@ -22,6 +23,7 @@ typedef struct {
 typedef struct {
     DataStatus status;
     UserData data;
+    ErrorValue error;
 } UserDataResult;
 
 typedef struct {

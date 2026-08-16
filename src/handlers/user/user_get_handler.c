@@ -11,11 +11,14 @@ void handle_get_user(http_s* h) {
     char *token = get_bearer_token(h);
     char* body;
 
-    if (strcmp(token, "null") == 0) {
+    if (token == NULL) {
       h->status = HTTP_UNAUTHORIZED;
-      body = create_post_user_failure();
-      http_send_body(h, body, strlen(body));
-      return;
+      ErrorValue errors[1];
+      errors[0].error = "is missing";
+      errors[0].property = "token";
+
+      body = create_post_user_failure_from_errors(errors, 1);
+      return http_send_body(h, body, strlen(body));
     }
 
     int id = decode_jwt_sub(token);
