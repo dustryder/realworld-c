@@ -15,9 +15,33 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-> Describe the general architecture of your app here
+Typical 3-tier architecture:
+
+HTTP layer
+    |
+    |
+    V
+Application layer
+    |
+    |
+    V
+Persistence layer
 
 # Getting started
 
-> npm install, npm start, etc.
+## Prerequisites
+
+This project uses postgres as a database and will need to be installed. As well as this it uses dbmate to perform database migrations, although frankly you may just as well run the migration scripts directly.
+
+Otherwise:
+
+1. Ensure dependencies are installed correctly via:
+
+apt update && apt install -y libpq-dev libjwt-dev
+
+3. Run make
+
+4. Run the executable in the build folder
+
+Note: this relies on glibc with gnu c extensions
 
