@@ -19,6 +19,16 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: follow; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.follow (
+    user_id integer NOT NULL,
+    user_follow_id integer NOT NULL
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -69,6 +79,14 @@ ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_
 
 
 --
+-- Name: follow follow_user_user_follow_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.follow
+    ADD CONSTRAINT follow_user_user_follow_pk PRIMARY KEY (user_id, user_follow_id);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -101,6 +119,22 @@ ALTER TABLE ONLY public."user"
 
 
 --
+-- Name: follow follow_user_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.follow
+    ADD CONSTRAINT follow_user_fk FOREIGN KEY (user_id) REFERENCES public."user"(id);
+
+
+--
+-- Name: follow follow_user_follow_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.follow
+    ADD CONSTRAINT follow_user_follow_fk FOREIGN KEY (user_follow_id) REFERENCES public."user"(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -112,4 +146,5 @@ ALTER TABLE ONLY public."user"
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20260812210635');
+    ('20260812210635'),
+    ('20260817072911');

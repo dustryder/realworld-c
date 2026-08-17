@@ -1,22 +1,24 @@
 #include "main.h"
 #include "profile_handlers.h"
+#include "../../services/profiles/profiles_services.h"
+#include "../../lib/http_helpers.h"
+#include "../../lib/constants.h"
 
 void handle_get_profile(http_s* h) {
+    FIO_LOG_DEBUG("handle_get_profile");
 
     char *username = parse_path_param(h->params, "username");
-    
-    printf("%s\n", username);
-}
 
-char *parse_path_param(FIOBJ *params, char *key) {
+    GetProfileByUsernameResult result = get_profile_by_username(username);
+    char *response_body;
 
-    // char *raw_params = fiobj_obj2cstr(params).data;
+    if (result.status == GET_PROFILE_SUCCESS) {
+      h->status = HTTP_SUCCESS;
+      response_body = create_success_profile_response(result.result);
+    } else if (result.status == GET_PROFILE_UNKNOWN) {
+      response_body = "failure";
+      h->status = HTTP_NOT_FOUND;
+    }
 
-    FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
-
-    FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
-
-    char* value = fiobj_obj2cstr(fiobj_value).data;
-
-    return value;
+    http_send_body(h, response_body, strlen(response_body));
 }

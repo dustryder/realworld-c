@@ -20,7 +20,7 @@ UserData map_user_data(const PGresult *res) {
     return data;
 }
 
-char *map_constraint(const PGresult *res) {
+char *map_user_constraint(const PGresult *res) {
     char* error = PQresultErrorField(res, PG_DIAG_CONSTRAINT_NAME);
 
     if (strcmp(error, "user_username_key") == 0) {
@@ -32,7 +32,7 @@ char *map_constraint(const PGresult *res) {
     }
 }
 
-UserDataResult get_result(const PGresult *res) {
+UserDataResult get_user_result(const PGresult *res) {
     UserDataResult result;
     ExecStatusType command_status = PQresultStatus(res);
 
@@ -49,12 +49,29 @@ UserDataResult get_result(const PGresult *res) {
         ErrorValue error;
         error.error = PQresultErrorMessage(res);
 
-        error.property = map_constraint(res);
+        error.property = map_user_constraint(res);
 
         result.error = error;
     } else {
         result.status = DATA_UNKNOWN;
     }
+
+    return result;
+}
+
+UserDataResult get_user_data_by_username(char* username) {
+    FIO_LOG_DEBUG("get_user_data_by_username: username=%s", username);
+
+    PGconn *connection = get_connection();
+
+    char* command = "SELECT *"
+                    "FROM \"user\""
+                    "WHERE username = $1";
+    const char * const data[1] = { username };
+
+    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+
+    UserDataResult result = get_user_result(data_result);
 
     return result;
 }
@@ -72,7 +89,7 @@ UserDataResult get_user_data_by_id(int id) {
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_result(data_result);
+    UserDataResult result = get_user_result(data_result);
 
     return result;
 }
@@ -88,7 +105,7 @@ UserDataResult get_user_by_email(char* email) {
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_result(data_result);
+    UserDataResult result = get_user_result(data_result);
 
     return result;
 }
@@ -104,7 +121,7 @@ UserDataResult insert_user(char* email, char* username, char* password) {
 
     PGresult *data_result = PQexecParams(connection,command,3,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_result(data_result);
+    UserDataResult result = get_user_result(data_result);
 
     return result;
 }
@@ -143,7 +160,7 @@ UserDataResult update_user_data(int id, UpdateValue *update_values, size_t value
 
     PGresult *data_result = PQexecParams(connection, command, value_count + 1, NULL, data, NULL, NULL, 0);
 
-    UserDataResult result = get_result(data_result);
+    UserDataResult result = get_user_result(data_result);
 
     return result;
 }

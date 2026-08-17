@@ -4,7 +4,7 @@
 bool http_path_matches(http_s *request, char *__route);
 
 #define http_route_handler(_h, _method, _route, _func) {                                                \
-    if (strcmp(fiobj_obj2cstr(_h->method).data, _method) == 0 && http_path_matches(_h, _route)) {  \
+    if (strcmp(fiobj_obj2cstr(_h->method).data, _method) == 0 && http_path_matches(_h, _route)) {       \
         FIO_LOG_DEBUG("Matched route %s %s", _method, _route);                                          \
         _func(_h);                                                                                      \
         return;                                                                                         \

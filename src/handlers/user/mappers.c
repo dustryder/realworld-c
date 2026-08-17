@@ -3,7 +3,7 @@
 #include "cJSON.h"
 
 char* create_user_success_response(char *email, char *username, char *token, char *bio, char *image) {
-    cJSON *wrapper = cJSON_CreateObject();
+    cJSON *response_body = cJSON_CreateObject();
     cJSON *user_properties = cJSON_CreateObject();
 
     cJSON_AddItemToObject(user_properties, "email", cJSON_CreateString(email));
@@ -12,9 +12,10 @@ char* create_user_success_response(char *email, char *username, char *token, cha
     cJSON_AddItemToObject(user_properties, "bio", bio != NULL ? cJSON_CreateString(bio) : cJSON_CreateNull());
     cJSON_AddItemToObject(user_properties, "image", image != NULL ? cJSON_CreateString(image) : cJSON_CreateNull());
 
-    cJSON_AddItemToObject(wrapper, "user", user_properties);
+    cJSON_AddItemToObject(response_body, "user", user_properties);
 
-    char *response_string = cJSON_Print(wrapper);
+    char *response_string = cJSON_Print(response_body);
+    cJSON_Delete(response_body);
 
     return response_string;
 }
@@ -28,10 +29,11 @@ char* create_post_user_failure() {
   cJSON *error = cJSON_CreateObject();
   cJSON_AddItemToObject(error, "username", arr);
 
-  cJSON *res = cJSON_CreateObject();
-  cJSON_AddItemToObject(res, "errors", error);
+  cJSON *response_body = cJSON_CreateObject();
+  cJSON_AddItemToObject(response_body, "errors", error);
 
-  char *response_string = cJSON_Print(res);
+  char *response_string = cJSON_Print(response_body);
+  cJSON_Delete(response_body);
 
   return response_string;
 }
@@ -59,6 +61,7 @@ char *create_post_user_failure_from_errors(ErrorValue* errors, size_t error_coun
   cJSON_AddItemToObject(response_body, "errors", error_body);
 
   char *response_string = cJSON_Print(response_body);
+  cJSON_Delete(response_body);
 
   return response_string;
 }

@@ -15,12 +15,16 @@ static void on_http_request(http_s *h) {
 
   _set_header(h, "content-type", "application/json");
 
+  //user routes
   http_route_post(h, "/api/users", handle_post_user);
   http_route_post(h, "/api/users/login", handle_post_login);
   http_route_get(h, "/api/user", handle_get_user);
   http_route_put(h, "/api/user", handle_put_user);
 
+  //profile routes
   http_route_get(h, "/api/profiles/:username", handle_get_profile);
+  http_route_post(h, "/api/profiles/:username/follow", handle_post_follow);
+  http_route_delete(h, "/api/profiles/:username/follow", handle_delete_follow);
 
   http_send_error(h, 404);
 }
