@@ -39,7 +39,7 @@ void handle_post_login(http_s* h) {
     validate_post_login_payload(values, errors, &error_count);
 
     if (error_count > 0) {
-      request_body = create_post_user_failure_from_errors(errors, error_count);
+      request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
       LoginUserResult result = login(values.email, values.password);
@@ -56,7 +56,7 @@ void handle_post_login(http_s* h) {
       } else if (result.status == LOGIN_USER_UNKNOWN || result.status == LOGIN_USER_BAD_PASSWORD) {
         h->status = HTTP_UNAUTHORIZED;
         ErrorValue errors[1] = { result.error };
-        request_body = create_post_user_failure_from_errors(errors, 1);
+        request_body = create_failure_body_from_errors(errors, 1);
       }
     }
     http_send_body(h, request_body, strlen(request_body));

@@ -16,7 +16,7 @@ void handle_post_follow(http_s* h) {
       errors[0].error = "is missing";
       errors[0].property = "token";
 
-      response_body = create_post_user_failure_from_errors(errors, 1);
+      response_body = create_failure_body_from_errors(errors, 1);
       h->status = HTTP_UNAUTHORIZED;
       http_send_body(h, response_body, strlen(response_body));
       return;
@@ -31,7 +31,10 @@ void handle_post_follow(http_s* h) {
     if (result.status == FOLLOW_USER_SUCCESS) {
       h->status = HTTP_SUCCESS;
       response_body = create_success_profile_response(result.result);
-      printf("After Response string -> %s\n", response_body);
+    } else if (result.status == FOLLOW_USER_UNKNOWN) {
+      h->status = HTTP_NOT_FOUND;
+      ErrorValue errors[1] = { result.error };
+      response_body = create_failure_body_from_errors(errors, 1);
     }
 
     http_send_body(h, response_body, strlen(response_body));

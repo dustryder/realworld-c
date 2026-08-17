@@ -18,22 +18,26 @@ typedef enum {
 typedef struct {
     GetProfileStatus status;
     ProfileServiceResultData result;
+    ErrorValue error;
 } GetProfileByUsernameResult;
 
 GetProfileByUsernameResult get_profile_by_username(char* username);
 
 typedef enum {
     FOLLOW_USER_SUCCESS,
+    FOLLOW_USER_UNKNOWN,
 } FollowUserStatus;
 
 typedef struct {
     FollowUserStatus status;
     ProfileServiceResultData result;
+    ErrorValue error;
 } FollowUserResult;
 
 typedef struct {
     FollowUserStatus status;
     ProfileServiceResultData result;
+    ErrorValue error;
 } UnfollowUserResult;
 
 FollowUserResult follow_user(int current_user, char* follow);

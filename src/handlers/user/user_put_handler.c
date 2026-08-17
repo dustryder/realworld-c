@@ -17,7 +17,7 @@ void handle_put_user(http_s* h) {
       errors[0].error = "is missing";
       errors[0].property = "token";
 
-      response_body = create_post_user_failure_from_errors(errors, 1);
+      response_body = create_failure_body_from_errors(errors, 1);
       h->status = HTTP_UNAUTHORIZED;
       http_send_body(h, response_body, strlen(response_body));
       return;
@@ -34,7 +34,7 @@ void handle_put_user(http_s* h) {
     validate_put_user_payload(values, errors, &error_count);
 
     if (error_count > 0) {
-      response_body = create_post_user_failure_from_errors(errors, error_count);
+      response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
       UpdateUserResult result = update_user(id,

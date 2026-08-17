@@ -16,7 +16,7 @@ void handle_post_user(http_s* h) {
     validate_user_payload(values, errors, &error_count);
 
     if (error_count > 0) {
-      request_body = create_post_user_failure_from_errors(errors, error_count);
+      request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
       RegisterUserStatus result = register_user(values.email, values.username, values.password);
@@ -26,7 +26,7 @@ void handle_post_user(http_s* h) {
         h->status = HTTP_CREATED;
       } else if (result.status == CREATE_USER_DUPLICATE) {
         ErrorValue errors[1] = { result.error };
-        request_body = create_post_user_failure_from_errors(errors, 1);
+        request_body = create_failure_body_from_errors(errors, 1);
         h->status = HTTP_CONFLICT;
       }
     }

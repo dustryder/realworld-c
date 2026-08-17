@@ -17,7 +17,7 @@ void handle_get_user(http_s* h) {
       errors[0].error = "is missing";
       errors[0].property = "token";
 
-      body = create_post_user_failure_from_errors(errors, 1);
+      body = create_failure_body_from_errors(errors, 1);
       return http_send_body(h, body, strlen(body));
     }
 

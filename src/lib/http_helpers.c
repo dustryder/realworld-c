@@ -1,4 +1,6 @@
 #include "main.h"
+#include "cJSON.h"
+#include "http_helpers.h"
 
 char* get_bearer_token(http_s* h) {
   int BEARER_PREFIX_LENGTH = 6;
@@ -29,4 +31,32 @@ char *parse_path_param(FIOBJ *params, char *key) {
     char* value = fiobj_obj2cstr(fiobj_value).data;
 
     return value;
+}
+
+char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {
+
+  cJSON *response_body = cJSON_CreateObject();
+  cJSON *error_body = cJSON_CreateObject();
+
+  for (int i = 0; i < error_count; i++) {
+    ErrorValue currentError = errors[i];
+
+    if (cJSON_GetObjectItem(error_body, currentError.property) != NULL) {
+      cJSON *errorArray = cJSON_GetObjectItem(error_body, currentError.property);
+      cJSON *errorArrayItem = cJSON_CreateString(currentError.error);
+      cJSON_AddItemToArray(errorArray, errorArrayItem);
+    } else {
+      cJSON *errorArray = cJSON_CreateArray();
+      cJSON *errorArrayItem = cJSON_CreateString(currentError.error);
+      cJSON_AddItemToArray(errorArray, errorArrayItem);
+      cJSON_AddItemToObject(error_body, currentError.property, errorArray);
+    }
+  }
+
+  cJSON_AddItemToObject(response_body, "errors", error_body);
+
+  char *response_string = cJSON_Print(response_body);
+  cJSON_Delete(response_body);
+
+  return response_string;
 }

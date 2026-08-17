@@ -39,7 +39,6 @@ void handle_put_user(http_s* h);
 
 char* create_post_user_success();
 char* create_post_user_failure();
-char *create_post_user_failure_from_errors(ErrorValue* errors, size_t error_count);
 char* create_user_success_response(char *email, char *username, char *token, char *image, char *bio);
 PostUserPayload parse_post_user_body(FIOBJ *raw_body);
 PutUserPayload parse_put_user_body(FIOBJ *raw_body);
