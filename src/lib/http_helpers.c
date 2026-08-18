@@ -33,6 +33,16 @@ char *parse_path_param(FIOBJ *params, char *key) {
     return value;
 }
 
+int parse_request_user(FIOBJ *params) {
+    FIOBJ fiobj_key = fiobj_str_new("_id", 3);
+    FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
+    char* value = fiobj_obj2cstr(fiobj_value).data;
+
+    strtol(value, NULL, 10);
+
+    return value;
+}
+
 char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {
 
   cJSON *response_body = cJSON_CreateObject();
