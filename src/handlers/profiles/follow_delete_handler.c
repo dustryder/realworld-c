@@ -6,25 +6,10 @@
 
 void handle_delete_follow(http_s* h) {
     FIO_LOG_DEBUG("handle_delete_follow");
-    char *token = get_bearer_token(h);
+
     char *username = parse_path_param(h->params, "username");
-
+    int id = parse_request_user(h->params);
     char* response_body;
-
-    if (token == NULL) {
-      ErrorValue errors[1];
-      errors[0].error = "is missing";
-      errors[0].property = "token";
-
-      response_body = create_failure_body_from_errors(errors, 1);
-      h->status = HTTP_UNAUTHORIZED;
-      http_send_body(h, response_body, strlen(response_body));
-      return;
-    }
-
-    int id = decode_jwt_sub(token);
-
-    free(token); 
 
     UnfollowUserResult result = unfollow_user(id, username);
 

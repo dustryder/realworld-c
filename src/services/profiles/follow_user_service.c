@@ -6,14 +6,14 @@ FollowUserResult follow_user(int current_user, char* follow) {
 
     FollowUserResult result;
 
-    UserDataResult user_data_result = get_user_data_by_username(follow);
+    DataResult user_data_result = get_user_data_by_username(follow);
 
     if (user_data_result.status == DATA_NOT_FOUND) {
         result.status = FOLLOW_USER_UNKNOWN;
         result.error.property = "profile";
         result.error.error = "not found";
     } else {
-        FollowDataResult data_result = insert_follow(current_user, follow);
+        DataResult data_result = insert_follow(current_user, follow);
     
         if (data_result.status == DATA_SUCCESS && user_data_result.status == DATA_SUCCESS) {
             result.status = FOLLOW_USER_SUCCESS;

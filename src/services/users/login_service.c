@@ -6,11 +6,12 @@
 LoginUserResult login(char* email, char* password) {
 
     LoginUserResult result;
-    UserDataResult data_result = get_user_by_email(email);
+    DataResult data_result = get_user_by_email(email);
+    UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {
 
-        if (strcmp(password, data_result.data.password) == 0) {
+        if (strcmp(password, user_data->password) == 0) {
             result.status = LOGIN_USER_SUCCESS;
             result.result = map_data_to_user(data_result.data);
         } else {

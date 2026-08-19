@@ -43,5 +43,5 @@ typedef struct {
 FollowUserResult follow_user(int current_user, char* follow);
 UnfollowUserResult unfollow_user(int current_user, char* follow);
 
-ProfileServiceResultData map_data_to_profile(UserData data_result, bool following);
+ProfileServiceResultData map_data_to_profile(UserData *data_result, bool following);
 #endif

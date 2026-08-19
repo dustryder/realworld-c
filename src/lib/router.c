@@ -11,21 +11,27 @@ bool http_path_matches(http_s *request, char *__route) {
         return false;
     }
 
-    char *path = fiobj_obj2cstr(request->path).data;
-
+    char *copied_path = strdup(fiobj_obj2cstr(request->path).data);
+    printf(
+        "MATCHING PATH [%s] AGAINST ROUTE [%s]\n",
+        fiobj_obj2cstr(request->path).data,
+        __route
+    );
     // truncate the path at the query string delimiter,
     // as we only care about the path itself and the 
     // query string is parsed by http_parse_query()
-    path = strtok(path, "?");
+    char *path = strtok(copied_path, "?");
 
     // does the route contain any inline path variables?
     if (strchr(route, ':') == NULL) {
         // no - perform direct string comparison
         if (strcmp(route, path) == 0) {
             free(route);
+            free(copied_path);
             return true;
         } else {
             free(route);
+            free(copied_path);
             return false;
         }
     }
@@ -39,6 +45,8 @@ bool http_path_matches(http_s *request, char *__route) {
 
     // do we have an equal number of parts?
     if (route_part_cnt != path_part_cnt) {
+        free(copied_path);
+        free(route);
         return false;
     }
 
@@ -65,6 +73,7 @@ bool http_path_matches(http_s *request, char *__route) {
             // the route part is literal, does it match the path part?
             if (strcmp(route_next_part, path_next_part)) {
                 free(route);
+                free(copied_path);
                 return false;
             }
         }
@@ -83,6 +92,7 @@ bool http_path_matches(http_s *request, char *__route) {
     }
 
     free(route);
+    free(copied_path);
 
     return true;
 }

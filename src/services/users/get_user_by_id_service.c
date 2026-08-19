@@ -5,7 +5,7 @@
 
 GetUserByIdResult get_user_by_id(int id) {
     GetUserByIdResult result;
-    UserDataResult data_result = get_user_data_by_id(id);
+    DataResult data_result = get_user_data_by_id(id);
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = GET_USER_SUCCESS;

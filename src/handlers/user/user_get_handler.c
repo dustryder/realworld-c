@@ -8,21 +8,9 @@
 
 void handle_get_user(http_s* h) {
 
-    char *token = get_bearer_token(h);
     char* body;
 
-    if (token == NULL) {
-      h->status = HTTP_UNAUTHORIZED;
-      ErrorValue errors[1];
-      errors[0].error = "is missing";
-      errors[0].property = "token";
-
-      body = create_failure_body_from_errors(errors, 1);
-      return http_send_body(h, body, strlen(body));
-    }
-
-    int id = decode_jwt_sub(token);
-    free(token);
+    int id = parse_request_user(h->params);
 
     GetUserByIdResult result = get_user_by_id(id);
 

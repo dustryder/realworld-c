@@ -4,7 +4,7 @@
 GetProfileByUsernameResult get_profile_by_username(char* username) {
     FIO_LOG_DEBUG("get_profile_by_username: username=%s", username);
 
-    UserDataResult data_result = get_user_data_by_username(username);
+    DataResult data_result = get_user_data_by_username(username);
     GetProfileByUsernameResult result;
 
     if (data_result.status == DATA_SUCCESS) {

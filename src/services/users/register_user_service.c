@@ -7,11 +7,12 @@ RegisterUserStatus register_user(char* email, char* username, char* password) {
     FIO_LOG_DEBUG("register_user: email: %s, user: %s, password: %s", email, username, password);
 
     RegisterUserStatus result;
-    UserDataResult data_result = insert_user(email, username, password);
+    DataResult data_result = insert_user(email, username, password);
+    UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = CREATE_USER_SUCCESS;
-        char* jwt = sign_jwt(data_result.data.id);
+        char* jwt = sign_jwt(user_data->id);
         result.result = jwt;
     } else if (data_result.status == DATA_DUPLICATE) {
         result.status = CREATE_USER_DUPLICATE;

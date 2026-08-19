@@ -1,5 +1,5 @@
-#include "data.h"
-#include "../../lib/http_helpers.h"
+#include "../lib/http_helpers.h"
+#include "../lib/db.h"
 
 #ifndef FOLLOW_DATA_H
 #define FOLLOW_DATA_H
@@ -8,13 +8,7 @@ typedef struct {
     int follow_user_id;
 } FollowData;
 
-typedef struct {
-    DataStatus status;
-    FollowData data;
-    ErrorValue error;
-} FollowDataResult;
-
-FollowDataResult insert_follow(int user_id, char* follow_username);
-FollowDataResult delete_follow(int user_id, char* follow_username);
+DataResult insert_follow(int user_id, char* follow_username);
+DataResult delete_follow(int user_id, char* follow_username);
 
 #endif

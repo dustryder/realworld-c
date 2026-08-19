@@ -2,6 +2,7 @@
 #include "main.h"
 #include "handlers/user/user_handlers.h"
 #include "handlers/profiles/profile_handlers.h"
+#include "handlers/articles/articles_handlers.h"
 #include "../lib/router.h"
 #include "../lib/middleware.h"
 
@@ -16,16 +17,25 @@ static void on_http_request(http_s *h) {
 
   _set_header(h, "content-type", "application/json");
 
+  printf(
+      "MATCHING PATH [%s]\n",
+      fiobj_obj2cstr(h->path).data
+  );
+
   //user routes
   http_route_post(h, "/api/users", handle_post_user, resolve_request_user);
   http_route_post(h, "/api/users/login", handle_post_login, resolve_request_user);
-  http_route_get(h, "/api/user", handle_get_user, resolve_request_user);
-  http_route_put(h, "/api/user", handle_put_user, resolve_request_user);
+  http_route_get(h, "/api/user", handle_get_user, resolve_request_user, require_auth);
+  http_route_put(h, "/api/user", handle_put_user, resolve_request_user, require_auth);
 
   //profile routes
   http_route_get(h, "/api/profiles/:username", handle_get_profile, resolve_request_user);
   http_route_post(h, "/api/profiles/:username/follow", handle_post_follow, resolve_request_user, require_auth);
   http_route_delete(h, "/api/profiles/:username/follow", handle_delete_follow, resolve_request_user, require_auth);
+
+  //articles routes
+  http_route_post(h, "/api/articles", handle_post_articles, resolve_request_user, require_auth);
+  http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user, require_auth);
 
   http_send_error(h, 404);
 }

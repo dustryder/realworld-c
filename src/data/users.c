@@ -7,61 +7,10 @@
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
-UserData map_user_data(const PGresult *res) {
-    UserData data;
+static UserData map_user_data(const PGresult *res);
 
-    data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.username = PQgetvalue(res, 0, 1);
-    data.email = PQgetvalue(res, 0, 2);
-    data.password = PQgetvalue(res, 0, 3);
-    data.bio = PQgetisnull(res, 0, 4) ? NULL : PQgetvalue(res, 0, 4);
-    data.image = PQgetisnull(res, 0, 5) ? NULL : PQgetvalue(res, 0, 5);
-
-    return data;
-}
-
-char *map_user_constraint(const PGresult *res) {
-    char* error = PQresultErrorField(res, PG_DIAG_CONSTRAINT_NAME);
-
-    if (strcmp(error, "user_username_key") == 0) {
-        return "username";
-    }
-
-    if (strcmp(error, "user_email_key") == 0) {
-        return "email";
-    }
-}
-
-UserDataResult get_user_result(const PGresult *res) {
-    UserDataResult result;
-    ExecStatusType command_status = PQresultStatus(res);
-
-    if (command_status == PGRES_COMMAND_OK) {
-        result.status = DATA_SUCCESS;
-    } else if (command_status == PGRES_TUPLES_OK && PQntuples(res) > 0) {
-        result.status = DATA_SUCCESS;
-        result.data = map_user_data(res);
-    } else if (command_status == PGRES_TUPLES_OK && PQntuples(res) == 0) {
-        result.status = DATA_NOT_FOUND;
-    } else if (command_status == PGRES_FATAL_ERROR) {
-        FIO_LOG_DEBUG("Database request failed: %s\n", PQresultErrorMessage(res));
-        result.status = DATA_DUPLICATE;
-        ErrorValue error;
-        error.error = PQresultErrorMessage(res);
-
-        error.property = map_user_constraint(res);
-
-        result.error = error;
-    } else {
-        result.status = DATA_UNKNOWN;
-    }
-
-    return result;
-}
-
-UserDataResult get_user_data_by_username(char* username) {
+DataResult get_user_data_by_username(char* username) {
     FIO_LOG_DEBUG("get_user_data_by_username: username=%s", username);
-
     PGconn *connection = get_connection();
 
     char* command = "SELECT *"
@@ -71,13 +20,13 @@ UserDataResult get_user_data_by_username(char* username) {
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_user_result(data_result);
+    DataResult result = get_data_result(data_result, map_user_data);
 
     return result;
 }
 
-UserDataResult get_user_data_by_id(int id) {
-
+DataResult get_user_data_by_id(int id) {
+    FIO_LOG_DEBUG("get_user_data_by_id: id: %d", id);
     PGconn *connection = get_connection();
     char str[20];
     sprintf(str, "%d", id);
@@ -89,13 +38,13 @@ UserDataResult get_user_data_by_id(int id) {
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_user_result(data_result);
+    DataResult result = get_data_result(data_result, map_user_data);
 
     return result;
 }
 
-UserDataResult get_user_by_email(char* email) {
-
+DataResult get_user_by_email(char* email) {
+    FIO_LOG_DEBUG("get_user_by_email: email: %s", email);
     PGconn *connection = get_connection();
 
     char* command = "SELECT *"
@@ -105,12 +54,12 @@ UserDataResult get_user_by_email(char* email) {
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_user_result(data_result);
+    DataResult result = get_data_result(data_result, map_user_data);
 
     return result;
 }
 
-UserDataResult insert_user(char* email, char* username, char* password) {
+DataResult insert_user(char* email, char* username, char* password) {
     FIO_LOG_DEBUG("insert_user: email: %s, user: %s, password: %s", email, username, password);
     PGconn *connection = get_connection();
 
@@ -121,13 +70,13 @@ UserDataResult insert_user(char* email, char* username, char* password) {
 
     PGresult *data_result = PQexecParams(connection,command,3,NULL,data,NULL,NULL,0);
 
-    UserDataResult result = get_user_result(data_result);
+    DataResult result = get_data_result(data_result, map_user_data);
+    resolve_user_constraints(&result.error);
 
     return result;
 }
 
-UserDataResult update_user_data(int id, UpdateValue *update_values, size_t value_count) {
-
+DataResult update_user_data(int id, UpdateValue *update_values, size_t value_count) {
     PGconn *connection = get_connection();
     char string_id[20];
     sprintf(string_id, "%d", id);
@@ -160,7 +109,31 @@ UserDataResult update_user_data(int id, UpdateValue *update_values, size_t value
 
     PGresult *data_result = PQexecParams(connection, command, value_count + 1, NULL, data, NULL, NULL, 0);
 
-    UserDataResult result = get_user_result(data_result);
+    DataResult result = get_data_result(data_result, map_user_data);
 
     return result;
 }
+
+UserData map_user_data(const PGresult *res) {
+    UserData data;
+
+    data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+    data.username = PQgetvalue(res, 0, 1);
+    data.email = PQgetvalue(res, 0, 2);
+    data.password = PQgetvalue(res, 0, 3);
+    data.bio = PQgetisnull(res, 0, 4) ? NULL : PQgetvalue(res, 0, 4);
+    data.image = PQgetisnull(res, 0, 5) ? NULL : PQgetvalue(res, 0, 5);
+
+    return data;
+}
+
+void resolve_user_constraints(ErrorValue *value) {
+        if (strcmp(value->property, "user_username_key") == 0) {
+        value->property = "username";
+    }
+
+    if (strcmp(value->property, "user_email_key") == 0) {
+        value->property = "email";
+    }
+}
+

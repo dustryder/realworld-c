@@ -10,7 +10,7 @@ typedef struct {
     char* image;
 } UserServiceResultData;
 
-UserServiceResultData map_data_to_user(UserData data_result);
+UserServiceResultData map_data_to_user(UserData *data_result);
 
 typedef enum {
     CREATE_USER_SUCCESS,
