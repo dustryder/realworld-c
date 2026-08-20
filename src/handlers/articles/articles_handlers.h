@@ -13,6 +13,8 @@ typedef struct {
 
 void handle_post_articles(http_s* h);
 void handle_get_articles(http_s* h);
+void handle_get_all_articles(http_s* h);
 
-char* create_article_success_response(ArticlesServiceResultData result);
+char *create_article_success_response(ArticlesServiceResultData result);
+char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count);
 #endif

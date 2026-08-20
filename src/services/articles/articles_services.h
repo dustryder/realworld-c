@@ -30,7 +30,7 @@ typedef struct {
     ErrorValue error;
 } CreateArticleResult;
 
-CreateArticleResult create_article(int creator, char* title, char* descrition, char* body, char** tags, int tag_count);
+CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, char** tags, int tag_count);
 
 typedef enum {
     GetArticleSuccess,
@@ -42,7 +42,7 @@ typedef struct {
     ErrorValue error;
 } GetArticleResult;
 
-GetArticleResult get_article_by_slug(int user_id, char* slug);
+GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug);
 
 ArticlesServiceResultData map_data_to_article(
     ArticleData *article_data,
@@ -50,5 +50,14 @@ ArticlesServiceResultData map_data_to_article(
     char** tags,
     int tag_count
 );
+
+typedef struct {
+    GetArticleStatus status;
+    ArticlesServiceResultData *result;
+    int article_count;
+    ErrorValue error;
+} GetAllArticleResult;
+
+GetAllArticleResult query_articles(PGconn *conn);
 
 #endif

@@ -3,9 +3,9 @@
 #include "../../lib/token.h"
 #include <string.h>
 
-GetUserByIdResult get_user_by_id(int id) {
+GetUserByIdResult get_user_by_id(PGconn *conn, int id) {
     GetUserByIdResult result;
-    DataResult data_result = get_user_data_by_id(id);
+    DataResult data_result = get_user_data_by_id(conn, id);
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = GET_USER_SUCCESS;

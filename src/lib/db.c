@@ -12,6 +12,7 @@ PGconn *get_connection() {
     ConnStatusType db_status = PQstatus(connection);
 
     if (db_status != CONNECTION_OK) {
+        
         return NULL;
     }
     

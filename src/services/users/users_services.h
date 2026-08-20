@@ -52,7 +52,7 @@ typedef struct {
     UserServiceResultData result;
 } GetUserByIdResult;
 
-GetUserByIdResult get_user_by_id(int id);
+GetUserByIdResult get_user_by_id(PGconn *conn, int id);
 
 typedef enum {
     UPDATE_USER_SUCCESS,

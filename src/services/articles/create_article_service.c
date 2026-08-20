@@ -6,7 +6,7 @@
 
 static char* sluggify(char* title, int title_count);
 
-CreateArticleResult create_article(int creator, char* title, char* description, char* body, char** tags, int tag_count) {
+CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, char** tags, int tag_count) {
     FIO_LOG_DEBUG("create_article: creator=%d, title=%s, description=%s, body=%s, tag_count=%d", creator, title, description, body, tag_count);
     int article_count = get_article_count_by_title(title);
     char* slug = sluggify(title, article_count);
@@ -20,7 +20,7 @@ CreateArticleResult create_article(int creator, char* title, char* description, 
             insert_article_tag(article_data->id, tags[i]);
         }
 
-        DataResult data_result = get_user_data_by_id(creator);
+        DataResult data_result = get_user_data_by_id(conn, creator);
 
         service_result.result = map_data_to_article(article_data, data_result.data, tags, tag_count);
         service_result.status = CreateArticleSuccess;

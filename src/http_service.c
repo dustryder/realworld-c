@@ -6,8 +6,12 @@
 #include "../lib/router.h"
 #include "../lib/middleware.h"
 
-void _set_header(http_s *h, char *key, char *value) {
-  http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
+void set_header(http_s *h, char *key, char *value) {
+    http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
+}
+
+void set_db_connection(http_s *h) {
+    h->udata = get_connection();
 }
 
 static void on_http_request(http_s *h) {
@@ -15,7 +19,8 @@ static void on_http_request(http_s *h) {
   http_parse_body(h);
   http_parse_query(h);
 
-  _set_header(h, "content-type", "application/json");
+  set_db_connection(h);
+  set_header(h, "content-type", "application/json");
 
   //user routes
   http_route_post(h, "/api/users", handle_post_user, resolve_request_user);
@@ -31,14 +36,17 @@ static void on_http_request(http_s *h) {
   //articles routes
   http_route_post(h, "/api/articles", handle_post_articles, resolve_request_user, require_auth);
   http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user, require_auth);
+  http_route_get(h, "/api/articles", handle_get_all_articles, resolve_request_user);
 
   http_send_error(h, 404);
+
+  PQfinish(h->udata);
 }
 
 /* starts a listeninng socket for HTTP connections. */
 void initialize_http_service(void) {
   /* listen for inncoming connections */
-  // FIO_LOG_LEVEL = FIO_LOG_LEVEL_DEBUG;
+  FIO_LOG_LEVEL = FIO_LOG_LEVEL_DEBUG;
 
   if (http_listen(fio_cli_get("-p"), fio_cli_get("-b"),
                   .on_request = on_http_request,

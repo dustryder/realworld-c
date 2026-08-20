@@ -25,5 +25,5 @@ DataResult insert_user(char* email, char* username, char* password);
 DataResult update_user_data(int id, UpdateValue *update_values, size_t value_count);
 DataResult get_user_data_by_username(char* username);
 DataResult get_user_by_email(char* email);
-DataResult get_user_data_by_id(int id);
+DataResult get_user_data_by_id(PGconn *conn, int id);
 #endif

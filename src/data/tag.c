@@ -19,9 +19,8 @@ void insert_tag(char* tag) {
     return;
 }
 
-char **get_tag_by_article_slug(char* slug, int *tag_count) {
+char **get_tag_by_article_slug(PGconn *conn, char* slug, int *tag_count) {
     FIO_LOG_DEBUG("get_tag_by_article_slug: slug: %s", slug);
-    PGconn *connection = get_connection();
 
     char *command = "SELECT tag.name "
                     "FROM tag "
@@ -31,7 +30,7 @@ char **get_tag_by_article_slug(char* slug, int *tag_count) {
 
     const char * const data[1] = { slug };
 
-    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     char **tag_names = get_tag_names(data_result, tag_count);
 

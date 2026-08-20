@@ -12,7 +12,7 @@ void handle_get_user(http_s* h) {
 
     int id = parse_request_user(h->params);
 
-    GetUserByIdResult result = get_user_by_id(id);
+    GetUserByIdResult result = get_user_by_id(h->udata, id);
 
     if (result.status == CREATE_USER_SUCCESS) {
       h->status = HTTP_SUCCESS;

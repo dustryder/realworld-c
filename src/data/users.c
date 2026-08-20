@@ -25,9 +25,8 @@ DataResult get_user_data_by_username(char* username) {
     return result;
 }
 
-DataResult get_user_data_by_id(int id) {
+DataResult get_user_data_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("get_user_data_by_id: id: %d", id);
-    PGconn *connection = get_connection();
     char str[20];
     sprintf(str, "%d", id);
 
@@ -36,7 +35,7 @@ DataResult get_user_data_by_id(int id) {
                     "WHERE id = $1";
     const char * const data[1] = { str };
 
-    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 

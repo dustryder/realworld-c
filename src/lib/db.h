@@ -22,6 +22,7 @@ typedef struct {
 
 typedef void *(*Mapper)(const PGresult *res);
 
+char *datetimestamp_to_date(char* datetimestamp);
 PGconn *get_connection();
 DataResult get_data_result(const PGresult *res, Mapper mapper);
 #endif

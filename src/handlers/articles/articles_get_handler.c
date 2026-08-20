@@ -11,7 +11,7 @@ void handle_get_articles(http_s* h) {
     char *slug = parse_path_param(h->params, "slug");
     char *response_body;
 
-    GetArticleResult result = get_article_by_slug(id, slug);
+    GetArticleResult result = get_article_by_slug(h->udata, id, slug);
 
     response_body = create_article_success_response(result.result);
 

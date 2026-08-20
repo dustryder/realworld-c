@@ -36,6 +36,11 @@ char *parse_path_param(FIOBJ *params, char *key) {
 int parse_request_user(FIOBJ *params) {
     FIOBJ fiobj_key = fiobj_str_new("_id", 3);
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
+
+    if (FIOBJ_TYPE_IS(fiobj_value, FIOBJ_T_NULL)) {
+      return NULL;
+    }
+  
     char* value = fiobj_obj2cstr(fiobj_value).data;
 
     int converted = strtol(value, NULL, 10);
