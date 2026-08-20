@@ -68,7 +68,7 @@ WARNINGS= -Wshadow -Wall -Wextra -Wno-missing-field-initializers -Wpedantic
 # any extra include folders, space seperated list. (i.e. `pg_config --includedir`)
 INCLUDE= ./ /usr/include/postgresql
 # any preprocessosr defined flags we want, space seperated list (i.e. DEBUG )
-FLAGS:=DEBUG
+FLAGS:=
 
 # we use sendfile64() and off_t
 override FLAGS += _FILE_OFFSET_BITS=64

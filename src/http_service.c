@@ -17,11 +17,6 @@ static void on_http_request(http_s *h) {
 
   _set_header(h, "content-type", "application/json");
 
-  printf(
-      "MATCHING PATH [%s]\n",
-      fiobj_obj2cstr(h->path).data
-  );
-
   //user routes
   http_route_post(h, "/api/users", handle_post_user, resolve_request_user);
   http_route_post(h, "/api/users/login", handle_post_login, resolve_request_user);
@@ -43,7 +38,7 @@ static void on_http_request(http_s *h) {
 /* starts a listeninng socket for HTTP connections. */
 void initialize_http_service(void) {
   /* listen for inncoming connections */
-  FIO_LOG_LEVEL = FIO_LOG_LEVEL_DEBUG;
+  // FIO_LOG_LEVEL = FIO_LOG_LEVEL_DEBUG;
 
   if (http_listen(fio_cli_get("-p"), fio_cli_get("-b"),
                   .on_request = on_http_request,

@@ -3,7 +3,6 @@
 #include "../lib/db.h"
 
 static TagData map_tag_data(const PGresult *res);
-static char **get_tag_names(const PGresult *res, int *tag_count);
 
 void insert_tag(char* tag) {
     FIO_LOG_DEBUG("insert_tag: tag: %s", tag);
@@ -32,9 +31,11 @@ char **get_tag_by_article_slug(char* slug, int *tag_count) {
 
     const char * const data[1] = { slug };
 
-    PGresult *data_result = PQexecParams(connection,command,2,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
-    return get_tag_names(data_result, tag_count);
+    char **tag_names = get_tag_names(data_result, tag_count);
+
+    return tag_names;
 }
 
 DataResult insert_article_tag(int article_id, char* tag) {
@@ -63,12 +64,12 @@ char **get_tag_names(const PGresult *res, int *tag_count) {
     ExecStatusType command_status = PQresultStatus(res);
 
     if (command_status == PGRES_TUPLES_OK) {
-        int row_count = strtol(PQcmdTuples(res), NULL, 10);
-        tag_count = row_count;
+        int row_count = PQntuples(res);
+        *tag_count = row_count;
         char **tags = malloc(sizeof(char *) * row_count);
 
         for (int i = 0; i < row_count; i++) {
-            tags[i] = PQgetvalue(res, i, 1);
+            tags[i] = strdup(PQgetvalue(res, i, 0));
         }
 
         return tags;

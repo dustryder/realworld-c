@@ -10,4 +10,5 @@ typedef struct {
 
 DataResult insert_article_tag(int article_id, char* tag);
 char **get_tag_by_article_slug(char* slug, int *tag_count);
+char **get_tag_names(const PGresult *res, int *tag_count);
 #endif

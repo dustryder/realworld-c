@@ -38,10 +38,7 @@ int parse_request_user(FIOBJ *params) {
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
     char* value = fiobj_obj2cstr(fiobj_value).data;
 
-    // ("\nRequest User -> %s\n", value);
     int converted = strtol(value, NULL, 10);
-
-    // printf("\nRequest user2 -> %d", value);
 
     return converted;
 }

@@ -12,11 +12,7 @@ bool http_path_matches(http_s *request, char *__route) {
     }
 
     char *copied_path = strdup(fiobj_obj2cstr(request->path).data);
-    printf(
-        "MATCHING PATH [%s] AGAINST ROUTE [%s]\n",
-        fiobj_obj2cstr(request->path).data,
-        __route
-    );
+
     // truncate the path at the query string delimiter,
     // as we only care about the path itself and the 
     // query string is parsed by http_parse_query()
