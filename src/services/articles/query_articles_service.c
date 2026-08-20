@@ -2,11 +2,11 @@
 #include "../../data/article.h"
 #include "../../data/tag.h"
 
-GetAllArticleResult query_articles(PGconn *conn) {
+GetAllArticleResult query_articles(PGconn *conn, char *author) {
     FIO_LOG_DEBUG("query_articles");
 
     GetAllArticleResult result;
-    DataResult article_result = get_all_articles(conn);
+    DataResult article_result = get_all_articles(conn, author);
 
     ArticleDataRecordset *article_data_recordset = article_result.data;
 
@@ -30,6 +30,10 @@ GetAllArticleResult query_articles(PGconn *conn) {
         result.article_count = article_data_recordset->record_count;
 
         return result;
+    } else if (article_result.status == DATA_NOT_FOUND) {
+        result.status = GET_ARTICLE_UNKNOWN;
+        result.result = 
+        result.article_count = 0;
     }
 
     return result;

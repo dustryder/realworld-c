@@ -34,6 +34,7 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
 
 typedef enum {
     GetArticleSuccess,
+    GET_ARTICLE_UNKNOWN
 } GetArticleStatus;
 
 typedef struct {
@@ -58,6 +59,6 @@ typedef struct {
     ErrorValue error;
 } GetAllArticleResult;
 
-GetAllArticleResult query_articles(PGconn *conn);
+GetAllArticleResult query_articles(PGconn *conn, char *author);
 
 #endif

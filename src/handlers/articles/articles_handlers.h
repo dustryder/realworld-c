@@ -11,6 +11,10 @@ typedef struct {
     int tag_count;
 } PostArticlePayload;
 
+typedef struct {
+    char* author;
+} GetAllArticleQuery;
+
 void handle_post_articles(http_s* h);
 void handle_get_articles(http_s* h);
 void handle_get_all_articles(http_s* h);

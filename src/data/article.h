@@ -21,6 +21,6 @@ typedef struct {
 
 DataResult insert_article(char* slug, char* title, char* description, char* body, int created_by);
 DataResult get_article_data_by_slug(char* slug);
-DataResult get_all_articles(PGconn *conn);
+DataResult get_all_articles(PGconn *conn, char* author);
 int get_article_count_by_title(char* title);
 #endif

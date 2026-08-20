@@ -38,12 +38,27 @@ DataResult get_article_data_by_slug(char* slug) {
     return result;
 }
 
-DataResult get_all_articles(PGconn *conn) {
-    FIO_LOG_DEBUG("get_all_articles");
+DataResult get_all_articles(PGconn *conn, char *author) {
+    FIO_LOG_DEBUG("get_all_articles: author=%s", author);
     
-    char* command = "SELECT * FROM \"article\"";
+    char *authorSubquery = "WHERE created_by = (SELECT id FROM \"user\" WHERE username = $1)";
+    char *baseQuery = "SELECT * FROM \"article\" %s";
+    char *data[1];
+    char data_count = 0;
 
-    PGresult *data_result = PQexecParams(conn,command,0,NULL,NULL,NULL,NULL,0);
+    char filters[strlen(baseQuery) + strlen(authorSubquery)];
+    memset(filters, '\0', strlen(baseQuery) + strlen(authorSubquery));
+    char command[strlen(baseQuery) + strlen(authorSubquery)];
+
+    if (author != NULL) {
+        sprintf(filters, "%s", authorSubquery);
+        data[data_count] = author;
+        data_count += 1;
+    }
+
+    sprintf(command, baseQuery, filters);
+
+    PGresult *data_result = PQexecParams(conn,command,data_count,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_many_article_data);
     ArticleDataRecordset *typ = result.data;
@@ -79,6 +94,8 @@ int get_article_count_result(const PGresult *res) {
 ArticleDataRecordset *map_many_article_data(const PGresult *res) {
 
     int row_count = PQntuples(res);
+
+    printf("Row_count: %d\n", row_count);
 
     ArticleDataRecordset *recordset = malloc(sizeof *recordset);
     recordset->record_count = row_count;
