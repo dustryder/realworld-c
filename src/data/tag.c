@@ -51,6 +51,19 @@ char **get_tag_by_article_slug(PGconn *conn, char* slug, int *tag_count) {
     return tag_names;
 }
 
+char **get_all_tags_data(PGconn *conn, int *tag_count) {
+    FIO_LOG_DEBUG("get_all_tags");
+
+    char *command = "SELECT tag.name "
+                    "FROM tag";
+
+    PGresult *data_result = PQexecParams(conn,command,0,NULL,NULL,NULL,NULL,0);
+
+    char **tag_names = get_tag_names(data_result, tag_count);
+
+    return tag_names;
+}
+
 DataResult insert_article_tag(int article_id, char* tag) {
     FIO_LOG_DEBUG("insert_article_tag: article_id: %d, tag: %s", article_id, tag);
     PGconn *connection = get_connection();
