@@ -74,32 +74,6 @@ void validate_put_user_payload(PutUserPayload payload, ErrorValue *values, size_
   }
 }
 
-OptionalValue parse_optional_value(FIOBJ obj, char* key) {
-  FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
-  OptionalValue optional_value;
-
-  if (!fiobj_hash_haskey(obj, fiobj_key)) {
-    optional_value.is_present = 0;
-    return optional_value;
-  }
-
-  FIOBJ value = fiobj_hash_get(obj, fiobj_key);
-
-  if (FIOBJ_TYPE_IS(value, FIOBJ_T_NULL)) {
-    optional_value.is_present = 1;
-    optional_value.value = NULL;
-    return optional_value;
-  }
-
-  char *json_value = fiobj_obj2cstr(fiobj_hash_get(obj, fiobj_key)).data;
-  optional_value.is_present = 1;
-  optional_value.value = json_value;
-
-  fiobj_free(fiobj_key);
-
-  return optional_value;
-}
-
 PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
 
   FIOBJ user_key = fiobj_str_new("user", 4);
@@ -113,11 +87,11 @@ PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
 
   PutUserPayload values;
 
-  values.email = parse_optional_value(user_body, "email");
-  values.password = parse_optional_value(user_body, "password");
-  values.username = parse_optional_value(user_body, "username");
-  values.bio = parse_optional_value(user_body, "bio");
-  values.image = parse_optional_value(user_body, "image");
+  values.email = parse_optional_string(user_body, "email");
+  values.password = parse_optional_string(user_body, "password");
+  values.username = parse_optional_string(user_body, "username");
+  values.bio = parse_optional_string(user_body, "bio");
+  values.image = parse_optional_string(user_body, "image");
 
   fiobj_free(user_key);
 

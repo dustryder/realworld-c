@@ -2,25 +2,16 @@
 #include "../../data/users.h"
 #include "../../lib/token.h"
 #include <string.h>
+#include "../../lib/type.h"
 
-void add_field(UpdateValue *values, size_t *count, char *key, OptionalValue value) {
-
-    if (!value.is_present) {
-        return;
-    }
-
-    values[*count].key = key;
-
-    if (value.value == NULL) {
-        values[*count].value = NULL;
-    } else {
-        values[*count].value = strcmp(value.value, "") != 0 ? value.value : NULL;
-    }
-
-    (*count)++;
-}
-
-UpdateUserResult update_user(int id, OptionalValue email, OptionalValue password, OptionalValue username, OptionalValue bio, OptionalValue image) {
+UpdateUserResult update_user(
+    int id, 
+    OptionalValue email, 
+    OptionalValue password, 
+    OptionalValue username, 
+    OptionalValue bio, 
+    OptionalValue image
+) {
 
     UpdateValue update_values[5];
     size_t value_count = 0;

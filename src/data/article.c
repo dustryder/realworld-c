@@ -1,4 +1,5 @@
 #include "article.h"
+#include "../lib/http_helpers.h"
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
@@ -21,6 +22,21 @@ DataResult insert_article(char* slug, char* title, char* description, char *body
     DataResult result = get_data_result(data_result, map_article_data);
 
     return result;
+}
+
+void delete_article_by_id(PGconn *conn, int id) {
+    FIO_LOG_DEBUG("delete_article_by_id: id=%d", id);
+    char article_id[20];
+    sprintf(article_id, "%d", id);
+
+    char* command = "DELETE FROM \"article\""
+                    "WHERE id = $1";
+
+    const char * const data[1] = { article_id };
+
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+
+    return;
 }
 
 DataResult get_article_data_by_slug(char* slug) {
@@ -128,6 +144,57 @@ int get_article_count_result(const PGresult *res) {
     }
 
     return 0;
+}
+
+DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_values, size_t update_count) {
+    FIO_LOG_DEBUG("update_article_by_slug");
+
+    char *data[update_count + 1];
+
+    char* update_updated_at = "updated_at = (now() at time zone 'utc')";
+
+    int update_substring_length = strlen(update_updated_at) + 3;
+
+    for (int i = 0; i < update_count; i++) {
+        update_substring_length += strlen(update_values[i].value);
+    }
+    
+    char update_substring[update_substring_length];
+    memset(update_substring, 0, sizeof(update_substring));
+
+    char *base_command = "UPDATE \"article\" "
+                         "SET %s "
+                         "WHERE slug = $1 "
+                         "RETURNING *";
+
+    data[0] = slug;
+
+    for (int i = 1; i < update_count + 1; i++) {
+        data[i] = update_values[i - 1].value;
+    }
+
+    for (int i = 0; i < update_count; i++) {
+        sprintf(update_substring + strlen(update_substring), "%s = $%d", update_values[i].key, i + 2);
+
+        if (i != update_count - 1) {
+            sprintf(update_substring + strlen(update_substring), ",");
+        }
+    };
+
+    if (update_count > 0) {
+        sprintf(update_substring + strlen(update_substring), ", %s", update_updated_at);
+    } else {
+        sprintf(update_substring + strlen(update_substring), "%s", update_updated_at);
+    }
+
+    char command[strlen(base_command) + strlen(update_substring)];
+    sprintf(command, base_command, update_substring);
+
+    PGresult *data_result = PQexecParams(conn, command, update_count + 1, NULL, data, NULL, NULL, 0);
+
+    DataResult result = get_data_result(data_result, map_article_data);
+
+    return result;
 }
 
 ArticleDataRecordset *map_many_article_data(const PGresult *res) {

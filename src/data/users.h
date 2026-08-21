@@ -14,11 +14,6 @@ typedef struct {
     char* image;
 } UserData;
 
-typedef struct {
-    char* key;
-    char* value;
-} UpdateValue;
-
 void resolve_user_constraints(ErrorValue *value);
 
 DataResult insert_user(char* email, char* username, char* password);

@@ -19,6 +19,20 @@ void insert_tag(char* tag) {
     return;
 }
 
+void delete_article_tags(PGconn *conn, int article_id) {
+    FIO_LOG_DEBUG("delete_article_tag: article_id=%d", article_id);
+    char article_id_str[20];
+    sprintf(article_id_str, "%d", article_id);
+
+    char *command = "DELETE FROM article_tag WHERE article_id = $1";
+
+    const char * const data[1] = { article_id_str };
+
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+
+    return;
+}
+
 char **get_tag_by_article_slug(PGconn *conn, char* slug, int *tag_count) {
     FIO_LOG_DEBUG("get_tag_by_article_slug: slug: %s", slug);
 

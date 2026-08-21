@@ -6,7 +6,7 @@
 static GetAllArticleQuery parse_get_all_articles_qs(FIOBJ *params);
 
 void handle_get_all_articles(http_s* h) {
-    FIO_LOG_DEBUG("handle_get_all_profile");
+    FIO_LOG_DEBUG("handle_get_all_articles");
 
     int id = parse_request_user(h->params);
     GetAllArticleQuery qs = parse_get_all_articles_qs(h->params);

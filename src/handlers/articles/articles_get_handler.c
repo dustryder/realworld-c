@@ -5,7 +5,7 @@
 #include "articles_handlers.h"
 
 void handle_get_articles(http_s* h) {
-    FIO_LOG_DEBUG("handle_get_profile");
+    FIO_LOG_DEBUG("handle_get_articles");
 
     int id = parse_request_user(h->params);
     char *slug = parse_path_param(h->params, "slug");
@@ -17,8 +17,9 @@ void handle_get_articles(http_s* h) {
         response_body = create_article_success_response(result.result, true, FORMAT_DATETIMESTAMP);
         h->status = HTTP_SUCCESS;
     } else if (result.status == GET_ARTICLE_UNKNOWN) {
+        ErrorValue errors[1] = { result.error };
+        response_body = create_failure_body_from_errors(errors, 1);
         h->status = HTTP_NOT_FOUND;
-        response_body = "Potato";
     }
 
     http_send_body(h, response_body, strlen(response_body));

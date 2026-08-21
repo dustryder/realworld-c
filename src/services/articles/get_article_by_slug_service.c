@@ -18,6 +18,8 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
         result.result = map_data_to_article(article_result.data, user_result.data, tags, tag_count);
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
+        result.error.property = "article";
+        result.error.error = "not found";
     }
 
     return result;

@@ -22,6 +22,89 @@ char* get_bearer_token(http_s* h) {
   return buffer;
 }
 
+void add_field(UpdateValue *values, size_t *count, char *key, OptionalValue value) {
+
+    if (!value.is_present) {
+        return;
+    }
+
+    values[*count].key = key;
+
+    if (value.value == NULL) {
+        values[*count].value = NULL;
+    } else {
+        values[*count].value = strcmp(value.value, "") != 0 ? value.value : NULL;
+    }
+
+    (*count)++;
+}
+
+OptionalArray parse_optional_array(FIOBJ obj, char* key) {
+  FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
+  OptionalArray optional_value;
+
+  if (!fiobj_hash_haskey(obj, fiobj_key)) {
+    optional_value.is_present = 0;
+    optional_value.value = NULL;
+    return optional_value;
+  }
+
+  FIOBJ value = fiobj_hash_get(obj, fiobj_key);
+
+  if (FIOBJ_TYPE_IS(value, FIOBJ_T_NULL)) {
+    optional_value.is_present = 1;
+    optional_value.value = NULL;
+    return optional_value;
+  }
+
+  char** result_value;
+
+  optional_value.is_present = 1;
+  if (FIOBJ_TYPE_IS(value, FIOBJ_T_ARRAY)) {
+
+    result_value = malloc(sizeof(char *) * fiobj_ary_count(value));
+
+    for (int i = 0; i < (int) fiobj_ary_count(value); i++) {
+        FIOBJ item = fiobj_ary_index(value, i);
+        char *string_item = fiobj_obj2cstr(item).data;
+        result_value[i] = string_item;
+    }
+
+    optional_value.value = result_value;
+    optional_value.value_count = fiobj_ary_count(value);
+  }
+
+  fiobj_free(fiobj_key);
+
+  return optional_value;
+}
+
+OptionalValue parse_optional_string(FIOBJ obj, char* key) {
+  FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
+  OptionalValue optional_value;
+
+  if (!fiobj_hash_haskey(obj, fiobj_key)) {
+    optional_value.is_present = 0;
+    return optional_value;
+  }
+
+  FIOBJ value = fiobj_hash_get(obj, fiobj_key);
+
+  if (FIOBJ_TYPE_IS(value, FIOBJ_T_NULL)) {
+    optional_value.is_present = 1;
+    optional_value.value = NULL;
+    return optional_value;
+  }
+
+  char *json_value = fiobj_obj2cstr(fiobj_hash_get(obj, fiobj_key)).data;
+  optional_value.is_present = 1;
+  optional_value.value = json_value;
+
+  fiobj_free(fiobj_key);
+
+  return optional_value;
+}
+
 char *parse_path_param(FIOBJ *params, char *key) {
 
     FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));

@@ -61,4 +61,21 @@ typedef struct {
 
 GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag);
 
+typedef struct {
+    GetArticleStatus status;
+    ArticlesServiceResultData result;
+    ErrorValue error;
+} UpdateArticleResult;
+
+UpdateArticleResult update_article(
+    PGconn *conn,
+    char* slug,
+    OptionalValue title,
+    OptionalValue description,
+    OptionalValue body,
+    OptionalArray tags
+);
+
+void delete_article(PGconn* conn, char *slug);
+
 #endif

@@ -3,8 +3,8 @@
 #include "handlers/user/user_handlers.h"
 #include "handlers/profiles/profile_handlers.h"
 #include "handlers/articles/articles_handlers.h"
-#include "../lib/router.h"
-#include "../lib/middleware.h"
+#include "./lib/router.h"
+#include "./lib/middleware.h"
 
 void set_header(http_s *h, char *key, char *value) {
     http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
@@ -37,6 +37,8 @@ static void on_http_request(http_s *h) {
   http_route_post(h, "/api/articles", handle_post_articles, resolve_request_user, require_auth);
   http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user);
   http_route_get(h, "/api/articles", handle_get_all_articles, resolve_request_user);
+  http_route_put(h, "/api/articles/:slug", handle_put_articles, resolve_request_user, require_auth);
+  http_route_delete(h, "/api/articles/:slug", handle_delete_articles, resolve_request_user, require_auth);
 
   http_send_error(h, 404);
 

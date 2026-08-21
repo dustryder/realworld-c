@@ -19,6 +19,8 @@ typedef struct {
     int record_count;
 } ArticleDataRecordset;
 
+DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_values, size_t update_count);
+void delete_article_by_id(PGconn *conn, int id);
 DataResult insert_article(char* slug, char* title, char* description, char* body, int created_by);
 DataResult get_article_data_by_slug(char* slug);
 DataResult get_all_articles(PGconn *conn, char *author, char *tag);
