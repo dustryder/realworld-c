@@ -21,13 +21,13 @@ void handle_post_articles(http_s* h) {
       response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      CreateArticleResult result = create_article(h->udata, id, payload.title, payload.description, payload.body, payload.tags, payload.tag_count);
+      CreateArticleResult result = create_article(h->udata, id, payload.title, payload.description, payload.body, payload.tags);
 
       response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
       h->status = HTTP_CREATED;
     }
 
-    free(payload.tags);
+    if (payload.tags.value != NULL) free(payload.tags.value);
 
     http_send_body(h, response_body, strlen(response_body));
 }
@@ -74,21 +74,7 @@ PostArticlePayload parse_post_article_body(FIOBJ *raw_body) {
   values.title = fiobj_obj2cstr(fiobj_hash_get(article_body, title_key)).data;
   values.description = fiobj_obj2cstr(fiobj_hash_get(article_body, description_key)).data;
   values.body = fiobj_obj2cstr(fiobj_hash_get(article_body, body_key)).data;
-
-  FIOBJ taglist = fiobj_hash_get(article_body, taglist_key);
-
-  char **tags = malloc(sizeof(char *) * fiobj_ary_count(taglist));
-
-  if (FIOBJ_TYPE_IS(taglist, FIOBJ_T_ARRAY)) {
-    for (int i = 0; i < (int) fiobj_ary_count(taglist); i++) {
-        FIOBJ item = fiobj_ary_index(taglist, i);
-        char *string_item = fiobj_obj2cstr(item).data;
-        tags[i] = string_item;
-    }
-  }
-
-  values.tags = tags;
-  values.tag_count = fiobj_ary_count(taglist);
+  values.tags = parse_optional_array(article_body, "tagList");
 
   fiobj_free(article_key);
   fiobj_free(title_key);

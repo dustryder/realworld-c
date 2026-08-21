@@ -6,8 +6,8 @@
 
 static char* sluggify(char* title, int title_count);
 
-CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, char** tags, int tag_count) {
-    FIO_LOG_DEBUG("create_article: creator=%d, title=%s, description=%s, body=%s, tag_count=%d", creator, title, description, body, tag_count);
+CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, OptionalArray tags) {
+    FIO_LOG_DEBUG("create_article: creator=%d, title=%s, description=%s, body=%s", creator, title, description, body);
     int article_count = get_article_count_by_title(title);
     char* slug = sluggify(title, article_count);
 
@@ -16,13 +16,16 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
     CreateArticleResult service_result;
 
     if (insert_article_result.status == DATA_SUCCESS) {
-        for (int i = 0; i < tag_count; i++) {
-            insert_article_tag(article_data->id, tags[i]);
+
+        if (tags.is_present && tags.value != NULL) {
+            for (int i = 0; i < tags.value_count; i++) {
+                insert_article_tag(article_data->id, tags.value[i]);
+            }
         }
 
         DataResult data_result = get_user_data_by_id(conn, creator);
 
-        service_result.result = map_data_to_article(article_data, data_result.data, tags, tag_count);
+        service_result.result = map_data_to_article(article_data, data_result.data, tags.value, tags.value_count);
         service_result.status = CreateArticleSuccess;
     }
 

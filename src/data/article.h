@@ -23,6 +23,7 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
 void delete_article_by_id(PGconn *conn, int id);
 DataResult insert_article(char* slug, char* title, char* description, char* body, int created_by);
 DataResult get_article_data_by_slug(char* slug);
-DataResult get_all_articles(PGconn *conn, char *author, char *tag);
+DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, int offset);
 int get_article_count_by_title(char *title);
+int get_all_articles_count(PGconn *conn);
 #endif

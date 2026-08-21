@@ -24,7 +24,7 @@ char* datetimestamp_to_datetimestamp(char* datetimestamp) {
     return buffer;
 }
 
-char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count) {
+char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count, int total_count) {
     cJSON *response_body = cJSON_CreateObject();
     cJSON *articles_body = cJSON_CreateArray();
     
@@ -34,7 +34,7 @@ char *create_many_article_success_response(ArticlesServiceResultData *results, i
     }
 
     cJSON_AddItemToObject(response_body, "articles", articles_body);
-    cJSON_AddItemToObject(response_body, "articlesCount", cJSON_CreateNumber(result_count));
+    cJSON_AddItemToObject(response_body, "articlesCount", cJSON_CreateNumber(total_count));
 
     char *response_string = cJSON_Print(response_body);
     cJSON_Delete(response_body);
@@ -71,7 +71,12 @@ static cJSON *create_article_json(ArticlesServiceResultData result, bool include
     cJSON_AddItemToObject(article_properties, "title", cJSON_CreateString(result.title));
     cJSON_AddItemToObject(article_properties, "description", cJSON_CreateString(result.description));
     if (include_body) cJSON_AddItemToObject(article_properties, "body", cJSON_CreateString(result.body));
-    cJSON_AddItemToObject(article_properties, "tagList", cJSON_CreateStringArray((const char *const *)result.tagList, result.tag_count));
+
+    if (result.tagList != NULL) {
+        cJSON_AddItemToObject(article_properties, "tagList", cJSON_CreateStringArray((const char *const *)result.tagList, result.tag_count));
+    } else {
+        cJSON_AddItemToObject(article_properties, "tagList", cJSON_CreateArray());
+    }
     cJSON_AddItemToObject(article_properties, "createdAt", cJSON_CreateString(created_at));
     cJSON_AddItemToObject(article_properties, "updatedAt", cJSON_CreateString(updated_at));
     cJSON_AddItemToObject(article_properties, "favorited", cJSON_CreateBool(result.favorited));

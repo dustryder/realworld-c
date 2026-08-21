@@ -30,7 +30,7 @@ typedef struct {
     ErrorValue error;
 } CreateArticleResult;
 
-CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, char** tags, int tag_count);
+CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, OptionalArray tags);
 
 typedef enum {
     GetArticleSuccess,
@@ -56,10 +56,11 @@ typedef struct {
     GetArticleStatus status;
     ArticlesServiceResultData *result;
     int article_count;
+    int total_count;
     ErrorValue error;
 } GetAllArticleResult;
 
-GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag);
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset);
 
 typedef struct {
     GetArticleStatus status;

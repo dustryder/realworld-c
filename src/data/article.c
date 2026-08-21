@@ -54,15 +54,35 @@ DataResult get_article_data_by_slug(char* slug) {
     return result;
 }
 
-DataResult get_all_articles(PGconn *conn, char *author, char *tag) {
-    FIO_LOG_DEBUG("get_all_articles: author=%s, tag=%s", author, tag);
+int get_all_articles_count(PGconn *conn) {
+    FIO_LOG_DEBUG("get_all_articles_count");
+
+    char *command = "SELECT COUNT(*) FROM article";
+
+    PGresult *data_result = PQexecParams(conn,command,0,NULL,NULL,NULL,NULL,0);
+
+    int result = get_article_count_result(data_result);
+
+    return result;
+}
+
+DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, int offset) {
+    FIO_LOG_DEBUG("get_all_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
     
     char *BASE_AUTHOR_QUERY = "created_by = (SELECT id FROM \"user\" WHERE username = $%d)";
     char *BASE_TAG_QUERY = "id IN (SELECT article_id FROM \"tag\" JOIN article_tag ON article_tag.tag_id = tag.id WHERE name = $%d)";
     char *BASE_QUERY = "SELECT * FROM \"article\"";
+    char *BASE_LIMIT_QUERY = "LIMIT $%d";
+    char *BASE_OFFSET_QUERY = "OFFSET $%d";
 
-    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + 500;
-    char *data[2];
+    char limit_str[20];
+    sprintf(limit_str, "%d", limit);
+
+    char offset_str[20];
+    sprintf(offset_str, "%d", offset);
+
+    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + strlen(BASE_LIMIT_QUERY) + strlen(BASE_OFFSET_QUERY) + 500;
+    char *data[4];
     int data_count = 0;
 
     char filters[max_command_length];
@@ -109,6 +129,26 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag) {
         sprintf(command + strlen(command), " %s", tag_buffer);
 
         data[data_count] = tag;
+        data_count += 1;
+    }
+
+    if (limit != NULL) {
+        char limit_buffer[strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 500];
+        memset(limit_buffer, '\0', strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 1);
+        sprintf(limit_buffer, BASE_LIMIT_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", limit_buffer);
+
+        data[data_count] = limit_str;
+        data_count += 1;
+    }
+
+    if (offset != NULL) {
+        char offset_buffer[strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 500];
+        memset(offset_buffer, '\0', strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 1);
+        sprintf(offset_buffer, BASE_OFFSET_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", offset_buffer);
+
+        data[data_count] = offset_str;
         data_count += 1;
     }
 
