@@ -35,7 +35,7 @@ static void on_http_request(http_s *h) {
 
   //articles routes
   http_route_post(h, "/api/articles", handle_post_articles, resolve_request_user, require_auth);
-  http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user, require_auth);
+  http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user);
   http_route_get(h, "/api/articles", handle_get_all_articles, resolve_request_user);
 
   http_send_error(h, 404);

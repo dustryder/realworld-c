@@ -7,7 +7,7 @@
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
-static UserData map_user_data(const PGresult *res);
+static UserData *map_user_data(const PGresult *res);
 
 DataResult get_user_data_by_username(char* username) {
     FIO_LOG_DEBUG("get_user_data_by_username: username=%s", username);
@@ -113,15 +113,16 @@ DataResult update_user_data(int id, UpdateValue *update_values, size_t value_cou
     return result;
 }
 
-UserData map_user_data(const PGresult *res) {
-    UserData data;
+UserData *map_user_data(const PGresult *res) {
 
-    data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.username = PQgetvalue(res, 0, 1);
-    data.email = PQgetvalue(res, 0, 2);
-    data.password = PQgetvalue(res, 0, 3);
-    data.bio = PQgetisnull(res, 0, 4) ? NULL : PQgetvalue(res, 0, 4);
-    data.image = PQgetisnull(res, 0, 5) ? NULL : PQgetvalue(res, 0, 5);
+    UserData *data = malloc(sizeof *data);
+
+    data->id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+    data->username = PQgetvalue(res, 0, 1);
+    data->email = PQgetvalue(res, 0, 2);
+    data->password = PQgetvalue(res, 0, 3);
+    data->bio = PQgetisnull(res, 0, 4) ? NULL : PQgetvalue(res, 0, 4);
+    data->image = PQgetisnull(res, 0, 5) ? NULL : PQgetvalue(res, 0, 5);
 
     return data;
 }

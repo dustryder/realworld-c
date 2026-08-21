@@ -7,16 +7,17 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
 
     GetArticleResult result;
     DataResult article_result = get_article_data_by_slug(slug);
-    DataResult user_result = get_user_data_by_id(conn, user_id);
+    ArticleData *article_data = article_result.data;
 
     if (article_result.status == DATA_SUCCESS) {
+        DataResult user_result = get_user_data_by_id(conn, article_data->created_by);
         result.status = GetArticleSuccess;
         int tag_count;
         char **tags = get_tag_by_article_slug(conn, slug, &tag_count);
 
         result.result = map_data_to_article(article_result.data, user_result.data, tags, tag_count);
-
-        return result;
+    } else if (article_result.status == DATA_NOT_FOUND) {
+        result.status = GET_ARTICLE_UNKNOWN;
     }
 
     return result;

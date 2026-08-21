@@ -2,7 +2,7 @@
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
-static ArticleData map_article_data(const PGresult *res);
+static ArticleData *map_article_data(const PGresult *res);
 static ArticleDataRecordset *map_many_article_data(const PGresult *res);
 
 DataResult insert_article(char* slug, char* title, char* description, char *body, int created_by) {
@@ -38,29 +38,68 @@ DataResult get_article_data_by_slug(char* slug) {
     return result;
 }
 
-DataResult get_all_articles(PGconn *conn, char *author) {
-    FIO_LOG_DEBUG("get_all_articles: author=%s", author);
+DataResult get_all_articles(PGconn *conn, char *author, char *tag) {
+    FIO_LOG_DEBUG("get_all_articles: author=%s, tag=%s", author, tag);
     
-    char *authorSubquery = "WHERE created_by = (SELECT id FROM \"user\" WHERE username = $1)";
-    char *baseQuery = "SELECT * FROM \"article\" %s";
-    char *data[1];
-    char data_count = 0;
+    char *BASE_AUTHOR_QUERY = "created_by = (SELECT id FROM \"user\" WHERE username = $%d)";
+    char *BASE_TAG_QUERY = "id IN (SELECT article_id FROM \"tag\" JOIN article_tag ON article_tag.tag_id = tag.id WHERE name = $%d)";
+    char *BASE_QUERY = "SELECT * FROM \"article\"";
 
-    char filters[strlen(baseQuery) + strlen(authorSubquery)];
-    memset(filters, '\0', strlen(baseQuery) + strlen(authorSubquery));
-    char command[strlen(baseQuery) + strlen(authorSubquery)];
+    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + 500;
+    char *data[2];
+    int data_count = 0;
+
+    char filters[max_command_length];
+    memset(filters, '\0', max_command_length);
+    char command[max_command_length];
+    memset(command, '\0', max_command_length);
+
+    sprintf(command, BASE_QUERY);
 
     if (author != NULL) {
-        sprintf(filters, "%s", authorSubquery);
+
+        if (data_count == 0) {
+            sprintf(command + strlen(command), "%s", " WHERE");
+        }
+
+        if (data_count > 0) {
+            sprintf(command + strlen(command), " %s ", "AND");
+        }
+
+        char author_buffer[strlen(BASE_AUTHOR_QUERY) + strlen(author) + 500];
+        memset(author_buffer, '\0', strlen(BASE_AUTHOR_QUERY) + strlen(author) + 1);
+
+        sprintf(author_buffer, BASE_AUTHOR_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", author_buffer);
+
         data[data_count] = author;
         data_count += 1;
     }
 
-    sprintf(command, baseQuery, filters);
+    if (tag != NULL) {
+
+        if (data_count == 0) {
+            sprintf(command + strlen(command), "%s", " WHERE");
+        }
+
+        if (data_count > 0) {
+            sprintf(command + strlen(command), " %s ", "AND");
+        }
+
+        char tag_buffer[strlen(BASE_TAG_QUERY) + strlen(tag) + 500];
+        memset(tag_buffer, '\0', strlen(BASE_TAG_QUERY) + strlen(tag) + 1);
+
+        sprintf(tag_buffer, BASE_TAG_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", tag_buffer);
+
+        data[data_count] = tag;
+        data_count += 1;
+    }
 
     PGresult *data_result = PQexecParams(conn,command,data_count,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_many_article_data);
+
     ArticleDataRecordset *typ = result.data;
 
     return result;
@@ -95,8 +134,6 @@ ArticleDataRecordset *map_many_article_data(const PGresult *res) {
 
     int row_count = PQntuples(res);
 
-    printf("Row_count: %d\n", row_count);
-
     ArticleDataRecordset *recordset = malloc(sizeof *recordset);
     recordset->record_count = row_count;
     recordset->data = malloc(row_count * sizeof(*recordset->data));
@@ -115,17 +152,17 @@ ArticleDataRecordset *map_many_article_data(const PGresult *res) {
     return recordset;
 }
 
-ArticleData map_article_data(const PGresult *res) {
-    ArticleData data;
+ArticleData *map_article_data(const PGresult *res) {
+    ArticleData *data = malloc(sizeof *data);
 
-    data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.slug = PQgetvalue(res, 0, 1);
-    data.title = PQgetvalue(res, 0, 2);
-    data.body = PQgetvalue(res, 0, 3);
-    data.description = PQgetvalue(res, 0, 4);
-    data.created_at = datetimestamp_to_date(PQgetvalue(res, 0, 5));
-    data.updated_at = datetimestamp_to_date(PQgetvalue(res, 0, 6));
-    data.created_by = strtol(PQgetvalue(res, 0, 7), NULL, 10);
+    data->id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+    data->slug = PQgetvalue(res, 0, 1);
+    data->title = PQgetvalue(res, 0, 2);
+    data->body = PQgetvalue(res, 0, 3);
+    data->description = PQgetvalue(res, 0, 4);
+    data->created_at = PQgetvalue(res, 0, 5);
+    data->updated_at = PQgetvalue(res, 0, 6);
+    data->created_by = strtol(PQgetvalue(res, 0, 7), NULL, 10);
 
     return data;
 }

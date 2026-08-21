@@ -2,17 +2,16 @@
 #include "../../data/article.h"
 #include "../../data/tag.h"
 
-GetAllArticleResult query_articles(PGconn *conn, char *author) {
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag) {
     FIO_LOG_DEBUG("query_articles");
 
     GetAllArticleResult result;
-    DataResult article_result = get_all_articles(conn, author);
+    DataResult article_result = get_all_articles(conn, author, tag);
 
     ArticleDataRecordset *article_data_recordset = article_result.data;
 
-    ArticlesServiceResultData *result_data = malloc(article_data_recordset->record_count * sizeof *result_data);
-
     if (article_result.status == DATA_SUCCESS) {
+        ArticlesServiceResultData *result_data = malloc(article_data_recordset->record_count * sizeof *result_data);
 
         for (int i = 0; i < article_data_recordset->record_count; i++) {
 
@@ -32,7 +31,6 @@ GetAllArticleResult query_articles(PGconn *conn, char *author) {
         return result;
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
-        result.result = 
         result.article_count = 0;
     }
 

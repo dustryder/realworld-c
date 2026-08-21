@@ -13,9 +13,13 @@ void handle_get_articles(http_s* h) {
 
     GetArticleResult result = get_article_by_slug(h->udata, id, slug);
 
-    response_body = create_article_success_response(result.result);
-
-    h->status = HTTP_SUCCESS;
+    if (result.status == GetArticleSuccess) {
+        response_body = create_article_success_response(result.result, true, FORMAT_DATETIMESTAMP);
+        h->status = HTTP_SUCCESS;
+    } else if (result.status == GET_ARTICLE_UNKNOWN) {
+        h->status = HTTP_NOT_FOUND;
+        response_body = "Potato";
+    }
 
     http_send_body(h, response_body, strlen(response_body));
 }

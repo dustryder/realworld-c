@@ -38,6 +38,7 @@ DataResult get_data_result(const PGresult *res, Mapper mapper) {
         error.property = PQresultErrorField(res, PG_DIAG_CONSTRAINT_NAME);
         result.error = error;
     } else {
+        FIO_LOG_DEBUG("Database request failed: %d\n", command_status);
         result.status = DATA_UNKNOWN;
     }
 

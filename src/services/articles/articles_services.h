@@ -59,6 +59,6 @@ typedef struct {
     ErrorValue error;
 } GetAllArticleResult;
 
-GetAllArticleResult query_articles(PGconn *conn, char *author);
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag);
 
 #endif

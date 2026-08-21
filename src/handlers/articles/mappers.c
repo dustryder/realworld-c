@@ -2,7 +2,7 @@
 #include "articles_handlers.h"
 #include "cJSON.h"
 
-static cJSON *create_article_json(ArticlesServiceResultData result, bool multi);
+static cJSON *create_article_json(ArticlesServiceResultData result, bool include_body, DateTimeFormat format);
 
 char* datetimestamp_to_date(char* datetimestamp) {
     char *buffer = malloc(sizeof(char) * 12);
@@ -20,7 +20,7 @@ char* datetimestamp_to_datetimestamp(char* datetimestamp) {
     strncpy(buffer, datetimestamp, 19);
     buffer[10] = 'T';
     buffer[20] = '\0';
-
+    
     return buffer;
 }
 
@@ -29,7 +29,7 @@ char *create_many_article_success_response(ArticlesServiceResultData *results, i
     cJSON *articles_body = cJSON_CreateArray();
     
     for (int i = 0; i < result_count; i++) {
-        cJSON *article_body = create_article_json(results[i], true);
+        cJSON *article_body = create_article_json(results[i], false, FORMAT_DATETIMESTAMP);
         cJSON_AddItemToArray(articles_body, article_body);
     }
 
@@ -42,10 +42,10 @@ char *create_many_article_success_response(ArticlesServiceResultData *results, i
     return response_string;
 }
 
-char* create_article_success_response(ArticlesServiceResultData result) {
+char* create_article_success_response(ArticlesServiceResultData result, bool include_body, DateTimeFormat format) {
     cJSON *response_body = cJSON_CreateObject();
     
-    cJSON *article_body = create_article_json(result, false);
+    cJSON *article_body = create_article_json(result, include_body, format);
 
     cJSON_AddItemToObject(response_body, "article", article_body);
 
@@ -55,12 +55,12 @@ char* create_article_success_response(ArticlesServiceResultData result) {
     return response_string;
 }
 
-static cJSON *create_article_json(ArticlesServiceResultData result, bool multi) {
+static cJSON *create_article_json(ArticlesServiceResultData result, bool include_body, DateTimeFormat format) {
     cJSON *article_properties = cJSON_CreateObject();
     cJSON *author_properties = cJSON_CreateObject();
 
-    char *created_at = !multi ? datetimestamp_to_date(result.createdAt) : datetimestamp_to_datetimestamp(result.createdAt);
-    char *updated_at = !multi ? datetimestamp_to_date(result.updatedAt) : datetimestamp_to_datetimestamp(result.updatedAt);
+    char *created_at = format == FORMAT_DATESTAMP ? datetimestamp_to_date(result.createdAt) : datetimestamp_to_datetimestamp(result.createdAt);
+    char *updated_at = format == FORMAT_DATESTAMP ? datetimestamp_to_date(result.updatedAt) : datetimestamp_to_datetimestamp(result.updatedAt);
 
     cJSON_AddItemToObject(author_properties, "username", cJSON_CreateString(result.author.username));
     cJSON_AddItemToObject(author_properties, "bio", cJSON_CreateString(result.author.bio));
@@ -70,7 +70,7 @@ static cJSON *create_article_json(ArticlesServiceResultData result, bool multi) 
     cJSON_AddItemToObject(article_properties, "slug", cJSON_CreateString(result.slug));
     cJSON_AddItemToObject(article_properties, "title", cJSON_CreateString(result.title));
     cJSON_AddItemToObject(article_properties, "description", cJSON_CreateString(result.description));
-    if (!multi) cJSON_AddItemToObject(article_properties, "body", cJSON_CreateString(result.body));
+    if (include_body) cJSON_AddItemToObject(article_properties, "body", cJSON_CreateString(result.body));
     cJSON_AddItemToObject(article_properties, "tagList", cJSON_CreateStringArray((const char *const *)result.tagList, result.tag_count));
     cJSON_AddItemToObject(article_properties, "createdAt", cJSON_CreateString(created_at));
     cJSON_AddItemToObject(article_properties, "updatedAt", cJSON_CreateString(updated_at));

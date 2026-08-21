@@ -14,7 +14,7 @@ void handle_get_all_articles(http_s* h) {
 
     char *response_body;
 
-    GetAllArticleResult result = query_articles(conn, qs.author);
+    GetAllArticleResult result = query_articles(conn, qs.author, qs.tag);
 
     response_body = create_many_article_success_response(result.result, result.article_count);
     h->status = HTTP_SUCCESS;
@@ -27,10 +27,13 @@ GetAllArticleQuery parse_get_all_articles_qs(FIOBJ *params) {
     GetAllArticleQuery qs;
 
     FIOBJ author_key = fiobj_str_new("author", 6);
+    FIOBJ tag_key = fiobj_str_new("tag", 3);
 
     FIOBJ fio_author = fiobj_hash_get(params, author_key);
+    FIOBJ fio_tag = fiobj_hash_get(params, tag_key);
 
     qs.author = FIOBJ_TYPE_IS(fio_author, FIOBJ_T_STRING) ? fiobj_obj2cstr(fio_author).data : NULL;
+    qs.tag = FIOBJ_TYPE_IS(fio_tag, FIOBJ_T_STRING) ? fiobj_obj2cstr(fio_tag).data : NULL;
 
     fiobj_free(author_key);
 

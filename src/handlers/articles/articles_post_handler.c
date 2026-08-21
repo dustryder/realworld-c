@@ -16,7 +16,7 @@ void handle_post_articles(http_s* h) {
 
     CreateArticleResult result = create_article(h->udata, id, payload.title, payload.description, payload.body, payload.tags, payload.tag_count);
 
-    response_body = create_article_success_response(result.result);
+    response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
     h->status = HTTP_CREATED;
 
     free(payload.tags);
