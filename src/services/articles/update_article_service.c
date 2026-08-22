@@ -26,7 +26,7 @@ UpdateArticleResult update_article(
 
     UpdateArticleResult result;
 
-    if (get_article_result.status == GET_ARTICLE_UNKNOWN) {
+    if (get_article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
         result.error.property = "article";
         result.error.error = "not found";

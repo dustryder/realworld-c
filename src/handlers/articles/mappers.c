@@ -1,28 +1,9 @@
 #include "articles_services.h"
 #include "articles_handlers.h"
 #include "cJSON.h"
+#include "../../lib/string_helpers.h"
 
 static cJSON *create_article_json(ArticlesServiceResultData result, bool include_body, DateTimeFormat format);
-
-char* datetimestamp_to_date(char* datetimestamp) {
-    char *buffer = malloc(sizeof(char) * 12);
-
-    strncpy(buffer, datetimestamp, 10);
-    buffer[10] = 'T';
-    buffer[11] = '\0';
-
-    return buffer;
-}
-
-char* datetimestamp_to_datetimestamp(char* datetimestamp) {
-    char *buffer = malloc(sizeof(char) * 21);
-
-    strncpy(buffer, datetimestamp, 19);
-    buffer[10] = 'T';
-    buffer[20] = '\0';
-    
-    return buffer;
-}
 
 char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count, int total_count) {
     cJSON *response_body = cJSON_CreateObject();

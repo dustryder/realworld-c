@@ -1,4 +1,5 @@
 #include "articles_services.h"
+#include "../../data/article.h"
 
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
     FIO_LOG_DEBUG("unfavorite_article: user_id=%d, slug=%s", user_id, slug);
@@ -7,7 +8,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
     DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
 
-    if (article_result.status == GET_ARTICLE_UNKNOWN) {
+    if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
         result.error.property = "resource";
         result.error.error = "not found";

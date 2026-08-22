@@ -116,6 +116,16 @@ char *parse_path_param(FIOBJ *params, char *key) {
     return value;
 }
 
+int parse_path_param_number(FIOBJ *params, char *key) {
+    FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
+
+    FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
+
+    int value = fiobj_obj2num(fiobj_value);
+
+    return value;
+}
+
 int parse_request_user(FIOBJ *params) {
     FIOBJ fiobj_key = fiobj_str_new("_id", 3);
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
@@ -129,6 +139,11 @@ int parse_request_user(FIOBJ *params) {
     int converted = strtol(value, NULL, 10);
 
     return converted;
+}
+
+char *create_failure_body_from_error(ErrorValue error) {
+    ErrorValue errors[1] = { error };
+    return create_failure_body_from_errors(errors, 1);
 }
 
 char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {

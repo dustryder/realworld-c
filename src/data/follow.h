@@ -10,5 +10,6 @@ typedef struct {
 
 DataResult insert_follow(PGconn *conn, int user_id, char* follow_username);
 DataResult delete_follow(PGconn *conn, int user_id, char* follow_username);
+int get_user_follows_user(PGconn *conn, int user_id, int followed_user_id);
 
 #endif

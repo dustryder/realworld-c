@@ -99,7 +99,7 @@ void delete_article_by_id(PGconn *conn, int id) {
 }
 
 DataResult get_article_data_by_slug(PGconn *conn, char* slug) {
-    FIO_LOG_DEBUG("insert_article: slug: %s", slug);
+    FIO_LOG_DEBUG("get_article_data_by_slug: slug: %s", slug);
 
     char* command = "SELECT * FROM \"article\" "
                     "WHERE slug = $1";

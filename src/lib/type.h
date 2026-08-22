@@ -21,4 +21,11 @@ typedef struct {
     char* key;
     char* value;
 } UpdateValue;
+
+typedef enum {
+    SUCCESS,
+    NOT_FOUND,
+    UNAUTHORIZED,
+    UNKNOWN
+} ServiceStatus;
 #endif

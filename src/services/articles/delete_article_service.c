@@ -13,7 +13,7 @@ ArticleServiceResult delete_article(
     ArticleData *article_data = article_result.data;
     ArticleServiceResult result;
 
-    if (article_result.status == GET_ARTICLE_UNKNOWN) {
+    if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
         result.error.property = "article";
         result.error.error = "not found";

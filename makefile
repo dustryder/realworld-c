@@ -40,7 +40,7 @@ CMAKE_LIBFILE_NAME=CMakeLists.txt
 # The development, non-library .c file(s) (i.e., the one with `int main(void)`).
 MAIN_ROOT=src
 # Development subfolders under the main development root
-MAIN_SUBFOLDERS=handlers services data lib services/users services/tags services/profiles handlers/profiles handlers/user handlers/articles handlers/tags services/articles
+MAIN_SUBFOLDERS=handlers services data lib services/users services/tags services/profiles services/articles services/comments handlers/profiles handlers/user handlers/articles handlers/tags handlers/comments
 
 #############################################################################
 # Library Folder Settings

@@ -1,4 +1,5 @@
 #include "articles_services.h"
+#include "../../data/article.h"
 
 GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset) {
 
