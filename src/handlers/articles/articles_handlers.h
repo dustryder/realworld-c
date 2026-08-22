@@ -24,6 +24,11 @@ typedef struct {
 } GetAllArticleQuery;
 
 typedef struct {
+    int limit;
+    int offset;
+} GetAllFeedQuery;
+
+typedef struct {
     OptionalValue title;
     OptionalValue description;
     OptionalValue body;
@@ -36,8 +41,11 @@ void handle_get_all_articles(http_s *h);
 void handle_put_articles(http_s *h);
 void handle_delete_articles(http_s *h);
 
+void handle_get_all_feed(http_s* h);
+
 void handle_post_favorite(http_s *h);
 void handle_delete_favorite(http_s *h);
+
 
 char *create_article_success_response(ArticlesServiceResultData, bool include_body, DateTimeFormat format);
 char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count, int total_count);

@@ -50,7 +50,8 @@ UpdateArticleResult update_article(
             result_tags,
             tag_count,
             false,
-            favorite_count
+            favorite_count,
+            false
         );
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;

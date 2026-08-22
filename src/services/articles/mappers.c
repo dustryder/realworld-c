@@ -7,7 +7,8 @@ ArticlesServiceResultData map_data_to_article(
     char** tags,
     int tag_count,
     bool favorited,
-    int favoritesCount
+    int favoritesCount,
+    bool user_is_following_creator
 ) {
     ArticlesServiceResultData data;
 
@@ -23,7 +24,7 @@ ArticlesServiceResultData map_data_to_article(
     data.favorited = favorited;
     data.favoritesCount = favoritesCount;
 
-    data.author = map_data_to_profile(user_data, false);
+    data.author = map_data_to_profile(user_data, user_is_following_creator);
 
     return data;
 }

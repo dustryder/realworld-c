@@ -35,6 +35,7 @@ static void on_http_request(http_s *h) {
   http_route_delete(h, "/api/profiles/:username/follow", handle_delete_follow, resolve_request_user, require_auth);
 
   //articles routes
+  http_route_get(h, "/api/articles/feed", handle_get_all_feed, resolve_request_user);
   http_route_post(h, "/api/articles", handle_post_articles, resolve_request_user, require_auth);
   http_route_get(h, "/api/articles/:slug", handle_get_articles, resolve_request_user);
   http_route_get(h, "/api/articles", handle_get_all_articles, resolve_request_user);

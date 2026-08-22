@@ -1,13 +1,11 @@
 #include "articles_services.h"
-#include "../../data/article.h"
-#include "../../data/tag.h"
 
-GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char *favorited) {
-    FIO_LOG_DEBUG("query_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
+GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset) {
 
     GetAllArticleResult result;
-    DataResult article_result = get_all_articles(conn, author, tag, limit, offset, favorited);
-    int article_count_result = get_all_articles_count(conn);
+
+    DataResult article_result = get_all_followed_articles(conn, user_id, limit, offset);
+    int article_count_result = get_all_followed_articles_count(conn, user_id);
 
     ArticleDataRecordset *article_data_recordset = article_result.data;
 
@@ -31,7 +29,7 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
                 tag_count,
                 false,
                 favorite_count,
-                false
+                true
             );
         }
 
@@ -39,11 +37,10 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
         result.result = result_data;
         result.article_count = article_data_recordset->record_count;
         result.total_count = article_count_result;
-
-        return result;
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
         result.article_count = 0;
+        result.total_count = 0;
     }
 
     return result;

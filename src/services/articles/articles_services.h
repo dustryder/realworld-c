@@ -51,7 +51,8 @@ ArticlesServiceResultData map_data_to_article(
     char** tags,
     int tag_count,
     bool favorited,
-    int favoritesCount
+    int favoritesCount,
+    bool user_is_following_creator
 );
 
 typedef struct {
@@ -89,4 +90,5 @@ typedef struct {
 
 ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
+GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset);
 #endif

@@ -27,7 +27,8 @@ ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug) {
             tags,
             tag_count,
             user_favorites_article,
-            favorite_count
+            favorite_count,
+            false
         );
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;

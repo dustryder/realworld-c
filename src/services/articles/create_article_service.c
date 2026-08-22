@@ -31,7 +31,8 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
             tags.value,
             tags.value_count,
             false,
-            0
+            0,
+            false
         );
         service_result.status = CreateArticleSuccess;
     }
