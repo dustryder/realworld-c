@@ -27,7 +27,8 @@ void handle_put_articles(http_s* h) {
       payload.title,
       payload.description,
       payload.body,
-      payload.tags
+      payload.tags,
+      id
     );
 
     if (result.status == GetArticleSuccess) {
@@ -37,6 +38,10 @@ void handle_put_articles(http_s* h) {
       ErrorValue errors[1] = { result.error };
       response_body = create_failure_body_from_errors(errors, 1);
       h->status = HTTP_NOT_FOUND;
+    } else if (result.status == GET_ARTICLE_UNAUTHORIZED) {
+      ErrorValue errors[1] = { result.error };
+      response_body = create_failure_body_from_errors(errors, 1);
+      h->status = HTTP_FORBIDDEN;
     }
 
     if (payload.tags.value != NULL) free(payload.tags.value);

@@ -34,7 +34,8 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
 
 typedef enum {
     GetArticleSuccess,
-    GET_ARTICLE_UNKNOWN
+    GET_ARTICLE_UNKNOWN,
+    GET_ARTICLE_UNAUTHORIZED
 } GetArticleStatus;
 
 typedef struct {
@@ -77,7 +78,8 @@ UpdateArticleResult update_article(
     OptionalValue title,
     OptionalValue description,
     OptionalValue body,
-    OptionalArray tags
+    OptionalArray tags,
+    int id
 );
 
 typedef struct {
@@ -86,7 +88,7 @@ typedef struct {
     ErrorValue error;
 } ArticleServiceResult;
 
-ArticleServiceResult delete_article(PGconn* conn, char *slug);
+ArticleServiceResult delete_article(PGconn* conn, char *slug, int user_id);
 ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
 GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset);

@@ -4,7 +4,8 @@
 
 ArticleServiceResult delete_article(
     PGconn *conn,
-    char* slug
+    char* slug,
+    int user_id
 ) {
     FIO_LOG_DEBUG("delete_article: slug=%s", slug);   
     
@@ -16,6 +17,11 @@ ArticleServiceResult delete_article(
         result.status = GET_ARTICLE_UNKNOWN;
         result.error.property = "article";
         result.error.error = "not found";
+        return result;
+    } else if (article_data->created_by != user_id) {
+        result.status = GET_ARTICLE_UNAUTHORIZED;
+        result.error.property = "article";
+        result.error.error = "forbidden";
         return result;
     }
 

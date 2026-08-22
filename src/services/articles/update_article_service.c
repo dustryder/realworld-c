@@ -11,7 +11,8 @@ UpdateArticleResult update_article(
     OptionalValue title,
     OptionalValue description,
     OptionalValue body,
-    OptionalArray tags
+    OptionalArray tags,
+    int id
 ) {
     FIO_LOG_DEBUG("update_article");    
     UpdateValue update_values[3];
@@ -29,6 +30,15 @@ UpdateArticleResult update_article(
         result.status = GET_ARTICLE_UNKNOWN;
         result.error.property = "article";
         result.error.error = "not found";
+        return result;
+    }
+
+    ArticleData *get_article_data = get_article_result.data;
+
+    if (get_article_data->created_by != id) {
+        result.status = GET_ARTICLE_UNAUTHORIZED;
+        result.error.property = "article";
+        result.error.error = "forbidden";
         return result;
     }
 
