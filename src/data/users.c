@@ -124,7 +124,7 @@ UserData *map_user_data(const PGresult *res) {
 }
 
 void resolve_user_constraints(ErrorValue *value) {
-        if (strcmp(value->property, "user_username_key") == 0) {
+    if (strcmp(value->property, "user_username_key") == 0) {
         value->property = "username";
     }
 

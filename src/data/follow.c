@@ -11,15 +11,14 @@ DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
     char str[20];
     sprintf(str, "%d", user_id);
 
-    char* command = "INSERT INTO \"follow\" (user_id, user_follow_id) VALUES"
-                    "($1, (SELECT id FROM \"user\" WHERE username = $2))"
+    char* command = "INSERT INTO \"follow\" (user_id, user_follow_id) VALUES "
+                    "($1, (SELECT id FROM \"user\" WHERE username = $2)) "
                     "RETURNING *";
     const char * const data[2] = { str, follow_username};
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
-    resolve_user_constraints(&result.error);
 
     return result;
 }
