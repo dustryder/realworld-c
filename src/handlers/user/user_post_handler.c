@@ -1,6 +1,6 @@
 #include "main.h"
 #include "user_handlers.h"
-#include "../services/users/users_services.h"
+#include "../../services/users/users_services.h"
 #include "cJSON.h"
 #include "../../lib/constants.h"
 #include "../../lib/http_helpers.h"
@@ -19,7 +19,7 @@ void handle_post_user(http_s* h) {
       request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      RegisterUserStatus result = register_user(values.email, values.username, values.password);
+      RegisterUserStatus result = register_user(h->udata, values.email, values.username, values.password);
 
       if (result.status == CREATE_USER_SUCCESS) {
         request_body = create_user_success_response(values.email, values.username, result.result, NULL, NULL);

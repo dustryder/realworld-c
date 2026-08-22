@@ -4,15 +4,14 @@
 
 static TagData map_tag_data(const PGresult *res);
 
-void insert_tag(char* tag) {
+void insert_tag(PGconn *conn, char* tag) {
     FIO_LOG_DEBUG("insert_tag: tag: %s", tag);
-    PGconn *connection = get_connection();
 
     char *command = "INSERT INTO \"tag\"(name) VALUES ($1) ON CONFLICT (name) DO NOTHING;";
 
     const char * const data[1] = { tag };
 
-    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     ExecStatusType command_status = PQresultStatus(data_result);
 
@@ -64,9 +63,8 @@ char **get_all_tags_data(PGconn *conn, int *tag_count) {
     return tag_names;
 }
 
-DataResult insert_article_tag(int article_id, char* tag) {
+DataResult insert_article_tag(PGconn *conn, int article_id, char* tag) {
     FIO_LOG_DEBUG("insert_article_tag: article_id: %d, tag: %s", article_id, tag);
-    PGconn *connection = get_connection();
     char article_id_str[20];
     sprintf(article_id_str, "%d", article_id);
 
@@ -77,9 +75,9 @@ DataResult insert_article_tag(int article_id, char* tag) {
                                 "ON CONFLICT DO NOTHING"; 
     const char * const data[2] = { tag, article_id_str };
 
-    insert_tag(tag);
+    insert_tag(conn, tag);
 
-    PGresult *data_result = PQexecParams(connection,command,2,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_tag_data);
 

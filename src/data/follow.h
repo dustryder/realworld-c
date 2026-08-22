@@ -8,7 +8,7 @@ typedef struct {
     int follow_user_id;
 } FollowData;
 
-DataResult insert_follow(int user_id, char* follow_username);
-DataResult delete_follow(int user_id, char* follow_username);
+DataResult insert_follow(PGconn *conn, int user_id, char* follow_username);
+DataResult delete_follow(PGconn *conn, int user_id, char* follow_username);
 
 #endif

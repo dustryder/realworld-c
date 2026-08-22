@@ -12,7 +12,7 @@ void handle_post_follow(http_s* h) {
 
     char* response_body;
 
-    FollowUserResult result = follow_user(id, username);
+    FollowUserResult result = follow_user(h->udata, id, username);
 
     if (result.status == FOLLOW_USER_SUCCESS) {
       h->status = HTTP_SUCCESS;

@@ -3,11 +3,11 @@
 #include "../../lib/token.h"
 #include <string.h>
 
-RegisterUserStatus register_user(char* email, char* username, char* password) {
+RegisterUserStatus register_user(PGconn *conn, char* email, char* username, char* password) {
     FIO_LOG_DEBUG("register_user: email: %s, user: %s, password: %s", email, username, password);
 
     RegisterUserStatus result;
-    DataResult data_result = insert_user(email, username, password);
+    DataResult data_result = insert_user(conn, email, username, password);
     UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {

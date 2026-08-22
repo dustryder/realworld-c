@@ -10,11 +10,10 @@ void handle_get_all_articles(http_s* h) {
 
     int id = parse_request_user(h->params);
     GetAllArticleQuery qs = parse_get_all_articles_qs(h->params);
-    PGconn *conn = h->udata;
 
     char *response_body;
 
-    GetAllArticleResult result = query_articles(conn, qs.author, qs.tag, qs.limit, qs.offset, qs.favorited);
+    GetAllArticleResult result = query_articles(h->udata, qs.author, qs.tag, qs.limit, qs.offset, qs.favorited);
 
     response_body = create_many_article_success_response(result.result, result.article_count, result.total_count);
     h->status = HTTP_SUCCESS;

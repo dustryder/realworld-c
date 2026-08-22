@@ -21,7 +21,8 @@ void handle_put_user(http_s* h) {
       response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      UpdateUserResult result = update_user(id,
+      UpdateUserResult result = update_user(h->udata,
+          id,
           values.email,
           values.password,
           values.username,

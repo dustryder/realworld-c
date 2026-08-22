@@ -21,7 +21,7 @@ typedef struct {
     ErrorValue error;
 } GetProfileByUsernameResult;
 
-GetProfileByUsernameResult get_profile_by_username(char* username);
+GetProfileByUsernameResult get_profile_by_username(PGconn *conn, char* username);
 
 typedef enum {
     FOLLOW_USER_SUCCESS,
@@ -40,8 +40,8 @@ typedef struct {
     ErrorValue error;
 } UnfollowUserResult;
 
-FollowUserResult follow_user(int current_user, char* follow);
-UnfollowUserResult unfollow_user(int current_user, char* follow);
+FollowUserResult follow_user(PGconn *conn, int current_user, char* follow);
+UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow);
 
 ProfileServiceResultData map_data_to_profile(UserData *data_result, bool following);
 #endif

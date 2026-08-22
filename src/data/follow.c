@@ -5,9 +5,9 @@
 
 static FollowData map_follow_data(const PGresult *res);
 
-DataResult insert_follow(int user_id, char* follow_username) {
+DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
     FIO_LOG_DEBUG("insert_follow: user_id: %d, follow_username: %s", user_id, follow_username);
-    PGconn *connection = get_connection();
+
     char str[20];
     sprintf(str, "%d", user_id);
 
@@ -16,7 +16,7 @@ DataResult insert_follow(int user_id, char* follow_username) {
                     "RETURNING *";
     const char * const data[2] = { str, follow_username};
 
-    PGresult *data_result = PQexecParams(connection,command,2,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
     resolve_user_constraints(&result.error);
@@ -24,7 +24,7 @@ DataResult insert_follow(int user_id, char* follow_username) {
     return result;
 }
 
-DataResult delete_follow(int user_id, char* follow_username) {
+DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
     FIO_LOG_DEBUG("delete_follow: user_id: %d, follow_username: %s", user_id, follow_username);
     PGconn *connection = get_connection();
     char str[20];
@@ -36,7 +36,7 @@ DataResult delete_follow(int user_id, char* follow_username) {
 
     const char * const data[2] = { str, follow_username};
 
-    PGresult *data_result = PQexecParams(connection,command,2,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
     resolve_user_constraints(&result.error);

@@ -11,7 +11,7 @@ void handle_delete_follow(http_s* h) {
     int id = parse_request_user(h->params);
     char* response_body;
 
-    UnfollowUserResult result = unfollow_user(id, username);
+    UnfollowUserResult result = unfollow_user(h->udata, id, username);
 
     if (result.status == FOLLOW_USER_SUCCESS) {
       h->status = HTTP_SUCCESS;

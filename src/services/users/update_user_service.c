@@ -5,6 +5,7 @@
 #include "../../lib/type.h"
 
 UpdateUserResult update_user(
+    PGconn *conn,
     int id, 
     OptionalValue email, 
     OptionalValue password, 
@@ -22,7 +23,7 @@ UpdateUserResult update_user(
     add_field(update_values, &value_count, "bio", bio);
     add_field(update_values, &value_count, "image", image);
 
-    DataResult data_result = update_user_data(id, update_values, value_count);
+    DataResult data_result = update_user_data(conn, id, update_values, value_count);
     UserData *user_data = data_result.data;
 
     UpdateUserResult result;

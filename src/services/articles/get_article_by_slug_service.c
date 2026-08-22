@@ -6,7 +6,7 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("get_article_by_slug: user_id=%d, slug=%s", user_id, slug);
 
     GetArticleResult result;
-    DataResult article_result = get_article_data_by_slug(slug);
+    DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
 
     if (article_result.status == DATA_SUCCESS) {

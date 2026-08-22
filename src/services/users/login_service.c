@@ -3,10 +3,10 @@
 #include "../../lib/token.h"
 #include <string.h>
 
-LoginUserResult login(char* email, char* password) {
+LoginUserResult login(PGconn *conn, char* email, char* password) {
 
     LoginUserResult result;
-    DataResult data_result = get_user_by_email(email);
+    DataResult data_result = get_user_by_email(conn, email);
     UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {

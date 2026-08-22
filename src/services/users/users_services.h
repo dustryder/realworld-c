@@ -24,7 +24,7 @@ typedef struct {
     ErrorValue error;
 } RegisterUserStatus;
 
-RegisterUserStatus register_user(char* username, char* email, char* password);
+RegisterUserStatus register_user(PGconn *conn, char* username, char* email, char* password);
 
 
 typedef enum {
@@ -39,7 +39,7 @@ typedef struct {
     ErrorValue error;
 } LoginUserResult;
 
-LoginUserResult login(char* email, char* password);
+LoginUserResult login(PGconn *conn, char* email, char* password);
 
 
 typedef enum {
@@ -64,5 +64,5 @@ typedef struct {
     UserServiceResultData result;
 } UpdateUserResult;
 
-UpdateUserResult update_user(int id, OptionalValue email, OptionalValue password, OptionalValue username, OptionalValue bio, OptionalValue image);
+UpdateUserResult update_user(PGconn *conn, int id, OptionalValue email, OptionalValue password, OptionalValue username, OptionalValue bio, OptionalValue image);
 #endif

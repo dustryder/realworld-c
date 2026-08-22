@@ -9,7 +9,7 @@ void handle_get_profile(http_s* h) {
 
     char *username = parse_path_param(h->params, "username");
 
-    GetProfileByUsernameResult result = get_profile_by_username(username);
+    GetProfileByUsernameResult result = get_profile_by_username(h->udata, username);
     char *response_body;
 
     if (result.status == GET_PROFILE_SUCCESS) {

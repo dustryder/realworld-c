@@ -31,7 +31,7 @@ UpdateArticleResult update_article(
         if (tags.is_present) {
             delete_article_tags(conn, article_data->id);
             for (int i = 0; i < tags.value_count; i++) {
-                insert_article_tag(article_data->id, tags.value[i]);
+                insert_article_tag(conn, article_data->id, tags.value[i]);
             }
         }
 

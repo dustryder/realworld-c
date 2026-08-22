@@ -9,16 +9,15 @@
 
 static UserData *map_user_data(const PGresult *res);
 
-DataResult get_user_data_by_username(char* username) {
+DataResult get_user_data_by_username(PGconn *conn, char* username) {
     FIO_LOG_DEBUG("get_user_data_by_username: username=%s", username);
-    PGconn *connection = get_connection();
 
     char* command = "SELECT *"
                     "FROM \"user\""
                     "WHERE username = $1";
     const char * const data[1] = { username };
 
-    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 
@@ -42,32 +41,30 @@ DataResult get_user_data_by_id(PGconn *conn, int id) {
     return result;
 }
 
-DataResult get_user_by_email(char* email) {
+DataResult get_user_by_email(PGconn *conn, char* email) {
     FIO_LOG_DEBUG("get_user_by_email: email: %s", email);
-    PGconn *connection = get_connection();
 
     char* command = "SELECT *"
                     "FROM \"user\""
                     "WHERE email = $1";
     const char * const data[1] = { email };
 
-    PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 
     return result;
 }
 
-DataResult insert_user(char* email, char* username, char* password) {
+DataResult insert_user(PGconn *conn, char* email, char* username, char* password) {
     FIO_LOG_DEBUG("insert_user: email: %s, user: %s, password: %s", email, username, password);
-    PGconn *connection = get_connection();
 
     char* command = "INSERT INTO \"user\" (username, email, password) VALUES"
                     "($1, $2, $3)"
                     "RETURNING *";
     const char * const data[3] = { username, email, password};
 
-    PGresult *data_result = PQexecParams(connection,command,3,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,3,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_user_data);
     resolve_user_constraints(&result.error);
@@ -75,8 +72,7 @@ DataResult insert_user(char* email, char* username, char* password) {
     return result;
 }
 
-DataResult update_user_data(int id, UpdateValue *update_values, size_t value_count) {
-    PGconn *connection = get_connection();
+DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, size_t value_count) {
     char string_id[20];
     sprintf(string_id, "%d", id);
 
@@ -106,7 +102,7 @@ DataResult update_user_data(int id, UpdateValue *update_values, size_t value_cou
     char command[strlen(base_command) + strlen(update_substring)];
     sprintf(command, base_command, update_substring);
 
-    PGresult *data_result = PQexecParams(connection, command, value_count + 1, NULL, data, NULL, NULL, 0);
+    PGresult *data_result = PQexecParams(conn, command, value_count + 1, NULL, data, NULL, NULL, 0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 

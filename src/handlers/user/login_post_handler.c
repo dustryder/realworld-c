@@ -42,7 +42,7 @@ void handle_post_login(http_s* h) {
       request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      LoginUserResult result = login(values.email, values.password);
+      LoginUserResult result = login(h->udata, values.email, values.password);
 
       if (result.status == LOGIN_USER_SUCCESS) {
         h->status = HTTP_SUCCESS;
