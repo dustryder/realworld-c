@@ -19,10 +19,10 @@ void handle_post_user(http_s* h) {
       request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      RegisterUserStatus result = register_user(h->udata, values.email, values.username, values.password);
+      RegisterUserServiceResult result = register_user(h->udata, values.email, values.username, values.password);
 
       if (result.status == SERVICE_SUCCESS) {
-        request_body = create_user_success_response(values.email, values.username, result.result, NULL, NULL);
+        request_body = create_user_success_response(values.email, values.username, result.data, NULL, NULL);
         h->status = HTTP_CREATED;
       } else if (result.status == SERVICE_DUPLICATE) {
         ErrorValue errors[1] = { result.error };

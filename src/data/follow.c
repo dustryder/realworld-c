@@ -37,7 +37,6 @@ DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
-    resolve_user_constraints(&result.error);
 
     return result;
 }

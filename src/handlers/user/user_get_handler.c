@@ -12,16 +12,16 @@ void handle_get_user(http_s* h) {
 
     int id = parse_request_user(h->params);
 
-    GetUserByIdResult result = get_user_by_id(h->udata, id);
+    UserServiceResult result = get_user_by_id(h->udata, id);
 
     if (result.status == SERVICE_SUCCESS) {
       h->status = HTTP_SUCCESS;
       body = create_user_success_response(
-        result.result.email,
-        result.result.username,
-        result.result.token,
-        result.result.bio,
-        result.result.image
+        result.data.email,
+        result.data.username,
+        result.data.token,
+        result.data.bio,
+        result.data.image
       );
       h->status = HTTP_SUCCESS;
     } else if (result.status == SERVICE_NOT_FOUND) {

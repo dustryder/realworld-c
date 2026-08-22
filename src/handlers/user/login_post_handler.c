@@ -42,16 +42,16 @@ void handle_post_login(http_s* h) {
       request_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      LoginUserResult result = login(h->udata, values.email, values.password);
+      UserServiceResult result = login(h->udata, values.email, values.password);
 
       if (result.status == SERVICE_SUCCESS) {
         h->status = HTTP_SUCCESS;
         request_body = create_user_success_response(
-          result.result.email,
-          result.result.username,
-          result.result.token,
-          result.result.bio,
-          result.result.image
+          result.data.email,
+          result.data.username,
+          result.data.token,
+          result.data.bio,
+          result.data.image
         );
       } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
         h->status = HTTP_UNAUTHORIZED;

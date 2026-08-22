@@ -3,17 +3,17 @@
 #include "../../lib/token.h"
 #include <string.h>
 
-RegisterUserStatus register_user(PGconn *conn, char* email, char* username, char* password) {
+RegisterUserServiceResult register_user(PGconn *conn, char* email, char* username, char* password) {
     FIO_LOG_DEBUG("register_user: email: %s, user: %s, password: %s", email, username, password);
 
-    RegisterUserStatus result;
+    RegisterUserServiceResult result;
     DataResult data_result = insert_user(conn, email, username, password);
     UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = SERVICE_SUCCESS;
         char* jwt = sign_jwt(user_data->id);
-        result.result = jwt;
+        result.data = jwt;
     } else if (data_result.status == DATA_DUPLICATE) {
         result.status = SERVICE_DUPLICATE;
         result.error.property = data_result.error.property;

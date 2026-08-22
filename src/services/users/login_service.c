@@ -3,9 +3,9 @@
 #include "../../lib/token.h"
 #include <string.h>
 
-LoginUserResult login(PGconn *conn, char* email, char* password) {
+UserServiceResult login(PGconn *conn, char* email, char* password) {
 
-    LoginUserResult result;
+    UserServiceResult result;
     DataResult data_result = get_user_by_email(conn, email);
     UserData *user_data = data_result.data;
 
@@ -13,7 +13,7 @@ LoginUserResult login(PGconn *conn, char* email, char* password) {
 
         if (strcmp(password, user_data->password) == 0) {
             result.status = SERVICE_SUCCESS;
-            result.result = map_data_to_user(data_result.data);
+            result.data = map_data_to_user(data_result.data);
         } else {
             result.status = SERVICE_UNAUTHORIZED;
             result.error.property = "credentials";

@@ -4,7 +4,7 @@
 #include <string.h>
 #include "../../lib/type.h"
 
-UpdateUserResult update_user(
+UserServiceResult update_user(
     PGconn *conn,
     int id, 
     OptionalValue email, 
@@ -26,11 +26,11 @@ UpdateUserResult update_user(
     DataResult data_result = update_user_data(conn, id, update_values, value_count);
     UserData *user_data = data_result.data;
 
-    UpdateUserResult result;
+    UserServiceResult result;
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = SERVICE_SUCCESS;
-        result.result = map_data_to_user(user_data);
+        result.data = map_data_to_user(user_data);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_UNKNOWN;
     }
