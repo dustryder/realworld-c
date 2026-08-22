@@ -80,14 +80,13 @@ UpdateArticleResult update_article(
     OptionalArray tags
 );
 
-void delete_article(PGconn* conn, char *slug);
-
 typedef struct {
     GetArticleStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
 } ArticleServiceResult;
 
+ArticleServiceResult delete_article(PGconn* conn, char *slug);
 ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
 GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset);

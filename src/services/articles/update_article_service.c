@@ -21,11 +21,20 @@ UpdateArticleResult update_article(
     add_field(update_values, &value_count, "description", description);
     add_field(update_values, &value_count, "body", body);
 
+    DataResult get_article_result = get_article_data_by_slug(conn, slug);
+
+    UpdateArticleResult result;
+
+    if (get_article_result.status == GET_ARTICLE_UNKNOWN) {
+        result.status = GET_ARTICLE_UNKNOWN;
+        result.error.property = "article";
+        result.error.error = "not found";
+        return result;
+    }
+
     DataResult data_result = update_article_by_slug(conn, slug, update_values, value_count);
 
     ArticleData *article_data = data_result.data;
-
-    UpdateArticleResult result;
 
     if (data_result.status == DATA_SUCCESS) {
         if (tags.is_present) {

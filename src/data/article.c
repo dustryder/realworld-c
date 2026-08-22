@@ -346,7 +346,7 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
     int update_substring_length = strlen(update_updated_at) + 3;
 
     for (int i = 0; i < update_count; i++) {
-        update_substring_length += strlen(update_values[i].value);
+        update_substring_length += strlen(update_values[i].value) + 500;
     }
     
     char update_substring[update_substring_length];

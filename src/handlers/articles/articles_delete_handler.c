@@ -9,9 +9,16 @@ void handle_delete_articles(http_s* h) {
     char *slug = parse_path_param(h->params, "slug");
     char *response_body;
 
-    delete_article(h->udata, slug);
+    ArticleServiceResult result = delete_article(h->udata, slug);
 
-    h->status = HTTP_NO_CONTENT;
+    if (result.status == GetArticleSuccess) {
+        h->status = HTTP_NO_CONTENT;
+        response_body = "";
+    } else if (result.status == GET_ARTICLE_UNKNOWN) {
+        ErrorValue errors[1] = { result.error };
+        response_body = create_failure_body_from_errors(errors, 1);
+        h->status = HTTP_NOT_FOUND;
+    }
 
-    http_send_body(h, "", 0);
+    http_send_body(h, response_body, strlen(response_body));
 }

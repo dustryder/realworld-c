@@ -2,7 +2,7 @@
 #include "../../data/article.h"
 #include "../../data/tag.h"
 
-void delete_article(
+ArticleServiceResult delete_article(
     PGconn *conn,
     char* slug
 ) {
@@ -10,9 +10,18 @@ void delete_article(
     
     DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
+    ArticleServiceResult result;
 
+    if (article_result.status == GET_ARTICLE_UNKNOWN) {
+        result.status = GET_ARTICLE_UNKNOWN;
+        result.error.property = "article";
+        result.error.error = "not found";
+        return result;
+    }
+
+    result.status == GetArticleSuccess;
     delete_article_tags(conn, article_data->id);
     delete_article_by_id(conn, article_data->id);
 
-    return;
+    return result;
 }

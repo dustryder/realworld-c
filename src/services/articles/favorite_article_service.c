@@ -9,6 +9,13 @@ ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug) {
     DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
 
+    if (article_result.status == GET_ARTICLE_UNKNOWN) {
+        result.status = GET_ARTICLE_UNKNOWN;
+        result.error.property = "resource";
+        result.error.error = "not found";
+        return result;
+    }
+
     if (article_result.status == DATA_SUCCESS) {
         insert_article_favorite(conn, user_id, slug);
         DataResult user_result = get_user_data_by_id(conn, article_data->created_by);

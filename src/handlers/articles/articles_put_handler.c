@@ -30,9 +30,14 @@ void handle_put_articles(http_s* h) {
       payload.tags
     );
 
-    response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
-
-    h->status = HTTP_SUCCESS;
+    if (result.status == GetArticleSuccess) {
+      response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
+      h->status = HTTP_SUCCESS;
+    } else if (result.status == GET_ARTICLE_UNKNOWN) {
+      ErrorValue errors[1] = { result.error };
+      response_body = create_failure_body_from_errors(errors, 1);
+      h->status = HTTP_NOT_FOUND;
+    }
 
     if (payload.tags.value != NULL) free(payload.tags.value);
 
