@@ -13,10 +13,10 @@ void handle_delete_follow(http_s* h) {
 
     UnfollowUserResult result = unfollow_user(h->udata, id, username);
 
-    if (result.status == FOLLOW_USER_SUCCESS) {
+    if (result.status == SERVICE_SUCCESS) {
       h->status = HTTP_SUCCESS;
       response_body = create_success_profile_response(result.result);
-    } else if (result.status == FOLLOW_USER_UNKNOWN) {
+    } else if (result.status == SERVICE_NOT_FOUND) {
       h->status = HTTP_NOT_FOUND;
       ErrorValue errors[1] = { result.error };
       response_body = create_failure_body_from_errors(errors, 1);

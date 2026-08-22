@@ -22,10 +22,10 @@ void handle_post_comments(http_s *h) {
       response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-        if (service_result.status == SUCCESS) {
+        if (service_result.status == SERVICE_SUCCESS) {
             h->status = HTTP_CREATED;
             response_body = create_comment_success_response(service_result.result);
-        } else if (service_result.status == NOT_FOUND) {
+        } else if (service_result.status == SERVICE_NOT_FOUND) {
             response_body = create_failure_body_from_error(service_result.error);
             h->status = HTTP_NOT_FOUND;
         }

@@ -14,7 +14,7 @@ void handle_get_user(http_s* h) {
 
     GetUserByIdResult result = get_user_by_id(h->udata, id);
 
-    if (result.status == CREATE_USER_SUCCESS) {
+    if (result.status == SERVICE_SUCCESS) {
       h->status = HTTP_SUCCESS;
       body = create_user_success_response(
         result.result.email,
@@ -24,7 +24,7 @@ void handle_get_user(http_s* h) {
         result.result.image
       );
       h->status = HTTP_SUCCESS;
-    } else if (result.status == CREATE_USER_DUPLICATE) {
+    } else if (result.status == SERVICE_NOT_FOUND) {
       body = create_post_user_failure();
       h->status = HTTP_NOT_FOUND;
     }

@@ -17,9 +17,9 @@ CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char
         DataResult insert_comment_result = insert_comment(conn, article_data->id, user_id, body);
 
         service_result.result = map_data_to_comment(insert_comment_result.data, get_user_result.data, false);
-        service_result.status = SUCCESS;
+        service_result.status = SERVICE_SUCCESS;
     } else if (get_article_result.status == DATA_NOT_FOUND) {
-        service_result.status = NOT_FOUND;
+        service_result.status = SERVICE_NOT_FOUND;
         service_result.error.property = "article";
         service_result.error.error = "not found";
     }

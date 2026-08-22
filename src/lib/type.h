@@ -23,9 +23,10 @@ typedef struct {
 } UpdateValue;
 
 typedef enum {
-    SUCCESS,
-    NOT_FOUND,
-    UNAUTHORIZED,
-    UNKNOWN
+    SERVICE_SUCCESS,
+    SERVICE_NOT_FOUND,
+    SERVICE_UNAUTHORIZED,
+    SERVICE_DUPLICATE,
+    SERVICE_UNKNOWN
 } ServiceStatus;
 #endif

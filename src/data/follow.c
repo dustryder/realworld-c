@@ -25,7 +25,6 @@ DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
 
 DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
     FIO_LOG_DEBUG("delete_follow: user_id: %d, follow_username: %s", user_id, follow_username);
-    PGconn *connection = get_connection();
     char str[20];
     sprintf(str, "%d", user_id);
 

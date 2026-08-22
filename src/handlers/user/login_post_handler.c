@@ -44,7 +44,7 @@ void handle_post_login(http_s* h) {
     } else {
       LoginUserResult result = login(h->udata, values.email, values.password);
 
-      if (result.status == LOGIN_USER_SUCCESS) {
+      if (result.status == SERVICE_SUCCESS) {
         h->status = HTTP_SUCCESS;
         request_body = create_user_success_response(
           result.result.email,
@@ -53,7 +53,7 @@ void handle_post_login(http_s* h) {
           result.result.bio,
           result.result.image
         );
-      } else if (result.status == LOGIN_USER_UNKNOWN || result.status == LOGIN_USER_BAD_PASSWORD) {
+      } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
         h->status = HTTP_UNAUTHORIZED;
         ErrorValue errors[1] = { result.error };
         request_body = create_failure_body_from_errors(errors, 1);

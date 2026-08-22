@@ -35,14 +35,14 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
             );
         }
 
-        result.status = GetArticleSuccess;
+        result.status = SERVICE_SUCCESS;
         result.result = result_data;
         result.article_count = article_data_recordset->record_count;
         result.total_count = article_count_result;
 
         return result;
     } else if (article_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.article_count = 0;
     }
 

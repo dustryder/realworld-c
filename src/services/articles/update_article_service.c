@@ -27,7 +27,7 @@ UpdateArticleResult update_article(
     UpdateArticleResult result;
 
     if (get_article_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.error.property = "article";
         result.error.error = "not found";
         return result;
@@ -36,7 +36,7 @@ UpdateArticleResult update_article(
     ArticleData *get_article_data = get_article_result.data;
 
     if (get_article_data->created_by != id) {
-        result.status = GET_ARTICLE_UNAUTHORIZED;
+        result.status = SERVICE_UNAUTHORIZED;
         result.error.property = "article";
         result.error.error = "forbidden";
         return result;
@@ -62,7 +62,7 @@ UpdateArticleResult update_article(
         int favorite_count = get_article_favorite_count(conn, slug);
         // int user_follows_article = get_user_follows_article(conn, user_id, slug);
 
-        result.status = GetArticleSuccess;
+        result.status = SERVICE_SUCCESS;
         result.result = map_data_to_article(
             article_data,
             user_result.data,
@@ -73,7 +73,7 @@ UpdateArticleResult update_article(
             false
         );
     } else if (data_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
     }
 
     return result;

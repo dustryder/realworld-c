@@ -15,20 +15,20 @@ CommentsServiceResult delete_comment(PGconn *conn, int article_id, char *slug, i
 
         if (get_comment_result.status == DATA_SUCCESS && comment_data->created_by == user_id) {
             delete_comment_by_id(conn, article_id);
-            service_result.status = SUCCESS;
+            service_result.status = SERVICE_SUCCESS;
         } else if (get_comment_result.status == DATA_NOT_FOUND) {
             service_result.error.property = "comment";
             service_result.error.error = "not found";
-            service_result.status = NOT_FOUND;
+            service_result.status = SERVICE_NOT_FOUND;
         } else if (comment_data->created_by != user_id) {
             service_result.error.property = "comment";
             service_result.error.error = "forbidden";
-            service_result.status = UNAUTHORIZED;
+            service_result.status = SERVICE_UNAUTHORIZED;
         }
     } else if (get_article_result.status == DATA_NOT_FOUND) {
         service_result.error.property = "article";
         service_result.error.error = "not found";
-        service_result.status = NOT_FOUND;
+        service_result.status = SERVICE_NOT_FOUND;
     }
 
     return service_result;

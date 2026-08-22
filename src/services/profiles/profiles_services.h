@@ -10,32 +10,22 @@ typedef struct {
     bool following;
 } ProfileServiceResultData;
 
-typedef enum {
-    GET_PROFILE_SUCCESS,
-    GET_PROFILE_UNKNOWN
-} GetProfileStatus;
-
 typedef struct {
-    GetProfileStatus status;
+    ServiceStatus status;
     ProfileServiceResultData result;
     ErrorValue error;
 } GetProfileByUsernameResult;
 
 GetProfileByUsernameResult get_profile_by_username(PGconn *conn, char* username);
 
-typedef enum {
-    FOLLOW_USER_SUCCESS,
-    FOLLOW_USER_UNKNOWN,
-} FollowUserStatus;
-
 typedef struct {
-    FollowUserStatus status;
+    ServiceStatus status;
     ProfileServiceResultData result;
     ErrorValue error;
 } FollowUserResult;
 
 typedef struct {
-    FollowUserStatus status;
+    ServiceStatus status;
     ProfileServiceResultData result;
     ErrorValue error;
 } UnfollowUserResult;

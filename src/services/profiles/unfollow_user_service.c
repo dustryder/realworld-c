@@ -9,14 +9,14 @@ UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow) {
     DataResult user_data_result = get_user_data_by_username(conn, follow);
 
     if (user_data_result.status == DATA_NOT_FOUND) {
-        result.status = FOLLOW_USER_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.error.property = "profile";
         result.error.error = "not found";
     } else {
         DataResult data_result = delete_follow(conn, current_user, follow);
 
         if (data_result.status == DATA_SUCCESS && user_data_result.status == DATA_SUCCESS) {
-            result.status = FOLLOW_USER_SUCCESS;
+            result.status = SERVICE_SUCCESS;
             result.result = map_data_to_profile(user_data_result.data, false);
         }
     }

@@ -21,10 +21,10 @@ void handle_post_user(http_s* h) {
     } else {
       RegisterUserStatus result = register_user(h->udata, values.email, values.username, values.password);
 
-      if (result.status == CREATE_USER_SUCCESS) {
+      if (result.status == SERVICE_SUCCESS) {
         request_body = create_user_success_response(values.email, values.username, result.result, NULL, NULL);
         h->status = HTTP_CREATED;
-      } else if (result.status == CREATE_USER_DUPLICATE) {
+      } else if (result.status == SERVICE_DUPLICATE) {
         ErrorValue errors[1] = { result.error };
         request_body = create_failure_body_from_errors(errors, 1);
         h->status = HTTP_CONFLICT;

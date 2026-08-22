@@ -6,10 +6,6 @@
 #ifndef ARTICLES_SERVICES_H
 #define ARTICLES_SERVICES_H
 
-typedef enum {
-    CreateArticleSuccess,
-} CreateArticleStatus;
-
 typedef struct {
     char* slug;
     char* title;
@@ -25,21 +21,16 @@ typedef struct {
 } ArticlesServiceResultData;
 
 typedef struct {
-    CreateArticleStatus status;
+    ServiceStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
 } CreateArticleResult;
 
 CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, OptionalArray tags);
 
-typedef enum {
-    GetArticleSuccess,
-    GET_ARTICLE_UNKNOWN,
-    GET_ARTICLE_UNAUTHORIZED
-} GetArticleStatus;
 
 typedef struct {
-    GetArticleStatus status;
+    ServiceStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
 } GetArticleResult;
@@ -57,7 +48,7 @@ ArticlesServiceResultData map_data_to_article(
 );
 
 typedef struct {
-    GetArticleStatus status;
+    ServiceStatus status;
     ArticlesServiceResultData *result;
     int article_count;
     int total_count;
@@ -67,7 +58,7 @@ typedef struct {
 GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char* favorited);
 
 typedef struct {
-    GetArticleStatus status;
+    ServiceStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
 } UpdateArticleResult;
@@ -83,7 +74,7 @@ UpdateArticleResult update_article(
 );
 
 typedef struct {
-    GetArticleStatus status;
+    ServiceStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
 } ArticleServiceResult;

@@ -9,7 +9,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
     ArticleData *article_data = article_result.data;
 
     if (article_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.error.property = "resource";
         result.error.error = "not found";
         return result;
@@ -19,7 +19,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
         delete_article_favorite(conn, user_id, slug);
         DataResult user_result = get_user_data_by_id(conn, article_data->created_by);
 
-        result.status = GetArticleSuccess;
+        result.status = SERVICE_SUCCESS;
         int tag_count;
         char **tags = get_tag_by_article_slug(conn, slug, &tag_count);
 
@@ -36,7 +36,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
             false
         );
     } else if (article_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.error.property = "article";
         result.error.error = "not found";
     }

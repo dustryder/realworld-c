@@ -34,7 +34,7 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
             0,
             false
         );
-        service_result.status = CreateArticleSuccess;
+        service_result.status = SERVICE_SUCCESS;
     }
 
     return service_result;

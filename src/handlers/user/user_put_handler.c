@@ -30,7 +30,7 @@ void handle_put_user(http_s* h) {
           values.image
       );
 
-      if (result.status == UPDATE_USER_SUCCESS) {
+      if (result.status == SERVICE_SUCCESS) {
         response_body = create_user_success_response(
           result.result.email,
           result.result.username,
@@ -39,7 +39,7 @@ void handle_put_user(http_s* h) {
           result.result.image
         );
         h->status = HTTP_SUCCESS;
-      } else if (result.status == UPDATE_USER_FAILURE) {
+      } else if (result.status == SERVICE_NOT_FOUND) {
         response_body = create_post_user_failure();
         h->status = HTTP_NOT_FOUND;
       }

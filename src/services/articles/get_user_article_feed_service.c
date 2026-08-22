@@ -34,12 +34,12 @@ GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, 
             );
         }
 
-        result.status = GetArticleSuccess;
+        result.status = SERVICE_SUCCESS;
         result.result = result_data;
         result.article_count = article_data_recordset->record_count;
         result.total_count = article_count_result;
     } else if (article_result.status == DATA_NOT_FOUND) {
-        result.status = GET_ARTICLE_UNKNOWN;
+        result.status = SERVICE_NOT_FOUND;
         result.article_count = 0;
         result.total_count = 0;
     }

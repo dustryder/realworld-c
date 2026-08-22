@@ -23,9 +23,9 @@ AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
 
         service_result.result = result_data;
         service_result.result_count = comments_recordset->record_count;
-        service_result.status = SUCCESS;
+        service_result.status = SERVICE_SUCCESS;
     } else if (get_article_result.status == DATA_NOT_FOUND) {
-        service_result.status = NOT_FOUND;
+        service_result.status = SERVICE_NOT_FOUND;
         service_result.error.property = "article";
         service_result.error.error = "not found";
     }

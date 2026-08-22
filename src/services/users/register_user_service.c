@@ -11,15 +11,13 @@ RegisterUserStatus register_user(PGconn *conn, char* email, char* username, char
     UserData *user_data = data_result.data;
 
     if (data_result.status == DATA_SUCCESS) {
-        result.status = CREATE_USER_SUCCESS;
+        result.status = SERVICE_SUCCESS;
         char* jwt = sign_jwt(user_data->id);
         result.result = jwt;
     } else if (data_result.status == DATA_DUPLICATE) {
-        result.status = CREATE_USER_DUPLICATE;
+        result.status = SERVICE_DUPLICATE;
         result.error.property = data_result.error.property;
         result.error.error = "has already been taken";
-    } else {
-        result.status = CREATE_USER_UNKNOWN;
     }
 
     return result;
