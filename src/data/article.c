@@ -12,7 +12,7 @@ DataResult insert_article(char* slug, char* title, char* description, char *body
     char created_by_str[20];
     sprintf(created_by_str, "%d", created_by);
 
-    char* command = "INSERT INTO \"article\" (slug, title, description, body, created_by) VALUES"
+    char* command = "INSERT INTO \"article\" (slug, title, description, body, created_by) VALUES "
                     "($1, $2, $3, $4, $5)"
                     "RETURNING *";
     const char * const data[5] = { slug, title, description, body, created_by_str};
@@ -24,12 +24,72 @@ DataResult insert_article(char* slug, char* title, char* description, char *body
     return result;
 }
 
+void insert_article_favorite(PGconn *conn, int user_id, char* slug) {
+    FIO_LOG_DEBUG("insert_article_favorite: user_id=%d, slug=%s", user_id, slug);
+    char user_id_str[20];
+    sprintf(user_id_str, "%d", user_id);
+
+    char *command = "INSERT INTO article_favourite (article_id, user_id) VALUES "
+                    "((SELECT id FROM article WHERE slug = $1), $2)";
+    
+    const char * const data[2] = { slug, user_id_str };
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
+
+    return;
+}
+
+int get_article_favorite_count(PGconn *conn, char* slug) {
+    FIO_LOG_DEBUG("get_article_favorite_count: slug=%s", slug);
+
+    char *command = "SELECT COUNT(*) FROM article_favourite "
+                    "WHERE article_id = (SELECT id FROM article WHERE slug = $1)";
+
+    const char * const data[1] = { slug };
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+
+    int result = get_article_count_result(data_result);
+
+    return result;
+}
+
+void delete_article_favorite(PGconn *conn, int user_id, char* slug) {
+    FIO_LOG_DEBUG("delete_article_favorite: user_id=%d, slug=%s", user_id, slug);
+    char user_id_str[20];
+    sprintf(user_id_str, "%d", user_id);
+
+    char *command = "DELETE FROM article_favourite "
+                    "WHERE article_id = (SELECT id FROM article WHERE slug = $1) AND "
+                    "user_id = $2";
+    
+    const char * const data[2] = { slug, user_id_str };
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
+
+    return;
+}
+
+int get_user_favorites_article(PGconn *conn, int user_id, char* slug) {
+    FIO_LOG_DEBUG("get_user_favorites_article: user_id=%d, slug=%s", user_id, slug);
+    char user_id_str[20];
+    sprintf(user_id_str, "%d", user_id);
+
+    char *command = "SELECT 1 FROM article_favourite "
+                    "WHERE user_id = $1 AND article_id = (SELECT id FROM article WHERE slug = $2)";
+
+    const char * const data[2] = { user_id_str, slug };
+
+    PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
+
+    int result = get_article_count_result(data_result);
+
+    return result;
+}
+
 void delete_article_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("delete_article_by_id: id=%d", id);
     char article_id[20];
     sprintf(article_id, "%d", id);
 
-    char* command = "DELETE FROM \"article\""
+    char* command = "DELETE FROM \"article\" "
                     "WHERE id = $1";
 
     const char * const data[1] = { article_id };
@@ -43,9 +103,9 @@ DataResult get_article_data_by_slug(char* slug) {
     FIO_LOG_DEBUG("insert_article: slug: %s", slug);
     PGconn *connection = get_connection();
 
-    char* command = "SELECT * FROM \"article\""
+    char* command = "SELECT * FROM \"article\" "
                     "WHERE slug = $1";
-    const char * const data[1] = { slug};
+    const char * const data[1] = { slug };
 
     PGresult *data_result = PQexecParams(connection,command,1,NULL,data,NULL,NULL,0);
 
@@ -66,11 +126,12 @@ int get_all_articles_count(PGconn *conn) {
     return result;
 }
 
-DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, int offset) {
-    FIO_LOG_DEBUG("get_all_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
+DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char* favorited) {
+    FIO_LOG_DEBUG("get_all_articles: author=%s, tag=%s, limit=%d, offset=%d, favorited=%s", author, tag, limit, offset, favorited);
     
     char *BASE_AUTHOR_QUERY = "created_by = (SELECT id FROM \"user\" WHERE username = $%d)";
     char *BASE_TAG_QUERY = "id IN (SELECT article_id FROM \"tag\" JOIN article_tag ON article_tag.tag_id = tag.id WHERE name = $%d)";
+    char *BASE_FAVORITED_QUERY = "id IN (SELECT article_id FROM article_favourite JOIN \"user\" ON \"user\".id = article_favourite.user_id WHERE username = $%d)";
     char *BASE_QUERY = "SELECT * FROM \"article\"";
     char *BASE_LIMIT_QUERY = "LIMIT $%d";
     char *BASE_OFFSET_QUERY = "OFFSET $%d";
@@ -81,8 +142,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
     char offset_str[20];
     sprintf(offset_str, "%d", offset);
 
-    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + strlen(BASE_LIMIT_QUERY) + strlen(BASE_OFFSET_QUERY) + 500;
-    char *data[4];
+    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + strlen(BASE_LIMIT_QUERY) + strlen(BASE_OFFSET_QUERY) + strlen(BASE_FAVORITED_QUERY) + 500;
+    char *data[5];
     int data_count = 0;
 
     char filters[max_command_length];
@@ -91,6 +152,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
     memset(command, '\0', max_command_length);
 
     sprintf(command, BASE_QUERY);
+
+    printf("%s\n", command);
 
     if (author != NULL) {
 
@@ -111,6 +174,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data[data_count] = author;
         data_count += 1;
     }
+
+    printf("%s\n", command);
 
     if (tag != NULL) {
 
@@ -152,6 +217,27 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
+    if (favorited != NULL) {
+        if (data_count == 0) {
+            sprintf(command + strlen(command), "%s", " WHERE");
+        }
+
+        if (data_count > 0) {
+            sprintf(command + strlen(command), " %s ", "AND");
+        }
+
+        char favorited_buffer[strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 500];
+        memset(favorited_buffer, '\0', strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 1);
+
+        sprintf(favorited_buffer, BASE_FAVORITED_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", favorited_buffer);
+
+        data[data_count] = favorited;
+        data_count += 1;
+    }
+
+    printf("%s\n", command);
+
     PGresult *data_result = PQexecParams(conn,command,data_count,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_many_article_data);
@@ -179,8 +265,12 @@ int get_article_count_by_title(char* title) {
 int get_article_count_result(const PGresult *res) {
     ExecStatusType command_status = PQresultStatus(res);
 
-    if (command_status == PGRES_TUPLES_OK) {
+    if (command_status == PGRES_TUPLES_OK && PQntuples(res) > 0) {
         return strtol(PQgetvalue(res, 0, 0), NULL, 10);
+    } else if (command_status == PGRES_TUPLES_OK && PQntuples(res) == 0) {
+        return 0;
+    } else if (command_status == PGRES_FATAL_ERROR) {
+        FIO_LOG_DEBUG("Database request failed: %s\n", PQresultErrorMessage(res));
     }
 
     return 0;

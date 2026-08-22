@@ -1,16 +1,16 @@
 #include "articles_services.h"
-#include "../../data/article.h"
-#include "../../data/tag.h"
 
-GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
-    FIO_LOG_DEBUG("get_article_by_slug: user_id=%d, slug=%s", user_id, slug);
+ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
+    FIO_LOG_DEBUG("unfavorite_article: user_id=%d, slug=%s", user_id, slug);
 
-    GetArticleResult result;
+    ArticleServiceResult result;
     DataResult article_result = get_article_data_by_slug(slug);
     ArticleData *article_data = article_result.data;
 
     if (article_result.status == DATA_SUCCESS) {
+        delete_article_favorite(conn, user_id, slug);
         DataResult user_result = get_user_data_by_id(conn, article_data->created_by);
+
         result.status = GetArticleSuccess;
         int tag_count;
         char **tags = get_tag_by_article_slug(conn, slug, &tag_count);

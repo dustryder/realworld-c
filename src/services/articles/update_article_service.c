@@ -40,8 +40,18 @@ UpdateArticleResult update_article(
         int tag_count;
         char **result_tags = get_tag_by_article_slug(conn, slug, &tag_count);
 
+        int favorite_count = get_article_favorite_count(conn, slug);
+        // int user_follows_article = get_user_follows_article(conn, user_id, slug);
+
         result.status = GetArticleSuccess;
-        result.result = map_data_to_article(article_data, user_result.data, result_tags, tag_count);
+        result.result = map_data_to_article(
+            article_data,
+            user_result.data,
+            result_tags,
+            tag_count,
+            false,
+            favorite_count
+        );
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = GET_ARTICLE_UNKNOWN;
     }

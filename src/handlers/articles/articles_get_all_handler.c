@@ -14,9 +14,7 @@ void handle_get_all_articles(http_s* h) {
 
     char *response_body;
 
-    GetAllArticleResult result = query_articles(conn, qs.author, qs.tag, qs.limit, qs.offset);
-
-    printf("Article count handler: %d\n", result.article_count);
+    GetAllArticleResult result = query_articles(conn, qs.author, qs.tag, qs.limit, qs.offset, qs.favorited);
 
     response_body = create_many_article_success_response(result.result, result.article_count, result.total_count);
     h->status = HTTP_SUCCESS;
@@ -30,21 +28,25 @@ GetAllArticleQuery parse_get_all_articles_qs(FIOBJ *params) {
 
     FIOBJ author_key = fiobj_str_new("author", 6);
     FIOBJ tag_key = fiobj_str_new("tag", 3);
+    FIOBJ favorited_key = fiobj_str_new("favorited", 9);
     FIOBJ limit_key = fiobj_str_new("limit", 5);
     FIOBJ offset_key = fiobj_str_new("offset", 6);
 
     FIOBJ fio_author = fiobj_hash_get(params, author_key);
     FIOBJ fio_tag = fiobj_hash_get(params, tag_key);
+    FIOBJ fio_favorited = fiobj_hash_get(params, favorited_key);
     FIOBJ fio_limit = fiobj_hash_get(params, limit_key);
     FIOBJ fio_offset = fiobj_hash_get(params, offset_key);
 
     qs.author = FIOBJ_TYPE_IS(fio_author, FIOBJ_T_STRING) ? fiobj_obj2cstr(fio_author).data : NULL;
     qs.tag = FIOBJ_TYPE_IS(fio_tag, FIOBJ_T_STRING) ? fiobj_obj2cstr(fio_tag).data : NULL;
+    qs.favorited = FIOBJ_TYPE_IS(fio_favorited, FIOBJ_T_STRING) ? fiobj_obj2cstr(fio_favorited).data : NULL;
     qs.limit = FIOBJ_TYPE_IS(fio_limit, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_limit) : NULL;
     qs.offset = FIOBJ_TYPE_IS(fio_offset, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_offset) : NULL;
 
     fiobj_free(author_key);
     fiobj_free(tag_key);
+    fiobj_free(favorited_key);
     fiobj_free(limit_key);
     fiobj_free(offset_key);
 

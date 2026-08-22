@@ -25,7 +25,14 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
 
         DataResult data_result = get_user_data_by_id(conn, creator);
 
-        service_result.result = map_data_to_article(article_data, data_result.data, tags.value, tags.value_count);
+        service_result.result = map_data_to_article(
+            article_data,
+            data_result.data,
+            tags.value,
+            tags.value_count,
+            false,
+            0
+        );
         service_result.status = CreateArticleSuccess;
     }
 

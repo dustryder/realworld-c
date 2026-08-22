@@ -40,6 +40,8 @@ static void on_http_request(http_s *h) {
   http_route_get(h, "/api/articles", handle_get_all_articles, resolve_request_user);
   http_route_put(h, "/api/articles/:slug", handle_put_articles, resolve_request_user, require_auth);
   http_route_delete(h, "/api/articles/:slug", handle_delete_articles, resolve_request_user, require_auth);
+  http_route_post(h, "/api/articles/:slug/favorite", handle_post_favorite, resolve_request_user, require_auth);
+  http_route_delete(h, "/api/articles/:slug/favorite", handle_delete_favorite, resolve_request_user, require_auth);
 
   //tag routes
   http_route_get(h, "/api/tags", handle_get_tags, resolve_request_user);

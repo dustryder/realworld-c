@@ -49,7 +49,9 @@ ArticlesServiceResultData map_data_to_article(
     ArticleData *article_data,
     UserData *user_data,
     char** tags,
-    int tag_count
+    int tag_count,
+    bool favorited,
+    int favoritesCount
 );
 
 typedef struct {
@@ -60,7 +62,7 @@ typedef struct {
     ErrorValue error;
 } GetAllArticleResult;
 
-GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset);
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char* favorited);
 
 typedef struct {
     GetArticleStatus status;
@@ -79,4 +81,12 @@ UpdateArticleResult update_article(
 
 void delete_article(PGconn* conn, char *slug);
 
+typedef struct {
+    GetArticleStatus status;
+    ArticlesServiceResultData result;
+    ErrorValue error;
+} ArticleServiceResult;
+
+ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
+ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
 #endif

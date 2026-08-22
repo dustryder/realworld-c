@@ -5,7 +5,9 @@ ArticlesServiceResultData map_data_to_article(
     ArticleData *article_data,
     UserData *user_data,
     char** tags,
-    int tag_count
+    int tag_count,
+    bool favorited,
+    int favoritesCount
 ) {
     ArticlesServiceResultData data;
 
@@ -18,8 +20,8 @@ ArticlesServiceResultData map_data_to_article(
 
     data.tagList = tags;
     data.tag_count = tag_count;
-    data.favorited = false;
-    data.favoritesCount = 0;
+    data.favorited = favorited;
+    data.favoritesCount = favoritesCount;
 
     data.author = map_data_to_profile(user_data, false);
 
