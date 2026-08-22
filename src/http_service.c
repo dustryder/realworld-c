@@ -12,8 +12,11 @@ void set_header(http_s *h, char *key, char *value) {
     http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
 }
 
-void set_db_connection(http_s *h) {
-    h->udata = get_connection();
+PGconn *set_db_connection(http_s *h) {
+  PGconn *connection = get_connection();
+  h->udata = get_connection();
+
+  return connection;
 }
 
 static void on_http_request(http_s *h) {
@@ -21,7 +24,7 @@ static void on_http_request(http_s *h) {
   http_parse_body(h);
   http_parse_query(h);
 
-  set_db_connection(h);
+  PGconn *conn = set_db_connection(h);
   set_header(h, "content-type", "application/json");
 
   //user routes
@@ -55,9 +58,9 @@ static void on_http_request(http_s *h) {
   //tag
   http_route_get(h, "/api/tags", handle_get_tags, resolve_request_user);
 
-  http_send_error(h, 404);
+  PQfinish(conn);
 
-  PQfinish(h->udata);
+  http_send_error(h, 404);
 }
 
 /* starts a listeninng socket for HTTP connections. */
