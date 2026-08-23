@@ -1,6 +1,8 @@
 #include "main.h"
+#include "dotenv.h"
 
 int main(int argc, char const *argv[]) {
+  env_load(".", false);
   /* accept command line arguments and setup default values, see "cli.c" */
   initialize_cli(argc, argv);
 

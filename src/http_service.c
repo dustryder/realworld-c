@@ -20,11 +20,9 @@ PGconn *set_db_connection(http_s *h) {
 }
 
 static void on_http_request(http_s *h) {
-
   http_parse_body(h);
   http_parse_query(h);
 
-  char *path = strdup(fiobj_obj2cstr(h->path).data);
   PGconn *conn = set_db_connection(h);
   set_header(h, "content-type", "application/json");
 
@@ -60,7 +58,6 @@ static void on_http_request(http_s *h) {
   http_route_get(h, "/api/tags", handle_get_tags, resolve_request_user);
 
 db_cleanup:
-  free(path);
   PQfinish(conn);
 
   http_send_error(h, 404);

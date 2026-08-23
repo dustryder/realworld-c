@@ -1,14 +1,13 @@
 #include <libpq-fe.h>
 #include "db.h"
-#include "dotenv.h"
 #include <stdlib.h>
 #include "http_helpers.h"
 #include "main.h"
 
 PGconn *get_connection() {
-    env_load(".", false);
-    char* connectionString = getenv("DATABASE_URL");
-    PGconn *connection = PQconnectdb(connectionString);
+    char *connection_string = getenv("DATABASE_URL");
+
+    PGconn *connection = PQconnectdb(connection_string);
 
     ConnStatusType db_status = PQstatus(connection);
 
