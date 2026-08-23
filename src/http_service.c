@@ -1,10 +1,10 @@
 #include "fio_cli.h"
 #include "main.h"
-#include "handlers/user/user_handlers.h"
-#include "handlers/profiles/profile_handlers.h"
-#include "handlers/articles/articles_handlers.h"
-#include "handlers/tags/tags_handlers.h"
-#include "handlers/comments/comments_handlers.h"
+#include "./aio.h"
+#include "./handlers/profiles/profile_handlers.h"
+#include "./handlers/articles/articles_handlers.h"
+#include "./handlers/tags/tags_handlers.h"
+#include "./handlers/comments/comments_handlers.h"
 #include "./lib/router.h"
 #include "./lib/middleware.h"
 
@@ -14,7 +14,7 @@ void set_header(http_s *h, char *key, char *value) {
 
 PGconn *set_db_connection(http_s *h) {
   PGconn *connection = get_connection();
-  h->udata = get_connection();
+  h->udata = connection;
 
   return connection;
 }
@@ -24,6 +24,7 @@ static void on_http_request(http_s *h) {
   http_parse_body(h);
   http_parse_query(h);
 
+  char *path = strdup(fiobj_obj2cstr(h->path).data);
   PGconn *conn = set_db_connection(h);
   set_header(h, "content-type", "application/json");
 
@@ -58,6 +59,8 @@ static void on_http_request(http_s *h) {
   //tag
   http_route_get(h, "/api/tags", handle_get_tags, resolve_request_user);
 
+db_cleanup:
+  free(path);
   PQfinish(conn);
 
   http_send_error(h, 404);

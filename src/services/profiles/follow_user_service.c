@@ -11,7 +11,7 @@ FollowUserResult follow_user(PGconn *conn, int current_user, char* follow) {
 
     if (user_data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        set_error(result.error, "profile", "not found");
+        set_error(&result.error, "profile", "not found");
     } else {
         DataResult data_result = insert_follow(conn, current_user, follow);
     

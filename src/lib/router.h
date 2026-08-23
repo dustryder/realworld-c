@@ -13,11 +13,13 @@ typedef bool (*middleware_fn)(http_s *request);
         size_t middleware_count = sizeof(middleware) / sizeof(middleware[0]);                           \
                                                                                                         \
         for (size_t i = 0; i < middleware_count; i++) {                                                 \
-            if (!middleware[i](_h)) return;                                                              \
+            if (!middleware[i](_h)) {                                                                   \
+                goto db_cleanup;                                                                        \
+            }                                                                                           \
         }                                                                                               \
                                                                                                         \
         _func(_h);                                                                                      \
-        return;                                                                                         \
+        goto db_cleanup;                                                                                \
     }                                                                                                   \
 }
 

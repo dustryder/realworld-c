@@ -8,7 +8,6 @@ static PostArticlePayload parse_post_article_body(FIOBJ *raw_body);
 
 void handle_post_articles(http_s* h) {
     FIO_LOG_DEBUG("handle_post_articles");
-
     int id = parse_request_user(h->params);
     char* response_body;
     ErrorValue errors[3];

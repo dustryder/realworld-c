@@ -17,7 +17,7 @@ RegisterUserServiceResult register_user(PGconn *conn, char* email, char* usernam
         result.data = jwt;
     } else if (data_result.status == DATA_DUPLICATE) {
         result.status = SERVICE_DUPLICATE;
-        set_error(result.error, data_result.error.property, "has already been taken");
+        set_error(&result.error, data_result.error.property, "has already been taken");
     }
 
     return result;

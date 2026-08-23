@@ -47,6 +47,8 @@ char **get_tag_by_article_slug(PGconn *conn, char* slug, int *tag_count) {
 
     char **tag_names = get_tag_names(data_result, tag_count);
 
+    PQclear(data_result);
+
     return tag_names;
 }
 
@@ -60,6 +62,7 @@ char **get_all_tags_data(PGconn *conn, int *tag_count) {
 
     char **tag_names = get_tag_names(data_result, tag_count);
 
+    PQclear(data_result);
     return tag_names;
 }
 
@@ -81,6 +84,7 @@ DataResult insert_article_tag(PGconn *conn, int article_id, char* tag) {
 
     DataResult result = get_data_result(data_result, map_tag_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -104,7 +108,7 @@ TagData map_tag_data(const PGresult *res) {
     TagData data;
 
     data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.name = PQgetvalue(res, 0, 1);
+    data.name = strdup(PQgetvalue(res, 0, 1));
 
     return data;
 }

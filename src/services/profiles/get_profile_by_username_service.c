@@ -13,7 +13,7 @@ GetProfileByUsernameResult get_profile_by_username(PGconn *conn, char* username)
         result.result = map_data_to_profile(data_result.data, false);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        set_error(result.error, "profile", "not found");
+        set_error(&result.error, "profile", "not found");
     }
 
     return result;

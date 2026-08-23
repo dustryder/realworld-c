@@ -152,17 +152,17 @@ char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {
   cJSON *error_body = cJSON_CreateObject();
 
   for (int i = 0; i < error_count; i++) {
-    ErrorValue currentError = errors[i];
+    ErrorValue current_error = errors[i];
 
-    if (cJSON_GetObjectItem(error_body, currentError.property) != NULL) {
-      cJSON *errorArray = cJSON_GetObjectItem(error_body, currentError.property);
-      cJSON *errorArrayItem = cJSON_CreateString(currentError.message);
+    if (cJSON_GetObjectItem(error_body, current_error.property) != NULL) {
+      cJSON *errorArray = cJSON_GetObjectItem(error_body, current_error.property);
+      cJSON *errorArrayItem = cJSON_CreateString(current_error.message);
       cJSON_AddItemToArray(errorArray, errorArrayItem);
     } else {
       cJSON *errorArray = cJSON_CreateArray();
-      cJSON *errorArrayItem = cJSON_CreateString(currentError.message);
+      cJSON *errorArrayItem = cJSON_CreateString(current_error.message);
       cJSON_AddItemToArray(errorArray, errorArrayItem);
-      cJSON_AddItemToObject(error_body, currentError.property, errorArray);
+      cJSON_AddItemToObject(error_body, current_error.property, errorArray);
     }
   }
 

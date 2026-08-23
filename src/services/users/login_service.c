@@ -17,7 +17,7 @@ UserServiceResult login(PGconn *conn, char* email, char* password) {
             result.data = map_data_to_user(data_result.data);
         } else {
             result.status = SERVICE_UNAUTHORIZED;
-            set_error(result.error, "credentials", "invalid");
+            set_error(&result.error, "credentials", "invalid");
         }
 
     } else if (data_result.status == DATA_NOT_FOUND) {

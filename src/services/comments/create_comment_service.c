@@ -21,7 +21,7 @@ CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char
         service_result.status = SERVICE_SUCCESS;
     } else if (get_article_result.status == DATA_NOT_FOUND) {
         service_result.status = SERVICE_NOT_FOUND;
-        set_error(service_result.error, "article", "not found");
+        set_error(&service_result.error, "article", "not found");
     }
 
     return service_result;

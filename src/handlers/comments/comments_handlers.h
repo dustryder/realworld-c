@@ -1,8 +1,8 @@
 #include "main.h"
 #include "../../services/comments/comments_services.h"
 
-#ifndef ARTICLES_HANDLERS_H
-#define ARTICLES_HANDLERS_H
+#ifndef COMMENTS_HANDLERS_H
+#define COMMENTS_HANDLERS_H
 
 typedef struct {
     char* body;

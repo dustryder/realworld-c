@@ -37,6 +37,7 @@ DataResult get_all_comments_by_article_id(PGconn *conn, int article_id) {
 
     DataResult result = get_data_result(data_result, map_many_comment_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -51,6 +52,8 @@ DataResult get_comment_by_id(PGconn *conn, int id) {
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
     DataResult result = get_data_result(data_result, map_comment_data);
+
+    PQclear(data_result);
 
     return result;
 }
@@ -67,6 +70,8 @@ DataResult delete_comment_by_id(PGconn *conn, int id) {
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
     DataResult result = get_data_result(data_result, NULL);
 
+    PQclear(data_result);
+
     return result;
 }
 
@@ -76,9 +81,9 @@ CommentData *map_comment_data(const PGresult *res) {
     data->id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
     data->article_id = strtol(PQgetvalue(res, 0, 1), NULL, 10);
     data->created_by = strtol(PQgetvalue(res, 0, 2), NULL, 10);
-    data->body = PQgetvalue(res, 0, 3);
-    data->created_at = PQgetvalue(res, 0, 4);
-    data->updated_at = PQgetvalue(res, 0, 5);
+    data->body = strdup(PQgetvalue(res, 0, 3));
+    data->created_at = strdup(PQgetvalue(res, 0, 4));
+    data->updated_at = strdup(PQgetvalue(res, 0, 5));
 
     return data;
 }
@@ -95,9 +100,9 @@ CommentDataRecordset *map_many_comment_data(const PGresult *res) {
         recordset->data[i].id = strtol(PQgetvalue(res, i, 0), NULL, 10);
         recordset->data[i].article_id = strtol(PQgetvalue(res, i, 1), NULL, 10);
         recordset->data[i].created_by = strtol(PQgetvalue(res, i, 2), NULL, 10);
-        recordset->data[i].body = PQgetvalue(res, i, 3);
-        recordset->data[i].created_at = PQgetvalue(res, i, 4);
-        recordset->data[i].updated_at = PQgetvalue(res, i, 5);
+        recordset->data[i].body = strdup(PQgetvalue(res, i, 3));
+        recordset->data[i].created_at = strdup(PQgetvalue(res, i, 4));
+        recordset->data[i].updated_at = strdup(PQgetvalue(res, i, 5));
     }
 
     return recordset;

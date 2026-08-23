@@ -30,7 +30,7 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
         );
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        set_error(result.error, "article", "not found");
+        set_error(&result.error, "article", "not found");
     }
 
     return result;

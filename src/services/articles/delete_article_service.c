@@ -16,11 +16,11 @@ ArticleServiceResult delete_article(
 
     if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        set_error(result.error, "article", "not found");
+        set_error(&result.error, "article", "not found");
         return result;
     } else if (article_data->created_by != user_id) {
         result.status = SERVICE_UNAUTHORIZED;
-        set_error(result.error, "article", "forbidden");
+        set_error(&result.error, "article", "forbidden");
         return result;
     }
 

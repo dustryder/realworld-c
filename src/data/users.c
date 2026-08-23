@@ -21,6 +21,7 @@ DataResult get_user_data_by_username(PGconn *conn, char* username) {
 
     DataResult result = get_data_result(data_result, map_user_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -29,15 +30,16 @@ DataResult get_user_data_by_id(PGconn *conn, int id) {
     char str[20];
     sprintf(str, "%d", id);
 
-    char* command = "SELECT *"
-                    "FROM \"user\""
+    char* command = "SELECT * "
+                    "FROM \"user\" "
                     "WHERE id = $1";
     const char * const data[1] = { str };
 
-    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -53,6 +55,7 @@ DataResult get_user_by_email(PGconn *conn, char* email) {
 
     DataResult result = get_data_result(data_result, map_user_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -69,6 +72,7 @@ DataResult insert_user(PGconn *conn, char* email, char* username, char* password
     DataResult result = get_data_result(data_result, map_user_data);
     resolve_user_constraints(&result.error);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -106,6 +110,7 @@ DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, si
 
     DataResult result = get_data_result(data_result, map_user_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -114,11 +119,11 @@ UserData *map_user_data(const PGresult *res) {
     UserData *data = malloc(sizeof *data);
 
     data->id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data->username = PQgetvalue(res, 0, 1);
-    data->email = PQgetvalue(res, 0, 2);
-    data->password = PQgetvalue(res, 0, 3);
-    data->bio = PQgetisnull(res, 0, 4) ? NULL : PQgetvalue(res, 0, 4);
-    data->image = PQgetisnull(res, 0, 5) ? NULL : PQgetvalue(res, 0, 5);
+    data->username = strdup(PQgetvalue(res, 0, 1));
+    data->email = strdup(PQgetvalue(res, 0, 2));
+    data->password = strdup(PQgetvalue(res, 0, 3));
+    data->bio = PQgetisnull(res, 0, 4) ? NULL : strdup(PQgetvalue(res, 0, 4));
+    data->image = PQgetisnull(res, 0, 5) ? NULL : strdup(PQgetvalue(res, 0, 5));
 
     return data;
 }

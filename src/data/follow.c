@@ -38,6 +38,8 @@ DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
 
     DataResult result = get_data_result(data_result, map_follow_data);
 
+    PQclear(data_result);
+
     return result;
 }
 
@@ -55,7 +57,10 @@ int get_user_follows_user(PGconn *conn, int user_id, int followed_user_id) {
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
-    return get_integer_result(data_result);
+    int integer_result = get_integer_result(data_result);
+
+    PQclear(data_result);
+    return integer_result;
 }
 
 FollowData map_follow_data(const PGresult *res) {

@@ -20,6 +20,7 @@ DataResult insert_article(PGconn *conn, char* slug, char* title, char* descripti
 
     DataResult result = get_data_result(data_result, map_article_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -34,6 +35,7 @@ void insert_article_favorite(PGconn *conn, int user_id, char* slug) {
     const char * const data[2] = { slug, user_id_str };
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
+    PQclear(data_result);
     return;
 }
 
@@ -48,6 +50,7 @@ int get_article_favorite_count(PGconn *conn, char* slug) {
 
     int result = get_article_count_result(data_result);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -63,6 +66,7 @@ void delete_article_favorite(PGconn *conn, int user_id, char* slug) {
     const char * const data[2] = { slug, user_id_str };
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
+    PQclear(data_result);
     return;
 }
 
@@ -80,6 +84,7 @@ int get_user_favorites_article(PGconn *conn, int user_id, char* slug) {
 
     int result = get_article_count_result(data_result);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -95,6 +100,7 @@ void delete_article_by_id(PGconn *conn, int id) {
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
+    PQclear(data_result);
     return;
 }
 
@@ -109,6 +115,7 @@ DataResult get_article_data_by_slug(PGconn *conn, char* slug) {
 
     DataResult result = get_data_result(data_result, map_article_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -121,6 +128,7 @@ int get_all_articles_count(PGconn *conn) {
 
     int result = get_article_count_result(data_result);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -138,6 +146,7 @@ int get_all_followed_articles_count(PGconn *conn, int user_id) {
 
     int result = get_article_count_result(data_result);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -189,6 +198,7 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
     DataResult result = get_data_result(data_result, map_many_article_data);
 
     ArticleDataRecordset *typ = result.data;
+    PQclear(data_result);
 
     return result;
 }
@@ -303,8 +313,7 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
 
     DataResult result = get_data_result(data_result, map_many_article_data);
 
-    ArticleDataRecordset *typ = result.data;
-
+    PQclear(data_result);
     return result;
 }
 
@@ -318,6 +327,7 @@ int get_article_count_by_title(PGconn *conn,char* title) {
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     int result = get_article_count_result(data_result);
+    PQclear(data_result);
 
     return result;
 }
@@ -397,12 +407,12 @@ ArticleDataRecordset *map_many_article_data(const PGresult *res) {
 
     for (int i = 0; i < row_count; i++) {
         recordset->data[i].id = strtol(PQgetvalue(res, i, 0), NULL, 10);
-        recordset->data[i].slug = PQgetvalue(res, i, 1);
-        recordset->data[i].title = PQgetvalue(res, i, 2);
-        recordset->data[i].body = PQgetvalue(res, i, 3);
-        recordset->data[i].description = PQgetvalue(res, i, 4);
-        recordset->data[i].created_at = PQgetvalue(res, i, 5);
-        recordset->data[i].updated_at = PQgetvalue(res, i, 6);
+        recordset->data[i].slug = strdup(PQgetvalue(res, i, 1));
+        recordset->data[i].title = strdup(PQgetvalue(res, i, 2));
+        recordset->data[i].body = strdup(PQgetvalue(res, i, 3));
+        recordset->data[i].description = strdup(PQgetvalue(res, i, 4));
+        recordset->data[i].created_at = strdup(PQgetvalue(res, i, 5));
+        recordset->data[i].updated_at = strdup(PQgetvalue(res, i, 6));
         recordset->data[i].created_by = strtol(PQgetvalue(res, i, 7), NULL, 10);
     }
 
@@ -413,12 +423,12 @@ ArticleData *map_article_data(const PGresult *res) {
     ArticleData *data = malloc(sizeof *data);
 
     data->id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data->slug = PQgetvalue(res, 0, 1);
-    data->title = PQgetvalue(res, 0, 2);
-    data->body = PQgetvalue(res, 0, 3);
-    data->description = PQgetvalue(res, 0, 4);
-    data->created_at = PQgetvalue(res, 0, 5);
-    data->updated_at = PQgetvalue(res, 0, 6);
+    data->slug = strdup(PQgetvalue(res, 0, 1));
+    data->title = strdup(PQgetvalue(res, 0, 2));
+    data->body = strdup(PQgetvalue(res, 0, 3));
+    data->description = strdup(PQgetvalue(res, 0, 4));
+    data->created_at = strdup(PQgetvalue(res, 0, 5));
+    data->updated_at = strdup(PQgetvalue(res, 0, 6));
     data->created_by = strtol(PQgetvalue(res, 0, 7), NULL, 10);
 
     return data;
