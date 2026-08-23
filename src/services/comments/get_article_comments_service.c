@@ -13,7 +13,7 @@ AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
     if (get_article_result.status == DATA_SUCCESS) {
         DataResult get_article_comments_result = get_all_comments_by_article_id(conn, article_data->id);
 
-        if (get_article_comments_result.data == DATA_SUCCESS) {
+        if (get_article_comments_result.status == DATA_SUCCESS) {
             CommentDataRecordset *comments_recordset = get_article_comments_result.data;
     
             CommentsServiceResultData *result_data = malloc(comments_recordset->record_count * sizeof *result_data);
