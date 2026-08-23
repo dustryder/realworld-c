@@ -17,7 +17,7 @@ void handle_post_follow(http_s* h) {
     if (result.status == SERVICE_SUCCESS) {
       h->status = HTTP_SUCCESS;
       response_body = create_success_profile_response(result.result);
-    } else if (result.status == SERVICE_UNKNOWN) {
+    } else if (result.status == SERVICE_NOT_FOUND) {
       h->status = HTTP_NOT_FOUND;
       response_body = create_failure_body_from_error(result.error);
     }

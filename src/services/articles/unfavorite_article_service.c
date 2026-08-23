@@ -11,7 +11,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
 
     if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        result.error.property = "resource";
+        result.error.property = "article";
         result.error.message = "not found";
         return result;
     }
