@@ -8,7 +8,7 @@
 void handle_post_user(http_s* h) {
     PostUserPayload values = parse_post_user_body(h->body);
 
-    char *request_body;
+    char *response_body = "";
 
     ErrorValue errors[3];
     size_t error_count = 0;
@@ -16,41 +16,40 @@ void handle_post_user(http_s* h) {
     validate_user_payload(values, errors, &error_count);
 
     if (error_count > 0) {
-      request_body = create_failure_body_from_errors(errors, error_count);
+      response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
       RegisterUserServiceResult result = register_user(h->udata, values.email, values.username, values.password);
 
       if (result.status == SERVICE_SUCCESS) {
-        request_body = create_user_success_response(values.email, values.username, result.data, NULL, NULL);
+        response_body = create_user_success_response(values.email, values.username, result.data, NULL, NULL);
         h->status = HTTP_CREATED;
       } else if (result.status == SERVICE_DUPLICATE) {
-        ErrorValue errors[1] = { result.error };
-        request_body = create_failure_body_from_errors(errors, 1);
+        response_body = create_failure_body_from_error(result.error);
         h->status = HTTP_CONFLICT;
       }
     }
 
-    http_send_body(h, request_body, strlen(request_body));
+    http_send_body(h, response_body, strlen(response_body));
 }
 
 void validate_user_payload(PostUserPayload payload, ErrorValue *values, size_t *error_count) {
 
   if (strlen(payload.username) == 0) {
     values[*error_count].property = "username";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (strlen(payload.email) == 0) {
     values[*error_count].property = "email";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (strlen(payload.password) == 0) {
     values[*error_count].property = "password";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 }

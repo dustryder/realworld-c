@@ -3,6 +3,7 @@
 #include "../../data/users.h"
 #include "../../data/comment.h"
 #include "../../data/follow.h"
+#include "../../lib/mappers.h"
 
 CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char* body) {
     FIO_LOG_DEBUG("create_comment: slug=%s, user_id=%d", slug, user_id);
@@ -20,8 +21,7 @@ CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char
         service_result.status = SERVICE_SUCCESS;
     } else if (get_article_result.status == DATA_NOT_FOUND) {
         service_result.status = SERVICE_NOT_FOUND;
-        service_result.error.property = "article";
-        service_result.error.error = "not found";
+        set_error(service_result.error, "article", "not found");
     }
 
     return service_result;

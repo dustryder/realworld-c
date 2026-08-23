@@ -52,25 +52,25 @@ void validate_put_user_payload(PutUserPayload payload, ErrorValue *values, size_
 
   if (payload.username.is_present == 1 && (payload.username.value == NULL || strlen(payload.username.value) == 0)) {
     values[*error_count].property = "username";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (payload.email.is_present == 1 && (payload.email.value == NULL || strlen(payload.email.value) == 0)) {
     values[*error_count].property = "email";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (payload.password.is_present == 1 && (payload.password.value == NULL || strlen(payload.password.value) == 0)) {
     values[*error_count].property = "password";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (payload.password.is_present == 1 && (payload.password.value != NULL && strlen(payload.password.value) < 8)) {
     values[*error_count].property = "password";
-    values[*error_count].error = "must be at least 8 characters";
+    values[*error_count].message = "must be at least 8 characters";
     (*error_count)++;
   }
 }

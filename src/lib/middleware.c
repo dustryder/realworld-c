@@ -35,7 +35,7 @@ bool require_auth(http_s *request) {
 
         if (FIOBJ_TYPE_IS(user_id, FIOBJ_T_NULL)) {
             ErrorValue errors[1];
-            errors[0].error = "is missing";
+            errors[0].message = "is missing";
             errors[0].property = "token";
 
             char *response_body = create_failure_body_from_errors(errors, 1);

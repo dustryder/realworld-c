@@ -10,7 +10,7 @@ void handle_get_all_feed(http_s* h) {
     int id = parse_request_user(h->params);
     GetAllFeedQuery qs = parse_get_all_feed_qs(h->params);
 
-    char *response_body;
+    char *response_body = "";
 
     GetAllArticleResult result = get_user_article_feed(h->udata, id, qs.limit, qs.offset);
 

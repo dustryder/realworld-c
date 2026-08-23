@@ -29,7 +29,7 @@ UpdateArticleResult update_article(
     if (get_article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         result.error.property = "article";
-        result.error.error = "not found";
+        result.error.message = "not found";
         return result;
     }
 
@@ -38,7 +38,7 @@ UpdateArticleResult update_article(
     if (get_article_data->created_by != id) {
         result.status = SERVICE_UNAUTHORIZED;
         result.error.property = "article";
-        result.error.error = "forbidden";
+        result.error.message = "forbidden";
         return result;
     }
 

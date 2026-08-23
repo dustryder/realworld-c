@@ -6,7 +6,7 @@ void handle_delete_favorite(http_s* h) {
 
     int id = parse_request_user(h->params);
     char *slug = parse_path_param(h->params, "slug");
-    char *response_body;
+    char *response_body = "";
 
     ArticleServiceResult result = unfavorite_article(h->udata, id, slug);
 
@@ -14,8 +14,7 @@ void handle_delete_favorite(http_s* h) {
         h->status = HTTP_SUCCESS;
         response_body = create_article_success_response(result.result, true, FORMAT_DATETIMESTAMP);
     } else if (result.status == SERVICE_NOT_FOUND) {
-        ErrorValue errors[1] = { result.error };
-        response_body = create_failure_body_from_errors(errors, 1);
+        response_body = create_failure_body_from_error(result.error);
         h->status = HTTP_NOT_FOUND;
     }
 

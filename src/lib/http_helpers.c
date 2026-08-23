@@ -156,11 +156,11 @@ char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {
 
     if (cJSON_GetObjectItem(error_body, currentError.property) != NULL) {
       cJSON *errorArray = cJSON_GetObjectItem(error_body, currentError.property);
-      cJSON *errorArrayItem = cJSON_CreateString(currentError.error);
+      cJSON *errorArrayItem = cJSON_CreateString(currentError.message);
       cJSON_AddItemToArray(errorArray, errorArrayItem);
     } else {
       cJSON *errorArray = cJSON_CreateArray();
-      cJSON *errorArrayItem = cJSON_CreateString(currentError.error);
+      cJSON *errorArrayItem = cJSON_CreateString(currentError.message);
       cJSON_AddItemToArray(errorArray, errorArrayItem);
       cJSON_AddItemToObject(error_body, currentError.property, errorArray);
     }

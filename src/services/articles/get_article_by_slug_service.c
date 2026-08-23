@@ -1,6 +1,7 @@
 #include "articles_services.h"
 #include "../../data/article.h"
 #include "../../data/tag.h"
+#include "../../lib/mappers.h"
 
 GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("get_article_by_slug: user_id=%d, slug=%s", user_id, slug);
@@ -29,8 +30,7 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
         );
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        result.error.property = "article";
-        result.error.error = "not found";
+        set_error(result.error, "article", "not found");
     }
 
     return result;

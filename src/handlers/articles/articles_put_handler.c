@@ -10,7 +10,7 @@ void handle_put_articles(http_s* h) {
     FIO_LOG_DEBUG("handle_put_article");
 
     int id = parse_request_user(h->params);
-    char* response_body;
+    char* response_body = "";
 
     PutArticlePayload payload = parse_put_article_body(h->body);
     char *slug = parse_path_param(h->params, "slug");
@@ -35,12 +35,10 @@ void handle_put_articles(http_s* h) {
       response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
       h->status = HTTP_SUCCESS;
     } else if (result.status == SERVICE_NOT_FOUND) {
-      ErrorValue errors[1] = { result.error };
-      response_body = create_failure_body_from_errors(errors, 1);
+      response_body = create_failure_body_from_error(result.error);
       h->status = HTTP_NOT_FOUND;
     } else if (result.status == SERVICE_UNAUTHORIZED) {
-      ErrorValue errors[1] = { result.error };
-      response_body = create_failure_body_from_errors(errors, 1);
+      response_body = create_failure_body_from_error(result.error);
       h->status = HTTP_FORBIDDEN;
     }
 

@@ -18,8 +18,7 @@ void handle_delete_follow(http_s* h) {
       response_body = create_success_profile_response(result.result);
     } else if (result.status == SERVICE_NOT_FOUND) {
       h->status = HTTP_NOT_FOUND;
-      ErrorValue errors[1] = { result.error };
-      response_body = create_failure_body_from_errors(errors, 1);
+      response_body = create_failure_body_from_error(result.error);
     }
 
     http_send_body(h, response_body, strlen(response_body));

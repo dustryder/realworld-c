@@ -1,6 +1,7 @@
 #include "articles_services.h"
 #include "../../data/article.h"
 #include "../../data/tag.h"
+#include "../../lib/mappers.h"
 
 ArticleServiceResult delete_article(
     PGconn *conn,
@@ -15,13 +16,11 @@ ArticleServiceResult delete_article(
 
     if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        result.error.property = "article";
-        result.error.error = "not found";
+        set_error(result.error, "article", "not found");
         return result;
     } else if (article_data->created_by != user_id) {
         result.status = SERVICE_UNAUTHORIZED;
-        result.error.property = "article";
-        result.error.error = "forbidden";
+        set_error(result.error, "article", "forbidden");
         return result;
     }
 

@@ -35,18 +35,18 @@ void handle_post_login(http_s* h) {
 
     ErrorValue errors[3];
     size_t error_count = 0;
-    char *request_body;
+    char *response_body = "";
     validate_post_login_payload(values, errors, &error_count);
 
     if (error_count > 0) {
-      request_body = create_failure_body_from_errors(errors, error_count);
+      response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
       UserServiceResult result = login(h->udata, values.email, values.password);
 
       if (result.status == SERVICE_SUCCESS) {
         h->status = HTTP_SUCCESS;
-        request_body = create_user_success_response(
+        response_body = create_user_success_response(
           result.data.email,
           result.data.username,
           result.data.token,
@@ -55,24 +55,23 @@ void handle_post_login(http_s* h) {
         );
       } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
         h->status = HTTP_UNAUTHORIZED;
-        ErrorValue errors[1] = { result.error };
-        request_body = create_failure_body_from_errors(errors, 1);
+        response_body = create_failure_body_from_error(result.error);
       }
     }
-    http_send_body(h, request_body, strlen(request_body));
+    http_send_body(h, response_body, strlen(response_body));
 }
 
 void validate_post_login_payload(PostLoginRequestPayload payload, ErrorValue *values, size_t *error_count) {
 
   if (strlen(payload.email) == 0) {
     values[*error_count].property = "email";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (strlen(payload.password) == 0) {
     values[*error_count].property = "password";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 }

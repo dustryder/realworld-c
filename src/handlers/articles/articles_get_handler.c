@@ -9,7 +9,7 @@ void handle_get_articles(http_s* h) {
 
     int id = parse_request_user(h->params);
     char *slug = parse_path_param(h->params, "slug");
-    char *response_body;
+    char *response_body = "";
 
     GetArticleResult result = get_article_by_slug(h->udata, id, slug);
 
@@ -17,8 +17,7 @@ void handle_get_articles(http_s* h) {
         response_body = create_article_success_response(result.result, true, FORMAT_DATETIMESTAMP);
         h->status = HTTP_SUCCESS;
     } else if (result.status == SERVICE_NOT_FOUND) {
-        ErrorValue errors[1] = { result.error };
-        response_body = create_failure_body_from_errors(errors, 1);
+        response_body = create_failure_body_from_error(result.error);
         h->status = HTTP_NOT_FOUND;
     }
 

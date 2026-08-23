@@ -1,6 +1,7 @@
 #include "comments_services.h"
 #include "../../data/comment.h"
 #include "../../data/article.h"
+#include "../../lib/mappers.h"
 
 CommentsServiceResult delete_comment(PGconn *conn, int article_id, char *slug, int user_id) {
     FIO_LOG_DEBUG("delete_comment: article_id=%d", article_id);
@@ -17,18 +18,15 @@ CommentsServiceResult delete_comment(PGconn *conn, int article_id, char *slug, i
             delete_comment_by_id(conn, article_id);
             service_result.status = SERVICE_SUCCESS;
         } else if (get_comment_result.status == DATA_NOT_FOUND) {
-            service_result.error.property = "comment";
-            service_result.error.error = "not found";
             service_result.status = SERVICE_NOT_FOUND;
+            set_error(service_result.error, "comment", "not found");
         } else if (comment_data->created_by != user_id) {
-            service_result.error.property = "comment";
-            service_result.error.error = "forbidden";
             service_result.status = SERVICE_UNAUTHORIZED;
+            set_error(service_result.error, "comment", "forbidden");
         }
     } else if (get_article_result.status == DATA_NOT_FOUND) {
-        service_result.error.property = "article";
-        service_result.error.error = "not found";
         service_result.status = SERVICE_NOT_FOUND;
+        set_error(service_result.error, "article", "not found");
     }
 
     return service_result;

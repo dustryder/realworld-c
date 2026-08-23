@@ -3,7 +3,7 @@
 #define LIB_TYPE_H
 typedef struct {
     char* property;
-    char* error;
+    char* message;
 } ErrorValue;
 
 typedef struct {

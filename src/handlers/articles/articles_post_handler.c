@@ -36,19 +36,19 @@ void validate_article_payload(PostArticlePayload payload, ErrorValue *values, si
 
   if (strlen(payload.title) == 0) {
     values[*error_count].property = "title";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (strlen(payload.body) == 0) {
     values[*error_count].property = "body";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 
   if (strlen(payload.description) == 0) {
     values[*error_count].property = "description";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 }

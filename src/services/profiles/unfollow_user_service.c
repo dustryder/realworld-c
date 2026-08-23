@@ -1,5 +1,6 @@
 #include "profiles_services.h"
 #include "../../data/follow.h"
+#include "../../lib/mappers.h"
 
 UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow) {
     FIO_LOG_DEBUG("unfollow_user: current_user=%d, follow=%s", current_user, follow);
@@ -10,12 +11,9 @@ UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow) {
 
     if (user_data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        result.error.property = "profile";
-        result.error.error = "not found";
+        set_error(result.error, "profile", "not found");
     } else {
         DataResult data_result = delete_follow(conn, current_user, follow);
-
-        printf("Here?\n");
 
         if (data_result.status == DATA_SUCCESS && user_data_result.status == DATA_SUCCESS) {
             result.status = SERVICE_SUCCESS;

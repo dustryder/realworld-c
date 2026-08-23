@@ -1,6 +1,7 @@
 #include "comments_services.h"
 #include "../../data/comment.h"
 #include "../../data/article.h"
+#include "../../lib/mappers.h"
 
 AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
     FIO_LOG_DEBUG("get_article_comments: slug=%s", slug);
@@ -26,8 +27,7 @@ AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
         service_result.status = SERVICE_SUCCESS;
     } else if (get_article_result.status == DATA_NOT_FOUND) {
         service_result.status = SERVICE_NOT_FOUND;
-        service_result.error.property = "article";
-        service_result.error.error = "not found";
+        set_error(service_result.error, "article", "not found");
     }
 
     return service_result;

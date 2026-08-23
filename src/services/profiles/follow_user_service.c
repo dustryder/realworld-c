@@ -1,5 +1,6 @@
 #include "profiles_services.h"
 #include "../../data/follow.h"
+#include "../../lib/mappers.h"
 
 FollowUserResult follow_user(PGconn *conn, int current_user, char* follow) {
     FIO_LOG_DEBUG("follow_user: current_user=%d, follow=%s", current_user, follow);
@@ -10,8 +11,7 @@ FollowUserResult follow_user(PGconn *conn, int current_user, char* follow) {
 
     if (user_data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
-        result.error.property = "profile";
-        result.error.error = "not found";
+        set_error(result.error, "profile", "not found");
     } else {
         DataResult data_result = insert_follow(conn, current_user, follow);
     

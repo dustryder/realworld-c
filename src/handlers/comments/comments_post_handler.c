@@ -38,7 +38,7 @@ void validate_comment_payload(PostCommentPayload payload, ErrorValue *values, si
 
   if (strlen(payload.body) == 0) {
     values[*error_count].property = "body";
-    values[*error_count].error = "can't be blank";
+    values[*error_count].message = "can't be blank";
     (*error_count)++;
   }
 }
