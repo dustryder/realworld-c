@@ -8,7 +8,7 @@
 
 void handle_put_user(http_s* h) {
 
-    char* response_body;
+    char* response_body = "";
     int id = parse_request_user(h->params);
 
     ErrorValue errors[2];
@@ -39,13 +39,25 @@ void handle_put_user(http_s* h) {
           result.data.image
         );
         h->status = HTTP_SUCCESS;
+
+        free(result.data.email);
+        free(result.data.token);
+        free(result.data.username);
+        free(result.data.bio);
+        free(result.data.image);
       } else if (result.status == SERVICE_NOT_FOUND) {
-        response_body = create_post_user_failure();
         h->status = HTTP_NOT_FOUND;
       }
     }
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    free(values.email.value);
+    free(values.password.value);
+    free(values.username.value);
+    free(values.bio.value);
+    free(values.image.value);
 }
 
 void validate_put_user_payload(PutUserPayload payload, ErrorValue *values, size_t *error_count) {
@@ -81,10 +93,10 @@ PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
 
   char *body = fiobj_obj2cstr(raw_body).data;
 
-  FIOBJ jsonBody = FIOBJ_INVALID;
-  fiobj_json2obj(&jsonBody, body, strlen(body));
+  FIOBJ json_body = FIOBJ_INVALID;
+  fiobj_json2obj(&json_body, body, strlen(body));
 
-  FIOBJ user_body = fiobj_hash_get(jsonBody, user_key);
+  FIOBJ user_body = fiobj_hash_get(json_body, user_key);
 
   PutUserPayload values;
 
@@ -95,6 +107,8 @@ PutUserPayload parse_put_user_body(FIOBJ *raw_body) {
   values.image = parse_optional_string(user_body, "image");
 
   fiobj_free(user_key);
+
+  fiobj_free(json_body);
 
   return values;
 }

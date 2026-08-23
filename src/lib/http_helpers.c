@@ -98,7 +98,7 @@ OptionalValue parse_optional_string(FIOBJ obj, char* key) {
 
   char *json_value = fiobj_obj2cstr(fiobj_hash_get(obj, fiobj_key)).data;
   optional_value.is_present = 1;
-  optional_value.value = json_value;
+  optional_value.value = strdup(json_value);
 
   fiobj_free(fiobj_key);
 
@@ -131,12 +131,15 @@ int parse_request_user(FIOBJ *params) {
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
 
     if (FIOBJ_TYPE_IS(fiobj_value, FIOBJ_T_NULL)) {
+      fiobj_free(fiobj_key);
       return NULL;
     }
   
     char* value = fiobj_obj2cstr(fiobj_value).data;
 
     int converted = strtol(value, NULL, 10);
+
+    fiobj_free(fiobj_key);
 
     return converted;
 }

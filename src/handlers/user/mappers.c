@@ -19,21 +19,3 @@ char* create_user_success_response(char *email, char *username, char *token, cha
 
     return response_string;
 }
-
-char* create_post_user_failure() {
-
-  cJSON *arr = cJSON_CreateArray();
-  cJSON *str = cJSON_CreateString("Oh no");
-  cJSON_AddItemToArray(arr, str);
-
-  cJSON *error = cJSON_CreateObject();
-  cJSON_AddItemToObject(error, "username", arr);
-
-  cJSON *response_body = cJSON_CreateObject();
-  cJSON_AddItemToObject(response_body, "errors", error);
-
-  char *response_string = cJSON_Print(response_body);
-  cJSON_Delete(response_body);
-
-  return response_string;
-}

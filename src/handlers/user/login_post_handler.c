@@ -53,12 +53,20 @@ void handle_post_login(http_s* h) {
           result.data.bio,
           result.data.image
         );
+    
+        free(result.data.email);
+        free(result.data.username);
+        free(result.data.token);
+        free(result.data.bio);
+        free(result.data.image);
       } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
         h->status = HTTP_UNAUTHORIZED;
         response_body = create_failure_body_from_error(result.error);
       }
     }
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
 }
 
 void validate_post_login_payload(PostLoginRequestPayload payload, ErrorValue *values, size_t *error_count) {

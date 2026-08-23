@@ -23,6 +23,7 @@ void handle_post_user(http_s* h) {
 
       if (result.status == SERVICE_SUCCESS) {
         response_body = create_user_success_response(values.email, values.username, result.data, NULL, NULL);
+        free(result.data);
         h->status = HTTP_CREATED;
       } else if (result.status == SERVICE_DUPLICATE) {
         response_body = create_failure_body_from_error(result.error);
@@ -31,6 +32,11 @@ void handle_post_user(http_s* h) {
     }
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free(values.email);
+    free(values.username);
+    free(values.password);
+    free(response_body);
 }
 
 void validate_user_payload(PostUserPayload payload, ErrorValue *values, size_t *error_count) {
@@ -64,21 +70,23 @@ PostUserPayload parse_post_user_body(FIOBJ *raw_body) {
 
   char *body = fiobj_obj2cstr(raw_body).data;
 
-  FIOBJ jsonBody = FIOBJ_INVALID;
-  fiobj_json2obj(&jsonBody, body, strlen(body));
+  FIOBJ json_body = FIOBJ_INVALID;
+  fiobj_json2obj(&json_body, body, strlen(body));
 
-  FIOBJ user_body = fiobj_hash_get(jsonBody, user_key);
+  FIOBJ user_body = fiobj_hash_get(json_body, user_key);
 
   PostUserPayload values;
 
-  values.email = fiobj_obj2cstr(fiobj_hash_get(user_body, email_key)).data;
-  values.password = fiobj_obj2cstr(fiobj_hash_get(user_body, password_key)).data;
-  values.username = fiobj_obj2cstr(fiobj_hash_get(user_body, username_key)).data;
+  values.email = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, email_key)).data);
+  values.password = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, password_key)).data);
+  values.username = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, username_key)).data);
 
   fiobj_free(user_key);
   fiobj_free(username_key);
   fiobj_free(email_key);
   fiobj_free(password_key);
+
+  fiobj_free(json_body);
 
   return values;
 }
