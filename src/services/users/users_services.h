@@ -28,4 +28,5 @@ UserServiceResult get_user_by_id(PGconn *conn, int id);
 UserServiceResult update_user(PGconn *conn, int id, OptionalValue email, OptionalValue password, OptionalValue username, OptionalValue bio, OptionalValue image);
 
 UserServiceResultData map_data_to_user(UserData *data_result);
+void free_UserServiceResultData(UserServiceResultData *data);
 #endif

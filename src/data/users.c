@@ -22,6 +22,7 @@ DataResult get_user_data_by_username(PGconn *conn, char* username) {
     DataResult result = get_data_result(data_result, map_user_data);
 
     PQclear(data_result);
+
     return result;
 }
 
@@ -126,6 +127,16 @@ UserData *map_user_data(const PGresult *res) {
     data->image = PQgetisnull(res, 0, 5) ? NULL : strdup(PQgetvalue(res, 0, 5));
 
     return data;
+}
+
+void free_UserData(UserData *data) {
+    free(data->username);
+    free(data->email);
+    free(data->password);
+    free(data->bio);
+    free(data->image);
+
+    free(data);
 }
 
 void resolve_user_constraints(ErrorValue *value) {

@@ -20,4 +20,6 @@ DataResult insert_comment(PGconn *conn, int article_id, int created_by, char *bo
 DataResult get_all_comments_by_article_id(PGconn *conn, int article_id);
 DataResult get_comment_by_id(PGconn *conn, int id);
 DataResult delete_comment_by_id(PGconn *conn, int id);
+
+void free_CommentData(CommentData *data);
 #endif

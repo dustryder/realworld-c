@@ -4,9 +4,9 @@
 #ifndef ARTICLES_HANDLERS_H
 #define ARTICLES_HANDLERS_H
 typedef struct {
-    char* title;
-    char* description;
-    char* body;
+    OptionalValue title;
+    OptionalValue  description;
+    OptionalValue body;
     OptionalArray tags;
 } PostArticlePayload;
 
@@ -45,7 +45,6 @@ void handle_get_all_feed(http_s* h);
 
 void handle_post_favorite(http_s *h);
 void handle_delete_favorite(http_s *h);
-
 
 char *create_article_success_response(ArticlesServiceResultData, bool include_body, DateTimeFormat format);
 char *create_many_article_success_response(ArticlesServiceResultData *results, int result_count, int total_count);

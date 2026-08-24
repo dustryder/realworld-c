@@ -197,9 +197,7 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
 
     DataResult result = get_data_result(data_result, map_many_article_data);
 
-    ArticleDataRecordset *typ = result.data;
     PQclear(data_result);
-
     return result;
 }
 
@@ -270,6 +268,25 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
+    if (favorited != NULL) {
+        if (data_count == 0) {
+            sprintf(command + strlen(command), "%s", " WHERE");
+        }
+
+        if (data_count > 0) {
+            sprintf(command + strlen(command), " %s ", "AND");
+        }
+
+        char favorited_buffer[strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 500];
+        memset(favorited_buffer, '\0', strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 1);
+
+        sprintf(favorited_buffer, BASE_FAVORITED_QUERY, data_count + 1);
+        sprintf(command + strlen(command), " %s", favorited_buffer);
+
+        data[data_count] = favorited;
+        data_count += 1;
+    }
+
     if (limit != NULL) {
         char limit_buffer[strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 500];
         memset(limit_buffer, '\0', strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 1);
@@ -287,25 +304,6 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         sprintf(command + strlen(command), " %s", offset_buffer);
 
         data[data_count] = offset_str;
-        data_count += 1;
-    }
-
-    if (favorited != NULL) {
-        if (data_count == 0) {
-            sprintf(command + strlen(command), "%s", " WHERE");
-        }
-
-        if (data_count > 0) {
-            sprintf(command + strlen(command), " %s ", "AND");
-        }
-
-        char favorited_buffer[strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 500];
-        memset(favorited_buffer, '\0', strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 1);
-
-        sprintf(favorited_buffer, BASE_FAVORITED_QUERY, data_count + 1);
-        sprintf(command + strlen(command), " %s", favorited_buffer);
-
-        data[data_count] = favorited;
         data_count += 1;
     }
 
@@ -327,8 +325,8 @@ int get_article_count_by_title(PGconn *conn,char* title) {
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     int result = get_article_count_result(data_result);
-    PQclear(data_result);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -394,6 +392,7 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
 
     DataResult result = get_data_result(data_result, map_article_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -417,6 +416,15 @@ ArticleDataRecordset *map_many_article_data(const PGresult *res) {
     }
 
     return recordset;
+}
+
+void free_ArticleData(ArticleData *data) {
+    free(data->body);
+    free(data->created_at);
+    free(data->description);
+    free(data->slug);
+    free(data->title);
+    free(data->updated_at);
 }
 
 ArticleData *map_article_data(const PGresult *res) {

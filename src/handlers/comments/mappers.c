@@ -40,17 +40,22 @@ cJSON *create_comment_json(CommentsServiceResultData result) {
     cJSON *comment_body = cJSON_CreateObject();
     cJSON *author_body = cJSON_CreateObject();
 
+    char *updated_at = datetimestamp_to_datetimestamp(result.updated_at);
+    char *created_at = datetimestamp_to_datetimestamp(result.created_at);
+
     cJSON_AddItemToObject(author_body, "username", cJSON_CreateString(result.author.username));
-    cJSON_AddItemToObject(author_body, "bio", cJSON_CreateString(result.author.bio));
-    cJSON_AddItemToObject(author_body, "image", cJSON_CreateString(result.author.image));
+    cJSON_AddItemToObject(author_body, "bio", result.author.bio != NULL ? cJSON_CreateString(result.author.bio) : cJSON_CreateNull());
+    cJSON_AddItemToObject(author_body, "image", result.author.image != NULL ? cJSON_CreateString(result.author.image) : cJSON_CreateNull());
     cJSON_AddItemToObject(author_body, "following", cJSON_CreateBool(result.author.following));
 
     cJSON_AddItemToObject(comment_body, "id", cJSON_CreateNumber(result.id));
-    cJSON_AddItemToObject(comment_body, "createdAt", cJSON_CreateString(datetimestamp_to_datetimestamp(result.created_at)));
-    cJSON_AddItemToObject(comment_body, "updatedAt", cJSON_CreateString(datetimestamp_to_datetimestamp(result.updated_at)));
+    cJSON_AddItemToObject(comment_body, "createdAt", cJSON_CreateString(created_at));
+    cJSON_AddItemToObject(comment_body, "updatedAt", cJSON_CreateString(updated_at));
     cJSON_AddItemToObject(comment_body, "body", cJSON_CreateString(result.body));
 
     cJSON_AddItemToObject(comment_body, "author", author_body);
 
+    free(updated_at);
+    free(created_at);
     return comment_body;
 }

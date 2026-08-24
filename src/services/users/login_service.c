@@ -6,7 +6,7 @@
 
 UserServiceResult login(PGconn *conn, char* email, char* password) {
 
-    UserServiceResult result;
+    UserServiceResult result = {0};
     DataResult data_result = get_user_by_email(conn, email);
     UserData *user_data = data_result.data;
 
@@ -20,8 +20,10 @@ UserServiceResult login(PGconn *conn, char* email, char* password) {
             set_error(&result.error, "credentials", "invalid");
         }
 
+        free_UserData(data_result.data);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
+        set_error(&result.error, "credentials", "invalid");
     }
 
     return result;

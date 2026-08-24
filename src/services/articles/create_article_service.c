@@ -6,14 +6,14 @@
 
 static char* sluggify(char* title, int title_count);
 
-CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, OptionalArray tags) {
+ArticleServiceResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, OptionalArray tags) {
     FIO_LOG_DEBUG("create_article: creator=%d, title=%s, description=%s, body=%s", creator, title, description, body);
     int article_count = get_article_count_by_title(conn, title);
     char* slug = sluggify(title, article_count);
 
     DataResult insert_article_result = insert_article(conn, slug, title, description, body, creator);
     ArticleData *article_data = insert_article_result.data;
-    CreateArticleResult service_result;
+    ArticleServiceResult service_result;
 
     if (insert_article_result.status == DATA_SUCCESS) {
 
@@ -35,7 +35,13 @@ CreateArticleResult create_article(PGconn *conn, int creator, char* title, char*
             false
         );
         service_result.status = SERVICE_SUCCESS;
+
+        free_UserData(data_result.data);
+        free_ArticleData(article_data);
+        free(article_data);
     }
+
+    free(slug);
 
     return service_result;
 }

@@ -4,50 +4,103 @@
 #include "../../lib/constants.h"
 #include "../../lib/type.h"
 
-static PutArticlePayload parse_put_article_body(FIOBJ *raw_body);
+static PutArticlePayload parse_PutArticlePayload(FIOBJ *raw_body);
+static void free_PutArticlePayload(PutArticlePayload payload);
+static void validate_PutArticlePayload(PutArticlePayload payload, ErrorValue *values, size_t *error_count);
 
 void handle_put_articles(http_s* h) {
     FIO_LOG_DEBUG("handle_put_article");
 
     int id = parse_request_user(h->params);
-    char* response_body = "";
+    char* response_body = NULL;
 
-    PutArticlePayload payload = parse_put_article_body(h->body);
+    ErrorValue errors[4];
+    size_t error_count = 0;
+
+    PutArticlePayload payload = parse_PutArticlePayload(h->body);
+    validate_PutArticlePayload(payload, errors, &error_count);
     char *slug = parse_path_param(h->params, "slug");
 
-    if (payload.tags.is_present && payload.tags.value == NULL) {
+    if (error_count > 0) {
+      response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
-      http_send_body(h, "", 0);
-      return;
+    } else {
+      ArticleServiceResult result = update_article(
+        h->udata,
+        slug,
+        payload.title,
+        payload.description,
+        payload.body,
+        payload.tags,
+        id
+      );
+
+      if (result.status == SERVICE_SUCCESS) {
+        response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
+        h->status = HTTP_SUCCESS;
+        free_ArticlesServiceResultData(&result.result);
+      } else if (result.status == SERVICE_NOT_FOUND) {
+        response_body = create_failure_body_from_error(result.error);
+        h->status = HTTP_NOT_FOUND;
+      } else if (result.status == SERVICE_UNAUTHORIZED) {
+        response_body = create_failure_body_from_error(result.error);
+        h->status = HTTP_FORBIDDEN;
+      } else {
+        response_body = create_empty_response();
+        h->status = HTTP_INTERNAL_SERVER_ERROR;
+      }
     }
-
-    UpdateArticleResult result = update_article(
-      h->udata,
-      slug,
-      payload.title,
-      payload.description,
-      payload.body,
-      payload.tags,
-      id
-    );
-
-    if (result.status == SERVICE_SUCCESS) {
-      response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
-      h->status = HTTP_SUCCESS;
-    } else if (result.status == SERVICE_NOT_FOUND) {
-      response_body = create_failure_body_from_error(result.error);
-      h->status = HTTP_NOT_FOUND;
-    } else if (result.status == SERVICE_UNAUTHORIZED) {
-      response_body = create_failure_body_from_error(result.error);
-      h->status = HTTP_FORBIDDEN;
-    }
-
-    if (payload.tags.value != NULL) free(payload.tags.value);
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free_PutArticlePayload(payload);
+    free(response_body);
+    free(slug);
 }
 
-PutArticlePayload parse_put_article_body(FIOBJ *raw_body) {
+void validate_PutArticlePayload(PutArticlePayload payload, ErrorValue *values, size_t *error_count) {
+
+  if (payload.title.is_present && payload.title.value == NULL) {
+    values[*error_count].property = "title";
+    values[*error_count].message = "can't be null";
+    (*error_count)++;
+  }
+
+  if (payload.body.is_present && payload.body.value == NULL) {
+    values[*error_count].property = "body";
+    values[*error_count].message = "can't be null";
+    (*error_count)++;
+  }
+
+  if (payload.description.is_present && payload.description.value == NULL) {
+    values[*error_count].property = "description";
+    values[*error_count].message = "can't be null";
+    (*error_count)++;
+  }
+
+  if (payload.tags.is_present && payload.tags.value == NULL) {
+    values[*error_count].property = "tagList";
+    values[*error_count].message = "can't be null";
+    (*error_count)++;
+  }
+}
+
+void free_PutArticlePayload(PutArticlePayload payload) {
+
+  free(payload.body.value);
+  free(payload.description.value);
+  free(payload.title.value);
+
+  if (payload.tags.value != NULL) {
+    for(int i = 0; i < payload.tags.value_count; i++) {
+      free(payload.tags.value[i]);
+    }
+
+    free(payload.tags.value);
+  }
+}
+
+PutArticlePayload parse_PutArticlePayload(FIOBJ *raw_body) {
   FIO_LOG_DEBUG("parse_put_article_body");
 
   FIOBJ article_key = fiobj_str_new("article", 7);

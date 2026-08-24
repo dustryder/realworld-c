@@ -4,12 +4,14 @@
 #include <string.h>
 
 UserServiceResult get_user_by_id(PGconn *conn, int id) {
-    UserServiceResult result;
+    UserServiceResult result = {0};
     DataResult data_result = get_user_data_by_id(conn, id);
 
     if (data_result.status == DATA_SUCCESS) {
         result.status = SERVICE_SUCCESS;
         result.data = map_data_to_user(data_result.data);
+
+        free_UserData(data_result.data);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
     }

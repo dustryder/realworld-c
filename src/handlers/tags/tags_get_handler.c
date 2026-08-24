@@ -8,13 +8,19 @@ char *create_get_tags_success_response(GetAllTagsResult result);
 void handle_get_tags(http_s* h) {
     FIO_LOG_DEBUG("handle_get_tags");
 
-    char* response_body;
+    char* response_body = NULL;
     GetAllTagsResult result = get_all_tags(h->udata);
 
     h->status = HTTP_SUCCESS;
     response_body = create_get_tags_success_response(result);
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    for (int i = 0; i < result.tag_count; i++) {
+        free(result.result[i]);
+    }
+    free(result.result);
 }
 
 char *create_get_tags_success_response(GetAllTagsResult result) {

@@ -14,24 +14,12 @@ typedef struct {
     ServiceStatus status;
     ProfileServiceResultData result;
     ErrorValue error;
-} GetProfileByUsernameResult;
+} ProfileServiceResult;
 
-GetProfileByUsernameResult get_profile_by_username(PGconn *conn, char* username);
-
-typedef struct {
-    ServiceStatus status;
-    ProfileServiceResultData result;
-    ErrorValue error;
-} FollowUserResult;
-
-typedef struct {
-    ServiceStatus status;
-    ProfileServiceResultData result;
-    ErrorValue error;
-} UnfollowUserResult;
-
-FollowUserResult follow_user(PGconn *conn, int current_user, char* follow);
-UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow);
+ProfileServiceResult follow_user(PGconn *conn, int current_user, char* follow);
+ProfileServiceResult unfollow_user(PGconn *conn, int current_user, char* follow);
+ProfileServiceResult get_profile_by_username(PGconn *conn, char* username);
 
 ProfileServiceResultData map_data_to_profile(UserData *data_result, bool following);
+void free_ProfileServiceResultData(ProfileServiceResultData *data);
 #endif

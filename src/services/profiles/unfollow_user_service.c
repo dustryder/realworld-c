@@ -2,10 +2,10 @@
 #include "../../data/follow.h"
 #include "../../lib/mappers.h"
 
-UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow) {
+ProfileServiceResult unfollow_user(PGconn *conn, int current_user, char* follow) {
     FIO_LOG_DEBUG("unfollow_user: current_user=%d, follow=%s", current_user, follow);
 
-    UnfollowUserResult result;
+    ProfileServiceResult result = {0};
 
     DataResult user_data_result = get_user_data_by_username(conn, follow);
 
@@ -19,6 +19,8 @@ UnfollowUserResult unfollow_user(PGconn *conn, int current_user, char* follow) {
             result.status = SERVICE_SUCCESS;
             result.result = map_data_to_profile(user_data_result.data, false);
         }
+
+        free_UserData(user_data_result.data);
     }
 
     return result;

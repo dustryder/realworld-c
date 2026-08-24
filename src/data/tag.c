@@ -15,6 +15,8 @@ void insert_tag(PGconn *conn, char* tag) {
 
     ExecStatusType command_status = PQresultStatus(data_result);
 
+    PQclear(data_result);
+
     return;
 }
 
@@ -28,6 +30,8 @@ void delete_article_tags(PGconn *conn, int article_id) {
     const char * const data[1] = { article_id_str };
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+
+    PQclear(data_result);
 
     return;
 }
@@ -66,7 +70,7 @@ char **get_all_tags_data(PGconn *conn, int *tag_count) {
     return tag_names;
 }
 
-DataResult insert_article_tag(PGconn *conn, int article_id, char* tag) {
+void insert_article_tag(PGconn *conn, int article_id, char* tag) {
     FIO_LOG_DEBUG("insert_article_tag: article_id: %d, tag: %s", article_id, tag);
     char article_id_str[20];
     sprintf(article_id_str, "%d", article_id);
@@ -82,10 +86,8 @@ DataResult insert_article_tag(PGconn *conn, int article_id, char* tag) {
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_tag_data);
-
     PQclear(data_result);
-    return result;
+    return;
 }
 
 char **get_tag_names(const PGresult *res, int *tag_count) {
@@ -94,6 +96,11 @@ char **get_tag_names(const PGresult *res, int *tag_count) {
     if (command_status == PGRES_TUPLES_OK) {
         int row_count = PQntuples(res);
         *tag_count = row_count;
+
+        if (row_count == 0) {
+            return NULL;
+        }
+
         char **tags = malloc(sizeof(char *) * row_count);
 
         for (int i = 0; i < row_count; i++) {

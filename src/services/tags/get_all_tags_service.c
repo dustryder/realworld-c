@@ -3,7 +3,7 @@
 
 GetAllTagsResult get_all_tags(PGconn *conn) {
 
-    GetAllTagsResult result;
+    GetAllTagsResult result = {0};
     int tag_count;
     char **data_result = get_all_tags_data(conn, &tag_count);
 

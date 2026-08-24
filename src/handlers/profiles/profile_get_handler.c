@@ -8,17 +8,25 @@ void handle_get_profile(http_s* h) {
     FIO_LOG_DEBUG("handle_get_profile");
 
     char *username = parse_path_param(h->params, "username");
+  
+    char *response_body = NULL;
 
-    GetProfileByUsernameResult result = get_profile_by_username(h->udata, username);
-    char *response_body = "";
+    ProfileServiceResult result = get_profile_by_username(h->udata, username);
 
     if (result.status == SERVICE_SUCCESS) {
-      h->status = HTTP_SUCCESS;
       response_body = create_success_profile_response(result.result);
+      h->status = HTTP_SUCCESS;
     } else if (result.status == SERVICE_NOT_FOUND) {
-      h->status = HTTP_NOT_FOUND;
       response_body = create_failure_body_from_error(result.error);
+      h->status = HTTP_NOT_FOUND;
+    } else {
+      response_body = create_empty_response();
+      h->status = HTTP_INTERNAL_SERVER_ERROR;
     }
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    free(username);
+    free_ProfileServiceResultData(&result.result);
 }

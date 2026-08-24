@@ -7,7 +7,7 @@
 RegisterUserServiceResult register_user(PGconn *conn, char* email, char* username, char* password) {
     FIO_LOG_DEBUG("register_user: email: %s, user: %s, password: %s", email, username, password);
 
-    RegisterUserServiceResult result;
+    RegisterUserServiceResult result = {0};
     DataResult data_result = insert_user(conn, email, username, password);
     UserData *user_data = data_result.data;
 
@@ -15,6 +15,7 @@ RegisterUserServiceResult register_user(PGconn *conn, char* email, char* usernam
         result.status = SERVICE_SUCCESS;
         char* jwt = sign_jwt(user_data->id);
         result.data = jwt;
+        free_UserData(user_data);
     } else if (data_result.status == DATA_DUPLICATE) {
         result.status = SERVICE_DUPLICATE;
         set_error(&result.error, data_result.error.property, "has already been taken");

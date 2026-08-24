@@ -1,4 +1,6 @@
 #include "string_helpers.h"
+#include <string.h>
+#include <stdlib.h>
 
 char* datetimestamp_to_date(char* datetimestamp) {
     char *buffer = malloc(sizeof(char) * 12);
@@ -11,11 +13,11 @@ char* datetimestamp_to_date(char* datetimestamp) {
 }
 
 char* datetimestamp_to_datetimestamp(char* datetimestamp) {
-    char *buffer = malloc(sizeof(char) * 21);
+    char *buffer = malloc(sizeof(char) * 20);
 
     strncpy(buffer, datetimestamp, 19);
     buffer[10] = 'T';
-    buffer[20] = '\0';
+    buffer[19] = '\0';
     
     return buffer;
 }

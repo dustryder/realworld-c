@@ -20,6 +20,8 @@ DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
 
     DataResult result = get_data_result(data_result, map_follow_data);
 
+    PQclear(data_result);
+    
     return result;
 }
 

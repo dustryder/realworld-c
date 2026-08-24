@@ -65,5 +65,7 @@ static cJSON *create_article_json(ArticlesServiceResultData result, bool include
 
     cJSON_AddItemToObject(article_properties, "author", author_properties);
 
+    free(created_at);
+    free(updated_at);
     return article_properties;
 }

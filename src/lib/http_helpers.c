@@ -46,6 +46,7 @@ OptionalArray parse_optional_array(FIOBJ obj, char* key) {
   if (!fiobj_hash_haskey(obj, fiobj_key)) {
     optional_value.is_present = 0;
     optional_value.value = NULL;
+    optional_value.value_count = 0;
     return optional_value;
   }
 
@@ -54,6 +55,7 @@ OptionalArray parse_optional_array(FIOBJ obj, char* key) {
   if (FIOBJ_TYPE_IS(value, FIOBJ_T_NULL)) {
     optional_value.is_present = 1;
     optional_value.value = NULL;
+    optional_value.value_count = 0;
     return optional_value;
   }
 
@@ -66,7 +68,7 @@ OptionalArray parse_optional_array(FIOBJ obj, char* key) {
 
     for (int i = 0; i < (int) fiobj_ary_count(value); i++) {
         FIOBJ item = fiobj_ary_index(value, i);
-        char *string_item = fiobj_obj2cstr(item).data;
+        char *string_item = strdup(fiobj_obj2cstr(item).data);
         result_value[i] = string_item;
     }
 
@@ -85,6 +87,7 @@ OptionalValue parse_optional_string(FIOBJ obj, char* key) {
 
   if (!fiobj_hash_haskey(obj, fiobj_key)) {
     optional_value.is_present = 0;
+    optional_value.value = NULL;
     return optional_value;
   }
 
@@ -111,7 +114,9 @@ char *parse_path_param(FIOBJ *params, char *key) {
 
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
 
-    char* value = fiobj_obj2cstr(fiobj_value).data;
+    char* value = strdup(fiobj_obj2cstr(fiobj_value).data);
+
+    fiobj_free(fiobj_key);
 
     return value;
 }
@@ -122,6 +127,8 @@ int parse_path_param_number(FIOBJ *params, char *key) {
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
 
     int value = fiobj_obj2num(fiobj_value);
+
+    fiobj_free(fiobj_key);
 
     return value;
 }
@@ -142,6 +149,10 @@ int parse_request_user(FIOBJ *params) {
     fiobj_free(fiobj_key);
 
     return converted;
+}
+
+char *create_empty_response() {
+  return strdup("");
 }
 
 char *create_failure_body_from_error(ErrorValue error) {

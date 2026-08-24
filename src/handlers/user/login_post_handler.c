@@ -3,14 +3,71 @@
 #include "../../services/users/users_services.h"
 #include "cJSON.h"
 #include "../../lib/constants.h"
+#include "../../lib/validate.h"
 
-PostLoginRequestPayload parse_post_login_body(FIOBJ *body) {
+static void validate_PostLoginRequestPayload(PostLoginRequestPayload payload, ErrorValue *values, size_t *error_count);
+static PostLoginRequestPayload parse_PostLoginRequestPayload(FIOBJ *body);
+void free_PostLoginRequestPayload(PostLoginRequestPayload payload);
+
+void handle_post_login(http_s* h) {
+
+    PostLoginRequestPayload values = parse_PostLoginRequestPayload(h->body);
+
+    ErrorValue errors[3];
+    size_t error_count = 0;
+    char *response_body = NULL;
+    validate_PostLoginRequestPayload(values, errors, &error_count);
+
+    if (error_count > 0) {
+      response_body = create_failure_body_from_errors(errors, error_count);
+      h->status = HTTP_UNPROCESSABLE_ENTITY;
+    } else {
+      UserServiceResult result = login(h->udata, values.email.value, values.password.value);
+
+      if (result.status == SERVICE_SUCCESS) {
+        response_body = create_user_success_response(
+          result.data.email,
+          result.data.username,
+          result.data.token,
+          result.data.bio,
+          result.data.image
+        );
+        h->status = HTTP_SUCCESS;
+      } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
+        response_body = create_failure_body_from_error(result.error);
+        h->status = HTTP_UNAUTHORIZED;
+      } else {
+        response_body = create_empty_response();
+        h->status = HTTP_INTERNAL_SERVER_ERROR;
+      }
+
+      free_UserServiceResultData(&result.data);
+    }
+
+    http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    free_PostLoginRequestPayload(values);
+}
+
+void free_PostLoginRequestPayload(PostLoginRequestPayload payload) {
+  free(payload.email.value);
+  free(payload.password.value);
+}
+
+void validate_PostLoginRequestPayload(PostLoginRequestPayload payload, ErrorValue *values, size_t *error_count) {
+
+  is_required(payload.email, &values[*error_count], error_count, "email");
+  is_required(payload.password, &values[*error_count], error_count, "password");
+
+  not_null_or_empty(payload.email, &values[*error_count], error_count, "email");
+  not_null_or_empty(payload.password, &values[*error_count], error_count, "password");
+}
+
+PostLoginRequestPayload parse_PostLoginRequestPayload(FIOBJ *body) {
   
   PostLoginRequestPayload payload;
   FIOBJ user_key = fiobj_str_new("user", 4);
-
-  FIOBJ email_key = fiobj_str_new("email", 5);
-  FIOBJ password_key = fiobj_str_new("password", 8);
 
   char *parsed_body = fiobj_obj2cstr(body).data;
 
@@ -19,67 +76,10 @@ PostLoginRequestPayload parse_post_login_body(FIOBJ *body) {
 
   FIOBJ user_body = fiobj_hash_get(json_body, user_key);
 
-  payload.email = fiobj_obj2cstr(fiobj_hash_get(user_body, email_key)).data;
-  payload.password = fiobj_obj2cstr(fiobj_hash_get(user_body, password_key)).data;
+  payload.email = parse_optional_string(user_body, "email");
+  payload.password = parse_optional_string(user_body, "password");
 
   fiobj_free(user_key);
-  fiobj_free(email_key);
-  fiobj_free(password_key);
 
   return payload;
-}
-
-void handle_post_login(http_s* h) {
-
-    PostLoginRequestPayload values = parse_post_login_body(h->body);
-
-    ErrorValue errors[3];
-    size_t error_count = 0;
-    char *response_body = "";
-    validate_post_login_payload(values, errors, &error_count);
-
-    if (error_count > 0) {
-      response_body = create_failure_body_from_errors(errors, error_count);
-      h->status = HTTP_UNPROCESSABLE_ENTITY;
-    } else {
-      UserServiceResult result = login(h->udata, values.email, values.password);
-
-      if (result.status == SERVICE_SUCCESS) {
-        h->status = HTTP_SUCCESS;
-        response_body = create_user_success_response(
-          result.data.email,
-          result.data.username,
-          result.data.token,
-          result.data.bio,
-          result.data.image
-        );
-    
-        free(result.data.email);
-        free(result.data.username);
-        free(result.data.token);
-        free(result.data.bio);
-        free(result.data.image);
-      } else if (result.status == SERVICE_NOT_FOUND || result.status == SERVICE_UNAUTHORIZED) {
-        h->status = HTTP_UNAUTHORIZED;
-        response_body = create_failure_body_from_error(result.error);
-      }
-    }
-    http_send_body(h, response_body, strlen(response_body));
-
-    free(response_body);
-}
-
-void validate_post_login_payload(PostLoginRequestPayload payload, ErrorValue *values, size_t *error_count) {
-
-  if (strlen(payload.email) == 0) {
-    values[*error_count].property = "email";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
-
-  if (strlen(payload.password) == 0) {
-    values[*error_count].property = "password";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
 }

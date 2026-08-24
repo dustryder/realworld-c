@@ -12,9 +12,9 @@ PGconn *get_connection() {
     ConnStatusType db_status = PQstatus(connection);
 
     if (db_status != CONNECTION_OK) {
-        PQfinish(connection);
         FIO_LOG_ERROR("Could not establish database connection with code: %d\n", db_status);
         FIO_LOG_ERROR("Database error: %s\n", PQerrorMessage(connection));
+        PQfinish(connection);
         
         return NULL;
     }

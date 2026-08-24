@@ -5,7 +5,7 @@
 
 AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
     FIO_LOG_DEBUG("get_article_comments: slug=%s", slug);
-    AllCommentsServiceResult service_result;
+    AllCommentsServiceResult service_result = {0};
 
     DataResult get_article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = get_article_result.data;
@@ -20,16 +20,24 @@ AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug) {
 
             for (int i = 0; i < comments_recordset->record_count; i++) {
                 DataResult get_user_result = get_user_data_by_id(conn, comments_recordset->data[i].created_by);
+                UserData *user_data = get_user_result.data;
 
-                result_data[i] = map_data_to_comment(&comments_recordset->data[i], get_user_result.data, false);
+                result_data[i] = map_data_to_comment(&comments_recordset->data[i], user_data, false);
+
+                free_UserData(user_data);
+                free_CommentData(&comments_recordset->data[i]);
             }
 
             service_result.result = result_data;
             service_result.result_count = comments_recordset->record_count;
+            free(comments_recordset->data);
+            free(comments_recordset);
         } else {
             service_result.result_count = 0;
         }
         service_result.status = SERVICE_SUCCESS;
+        free_ArticleData(article_data);
+        free(article_data);
     } else if (get_article_result.status == DATA_NOT_FOUND) {
         service_result.status = SERVICE_NOT_FOUND;
         set_error(&service_result.error, "article", "not found");

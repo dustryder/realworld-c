@@ -3,38 +3,48 @@
 #include "comments_handlers.h";
 #include "../../services/comments/comments_services.h"
 
-static PostCommentPayload parse_post_comment_body(FIOBJ *raw_body);
+static PostCommentPayload parse_PostCommentPayload(FIOBJ *raw_body);
+void validate_PostCommentPayload(PostCommentPayload payload, ErrorValue *values, size_t *error_count);
 
 void handle_post_comments(http_s *h) {
     FIO_LOG_DEBUG("handle_post_comments");
 
     int id = parse_request_user(h->params);
     char *slug = parse_path_param(h->params, "slug");
-    PostCommentPayload payload = parse_post_comment_body(h->body);
+    PostCommentPayload payload = parse_PostCommentPayload(h->body);
     ErrorValue errors[3];
     size_t error_count = 0;
-    validate_comment_payload(payload, errors, &error_count);
+    validate_PostCommentPayload(payload, errors, &error_count);
 
-    char *response_body = "";
-    CommentsServiceResult service_result = create_comment(h->udata, slug, id, payload.body);
+    char *response_body = NULL;
 
     if (error_count > 0) {
       response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
+        CommentsServiceResult service_result = create_comment(h->udata, slug, id, payload.body);
+
         if (service_result.status == SERVICE_SUCCESS) {
-            h->status = HTTP_CREATED;
-            response_body = create_comment_success_response(service_result.result);
+          response_body = create_comment_success_response(service_result.result);
+          h->status = HTTP_CREATED;
+          free_CommentsServiceResultData(&service_result.result);
         } else if (service_result.status == SERVICE_NOT_FOUND) {
-            response_body = create_failure_body_from_error(service_result.error);
-            h->status = HTTP_NOT_FOUND;
+          response_body = create_failure_body_from_error(service_result.error);
+          h->status = HTTP_NOT_FOUND;
+        } else {
+          response_body = create_empty_response();
+          h->status = HTTP_INTERNAL_SERVER_ERROR;
         }
     }
 
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    free(payload.body);
+    free(slug);
 }
 
-void validate_comment_payload(PostCommentPayload payload, ErrorValue *values, size_t *error_count) {
+void validate_PostCommentPayload(PostCommentPayload payload, ErrorValue *values, size_t *error_count) {
 
   if (strlen(payload.body) == 0) {
     values[*error_count].property = "body";
@@ -43,7 +53,7 @@ void validate_comment_payload(PostCommentPayload payload, ErrorValue *values, si
   }
 }
 
-PostCommentPayload parse_post_comment_body(FIOBJ *raw_body) {
+PostCommentPayload parse_PostCommentPayload(FIOBJ *raw_body) {
 
   FIOBJ comment_key = fiobj_str_new("comment", 7);
 
@@ -58,9 +68,11 @@ PostCommentPayload parse_post_comment_body(FIOBJ *raw_body) {
 
   PostCommentPayload values;
 
-  values.body = fiobj_obj2cstr(fiobj_hash_get(comment_body, body_key)).data;
+  values.body = strdup(fiobj_obj2cstr(fiobj_hash_get(comment_body, body_key)).data);
 
   fiobj_free(body_key);
+  fiobj_free(comment_key);
+  fiobj_free(json_body);
 
   return values;
 }

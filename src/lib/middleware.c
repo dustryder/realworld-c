@@ -42,6 +42,8 @@ bool require_auth(http_s *request) {
             request->status = HTTP_UNAUTHORIZED;
             http_send_body(request, response_body, strlen(response_body));
 
+            free(response_body);
+
             return false;
         }
     }

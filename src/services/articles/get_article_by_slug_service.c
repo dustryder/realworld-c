@@ -3,10 +3,10 @@
 #include "../../data/tag.h"
 #include "../../lib/mappers.h"
 
-GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
+ArticleServiceResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("get_article_by_slug: user_id=%d, slug=%s", user_id, slug);
 
-    GetArticleResult result;
+    ArticleServiceResult result;
     DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
 
@@ -28,6 +28,15 @@ GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
             favorite_count,
             false
         );
+
+        free_ArticleData(article_data);
+        free_UserData(user_result.data);
+        free(article_data);
+
+        for (int i = 0; i < tag_count; i++) {
+            free(tags[i]);
+        }
+        free(tags);
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         set_error(&result.error, "article", "not found");

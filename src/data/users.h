@@ -21,4 +21,6 @@ DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, si
 DataResult get_user_data_by_username(PGconn *conn, char* username);
 DataResult get_user_by_email(PGconn *conn, char* email);
 DataResult get_user_data_by_id(PGconn *conn, int id);
+
+void free_UserData(UserData *data);
 #endif

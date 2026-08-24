@@ -13,5 +13,6 @@ OptionalValue parse_optional_string(FIOBJ obj, char* key);
 OptionalArray parse_optional_array(FIOBJ obj, char* key);
 char *create_failure_body_from_error(ErrorValue error);
 char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count);
+char *create_empty_response();
 
 #endif

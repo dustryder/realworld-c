@@ -32,12 +32,18 @@ GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, 
                 favorite_count,
                 true
             );
+
+            free_ArticleData(&current_record);
+            free_UserData(user_result.data);
         }
 
         result.status = SERVICE_SUCCESS;
         result.result = result_data;
         result.article_count = article_data_recordset->record_count;
         result.total_count = article_count_result;
+        free(article_data_recordset->data);
+        free(article_data_recordset);
+
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         result.article_count = 0;

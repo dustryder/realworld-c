@@ -20,23 +20,6 @@ typedef struct {
     ProfileServiceResultData author;
 } ArticlesServiceResultData;
 
-typedef struct {
-    ServiceStatus status;
-    ArticlesServiceResultData result;
-    ErrorValue error;
-} CreateArticleResult;
-
-CreateArticleResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, OptionalArray tags);
-
-
-typedef struct {
-    ServiceStatus status;
-    ArticlesServiceResultData result;
-    ErrorValue error;
-} GetArticleResult;
-
-GetArticleResult get_article_by_slug(PGconn *conn, int user_id, char* slug);
-
 ArticlesServiceResultData map_data_to_article(
     ArticleData *article_data,
     UserData *user_data,
@@ -61,9 +44,15 @@ typedef struct {
     ServiceStatus status;
     ArticlesServiceResultData result;
     ErrorValue error;
-} UpdateArticleResult;
+} ArticleServiceResult;
 
-UpdateArticleResult update_article(
+ArticleServiceResult get_article_by_slug(PGconn *conn, int user_id, char* slug);
+ArticleServiceResult delete_article(PGconn* conn, char *slug, int user_id);
+ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
+ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
+ArticleServiceResult create_article(PGconn *conn, int creator, char* title, char* descrition, char* body, OptionalArray tags);
+GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset);
+ArticleServiceResult update_article(
     PGconn *conn,
     char* slug,
     OptionalValue title,
@@ -73,14 +62,5 @@ UpdateArticleResult update_article(
     int id
 );
 
-typedef struct {
-    ServiceStatus status;
-    ArticlesServiceResultData result;
-    ErrorValue error;
-} ArticleServiceResult;
-
-ArticleServiceResult delete_article(PGconn* conn, char *slug, int user_id);
-ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug);
-ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug);
-GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset);
+void free_ArticlesServiceResultData(ArticlesServiceResultData *data);
 #endif

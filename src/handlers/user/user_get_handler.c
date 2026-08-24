@@ -8,14 +8,13 @@
 
 void handle_get_user(http_s* h) {
 
-    char* response_body;
-
     int id = parse_request_user(h->params);
+
+    char* response_body = NULL;
 
     UserServiceResult result = get_user_by_id(h->udata, id);
 
     if (result.status == SERVICE_SUCCESS) {
-      h->status = HTTP_SUCCESS;
       response_body = create_user_success_response(
         result.data.email,
         result.data.username,
@@ -24,17 +23,16 @@ void handle_get_user(http_s* h) {
         result.data.image
       );
       h->status = HTTP_SUCCESS;
-
-      free(result.data.email);
-      free(result.data.username);
-      free(result.data.token);
-      free(result.data.bio);
-      free(result.data.image);
     } else if (result.status == SERVICE_NOT_FOUND) {
+      response_body = create_empty_response();
       h->status = HTTP_NOT_FOUND;
+    } else {
+      response_body = create_empty_response();
+      h->status = HTTP_INTERNAL_SERVER_ERROR;
     }
 
     http_send_body(h, response_body, strlen(response_body));
 
     free(response_body);
+    free_UserServiceResultData(&result.data);
 }

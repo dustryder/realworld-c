@@ -37,6 +37,10 @@ ArticleServiceResult favorite_article(PGconn *conn, int user_id, char *slug) {
             favorite_count,
             false
         );
+
+        free_ArticleData(article_data);
+        free_UserData(user_result.data);
+        free(article_data);
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         set_error(&result.error, "article", "not found");

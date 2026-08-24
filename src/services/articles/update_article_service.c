@@ -5,7 +5,7 @@
 #include "articles_services.h"
 #include "../../lib/type.h"
 
-UpdateArticleResult update_article(
+ArticleServiceResult update_article(
     PGconn *conn,
     char* slug,
     OptionalValue title,
@@ -24,7 +24,7 @@ UpdateArticleResult update_article(
 
     DataResult get_article_result = get_article_data_by_slug(conn, slug);
 
-    UpdateArticleResult result;
+    ArticleServiceResult result;
 
     if (get_article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
@@ -35,10 +35,13 @@ UpdateArticleResult update_article(
 
     ArticleData *get_article_data = get_article_result.data;
 
-    if (get_article_data->created_by != id) {
+    if (get_article_result.status == DATA_SUCCESS && get_article_data->created_by != id) {
         result.status = SERVICE_UNAUTHORIZED;
         result.error.property = "article";
         result.error.message = "forbidden";
+
+        free_ArticleData(get_article_data);
+        free(get_article_data);
         return result;
     }
 
@@ -72,9 +75,21 @@ UpdateArticleResult update_article(
             favorite_count,
             false
         );
+
+        free_ArticleData(article_data);
+        free_UserData(user_result.data);
+        free(article_data);
+        for (int i = 0; i < tag_count; i++) {
+            free(result_tags[i]);
+        }
+
+        free(result_tags);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
     }
+
+    free_ArticleData(get_article_data);
+    free(get_article_data);
 
     return result;
 }

@@ -21,6 +21,7 @@ DataResult insert_comment(PGconn *conn, int article_id, int created_by, char *bo
 
     DataResult result = get_data_result(data_result, map_comment_data);
 
+    PQclear(data_result);
     return result;
 }
 
@@ -54,7 +55,6 @@ DataResult get_comment_by_id(PGconn *conn, int id) {
     DataResult result = get_data_result(data_result, map_comment_data);
 
     PQclear(data_result);
-
     return result;
 }
 
@@ -71,8 +71,13 @@ DataResult delete_comment_by_id(PGconn *conn, int id) {
     DataResult result = get_data_result(data_result, NULL);
 
     PQclear(data_result);
-
     return result;
+}
+
+void free_CommentData(CommentData *data) {
+    free(data->body);
+    free(data->created_at);
+    free(data->updated_at);
 }
 
 CommentData *map_comment_data(const PGresult *res) {

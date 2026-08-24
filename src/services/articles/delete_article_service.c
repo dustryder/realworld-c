@@ -17,15 +17,18 @@ ArticleServiceResult delete_article(
     if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         set_error(&result.error, "article", "not found");
-        return result;
-    } else if (article_data->created_by != user_id) {
-        result.status = SERVICE_UNAUTHORIZED;
-        set_error(&result.error, "article", "forbidden");
-        return result;
-    }
+    } else if (article_result.status == DATA_SUCCESS) {
+        if (article_data->created_by != user_id) {
+            result.status = SERVICE_UNAUTHORIZED;
+            set_error(&result.error, "article", "forbidden");
+        } else {
+            result.status = SERVICE_SUCCESS;
+            delete_article_by_id(conn, article_data->id);
+        }
 
-    result.status = SERVICE_SUCCESS;
-    delete_article_by_id(conn, article_data->id);
+        free_ArticleData(article_data);
+        free(article_data);
+    }
 
     return result;
 }

@@ -4,69 +4,69 @@
 #include "cJSON.h"
 #include "../../lib/constants.h"
 #include "../../lib/http_helpers.h"
+#include "../../lib/validate.h"
+
+static void validate_PostUserPayload(PostUserPayload payload, ErrorValue *values, size_t *error_count);
+static PostUserPayload parse_PostUserPayload(FIOBJ *raw_body);
+static void free_PostUserPayload(PostUserPayload values);
 
 void handle_post_user(http_s* h) {
-    PostUserPayload values = parse_post_user_body(h->body);
 
-    char *response_body = "";
+    PostUserPayload values = parse_PostUserPayload(h->body);
 
     ErrorValue errors[3];
     size_t error_count = 0;
+    validate_PostUserPayload(values, errors, &error_count);
 
-    validate_user_payload(values, errors, &error_count);
+    char *response_body = NULL;
 
     if (error_count > 0) {
       response_body = create_failure_body_from_errors(errors, error_count);
       h->status = HTTP_UNPROCESSABLE_ENTITY;
     } else {
-      RegisterUserServiceResult result = register_user(h->udata, values.email, values.username, values.password);
+      RegisterUserServiceResult result = register_user(h->udata, values.email.value, values.username.value, values.password.value);
 
       if (result.status == SERVICE_SUCCESS) {
-        response_body = create_user_success_response(values.email, values.username, result.data, NULL, NULL);
-        free(result.data);
+        response_body = create_user_success_response(values.email.value, values.username.value, result.data, NULL, NULL);
         h->status = HTTP_CREATED;
       } else if (result.status == SERVICE_DUPLICATE) {
         response_body = create_failure_body_from_error(result.error);
         h->status = HTTP_CONFLICT;
+      } else {
+        response_body = create_empty_response();
+        h->status = HTTP_INTERNAL_SERVER_ERROR;
       }
+
+      free(result.data);
     }
 
     http_send_body(h, response_body, strlen(response_body));
 
-    free(values.email);
-    free(values.username);
-    free(values.password);
+    free_PostUserPayload(values);
     free(response_body);
 }
 
-void validate_user_payload(PostUserPayload payload, ErrorValue *values, size_t *error_count) {
+void free_PostUserPayload(PostUserPayload values) {
 
-  if (strlen(payload.username) == 0) {
-    values[*error_count].property = "username";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
-
-  if (strlen(payload.email) == 0) {
-    values[*error_count].property = "email";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
-
-  if (strlen(payload.password) == 0) {
-    values[*error_count].property = "password";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
+    free(values.email.value);
+    free(values.username.value);
+    free(values.password.value);
 }
 
-PostUserPayload parse_post_user_body(FIOBJ *raw_body) {
+void validate_PostUserPayload(PostUserPayload payload, ErrorValue *values, size_t *error_count) {
+
+  is_required(payload.username, &values[*error_count], error_count, "username");
+  is_required(payload.email, &values[*error_count], error_count, "email");
+  is_required(payload.password, &values[*error_count], error_count, "password");
+
+  not_null_or_empty(payload.username, &values[*error_count], error_count, "username");
+  not_null_or_empty(payload.email, &values[*error_count], error_count, "email");
+  not_null_or_empty(payload.password, &values[*error_count], error_count, "password");
+}
+
+PostUserPayload parse_PostUserPayload(FIOBJ *raw_body) {
 
   FIOBJ user_key = fiobj_str_new("user", 4);
-
-  FIOBJ username_key = fiobj_str_new("username", 8);
-  FIOBJ email_key = fiobj_str_new("email", 5);
-  FIOBJ password_key = fiobj_str_new("password", 8);
 
   char *body = fiobj_obj2cstr(raw_body).data;
 
@@ -77,15 +77,11 @@ PostUserPayload parse_post_user_body(FIOBJ *raw_body) {
 
   PostUserPayload values;
 
-  values.email = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, email_key)).data);
-  values.password = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, password_key)).data);
-  values.username = strdup(fiobj_obj2cstr(fiobj_hash_get(user_body, username_key)).data);
+  values.email = parse_optional_string(user_body, "email");
+  values.password = parse_optional_string(user_body, "password");
+  values.username = parse_optional_string(user_body, "username");
 
   fiobj_free(user_key);
-  fiobj_free(username_key);
-  fiobj_free(email_key);
-  fiobj_free(password_key);
-
   fiobj_free(json_body);
 
   return values;

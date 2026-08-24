@@ -33,4 +33,6 @@ int get_all_followed_articles_count(PGconn *conn, int user_id);
 
 void insert_article_favorite(PGconn *conn, int user_id, char* slug);
 void delete_article_favorite(PGconn *conn, int user_id, char* slug);
+
+void free_ArticleData(ArticleData *data);
 #endif

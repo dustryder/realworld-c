@@ -19,7 +19,14 @@ CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char
 
         service_result.result = map_data_to_comment(insert_comment_result.data, get_user_result.data, false);
         service_result.status = SERVICE_SUCCESS;
+
+        free_CommentData(insert_comment_result.data);
+        free_UserData(get_user_result.data);
+        free(insert_comment_result.data);
+        free_ArticleData(article_data);
+        free(article_data);
     } else if (get_article_result.status == DATA_NOT_FOUND) {
+        printf("eere\n");
         service_result.status = SERVICE_NOT_FOUND;
         set_error(&service_result.error, "article", "not found");
     }

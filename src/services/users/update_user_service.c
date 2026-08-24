@@ -31,6 +31,7 @@ UserServiceResult update_user(
     if (data_result.status == DATA_SUCCESS) {
         result.status = SERVICE_SUCCESS;
         result.data = map_data_to_user(user_data);
+        free_UserData(user_data);
     } else if (data_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_UNKNOWN;
     }

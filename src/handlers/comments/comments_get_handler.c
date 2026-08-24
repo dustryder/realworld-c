@@ -5,19 +5,28 @@
 
 void handle_get_comments(http_s *h) {
 
-    char *response_body = "";
+    char *response_body = NULL;
     char *slug = parse_path_param(h->params, "slug");
 
     AllCommentsServiceResult service_result = get_article_comments(h->udata, slug);
 
     if (service_result.status == SERVICE_SUCCESS) {
-        h->status = HTTP_SUCCESS;
         response_body = create_many_comment_success_response(service_result.result, service_result.result_count);
+        h->status = HTTP_SUCCESS;
+        for (int i = 0; i < service_result.result_count; i++) {
+            free_CommentsServiceResultData(&service_result.result[i]);
+        }
+        free(service_result.result);
     } else if (service_result.status == SERVICE_NOT_FOUND) {
-        response_body = create_failure_body_from_error(service_result.error);
         h->status = HTTP_NOT_FOUND;
+        response_body = create_failure_body_from_error(service_result.error);
+    } else {
+        h->status = HTTP_INTERNAL_SERVER_ERROR;
+        response_body = create_empty_response();
     }
-
     
     http_send_body(h, response_body, strlen(response_body));
+
+    free(response_body);
+    free(slug);
 }

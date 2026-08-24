@@ -11,6 +11,8 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
 
     ArticleDataRecordset *article_data_recordset = article_result.data;
 
+    printf("Article status: %d\n", article_result.status);
+
     if (article_result.status == DATA_SUCCESS) {
         ArticlesServiceResultData *result_data = malloc(article_data_recordset->record_count * sizeof *result_data);
 
@@ -33,12 +35,22 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
                 favorite_count,
                 false
             );
+            free_ArticleData(&current_record);
+            free_UserData(user_result.data);
+
+            for (int i = 0; i < tag_count; i++) {
+                free(tags[i]);
+            }
+
+            free(tags);
         }
 
         result.status = SERVICE_SUCCESS;
         result.result = result_data;
         result.article_count = article_data_recordset->record_count;
         result.total_count = article_count_result;
+        free(article_data_recordset->data);
+        free(article_data_recordset);
 
         return result;
     } else if (article_result.status == DATA_NOT_FOUND) {

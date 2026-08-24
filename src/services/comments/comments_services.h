@@ -34,4 +34,6 @@ CommentsServiceResultData map_data_to_comment(
     UserData *user_data,
     bool user_is_following_creator
 );
+
+void free_CommentsServiceResultData(CommentsServiceResultData *data);
 #endif
