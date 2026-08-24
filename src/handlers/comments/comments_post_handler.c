@@ -27,7 +27,6 @@ void handle_post_comments(http_s *h) {
         if (service_result.status == SERVICE_SUCCESS) {
           response_body = create_comment_success_response(service_result.result);
           h->status = HTTP_CREATED;
-          free_CommentsServiceResultData(&service_result.result);
         } else if (service_result.status == SERVICE_NOT_FOUND) {
           response_body = create_failure_body_from_error(service_result.error);
           h->status = HTTP_NOT_FOUND;
@@ -35,6 +34,7 @@ void handle_post_comments(http_s *h) {
           response_body = create_empty_response();
           h->status = HTTP_INTERNAL_SERVER_ERROR;
         }
+        free_CommentsServiceResultData(&service_result.result);
     }
 
     http_send_body(h, response_body, strlen(response_body));

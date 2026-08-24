@@ -5,7 +5,7 @@
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
     FIO_LOG_DEBUG("unfavorite_article: user_id=%d, slug=%s", user_id, slug);
 
-    ArticleServiceResult result;
+    ArticleServiceResult result = {0};
     DataResult article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = article_result.data;
 
@@ -40,6 +40,10 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
         free_ArticleData(article_data);
         free_UserData(user_result.data);
         free(article_data);
+        for (int i = 0; i < tag_count; i++) {
+            free(tags[i]);
+        }
+        free(tags);
     } else if (article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;
         set_error(&result.error, "article", "not found");

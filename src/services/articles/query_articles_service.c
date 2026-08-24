@@ -5,7 +5,7 @@
 GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char *favorited) {
     FIO_LOG_DEBUG("query_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
 
-    GetAllArticleResult result;
+    GetAllArticleResult result = {0};
     DataResult article_result = get_all_articles(conn, author, tag, limit, offset, favorited);
     int article_count_result = get_all_articles_count(conn);
 

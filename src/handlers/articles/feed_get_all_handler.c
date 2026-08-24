@@ -17,13 +17,6 @@ void handle_get_all_feed(http_s* h) {
     if (result.status == SERVICE_SUCCESS || result.status == SERVICE_NOT_FOUND) {
         response_body = create_many_article_success_response(result.result, result.article_count, result.total_count);
         h->status = HTTP_SUCCESS;
-
-        if (result.status == SERVICE_SUCCESS) {
-            for (int i = 0; i < result.article_count; i++) {
-                free_ArticlesServiceResultData(&result.result[i]);
-            }
-            free(result.result);
-        }
     } 
     else {
         response_body = create_empty_response();
@@ -33,6 +26,10 @@ void handle_get_all_feed(http_s* h) {
     http_send_body(h, response_body, strlen(response_body));
 
     free(response_body);
+    for (int i = 0; i < result.article_count; i++) {
+        free_ArticlesServiceResultData(&result.result[i]);
+    }
+    free(result.result);
 }
 
 GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ *params) {

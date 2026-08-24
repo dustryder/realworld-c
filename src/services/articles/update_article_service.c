@@ -24,7 +24,7 @@ ArticleServiceResult update_article(
 
     DataResult get_article_result = get_article_data_by_slug(conn, slug);
 
-    ArticleServiceResult result;
+    ArticleServiceResult result = {0};
 
     if (get_article_result.status == DATA_NOT_FOUND) {
         result.status = SERVICE_NOT_FOUND;

@@ -7,7 +7,7 @@
 
 CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char* body) {
     FIO_LOG_DEBUG("create_comment: slug=%s, user_id=%d", slug, user_id);
-    CommentsServiceResult service_result;
+    CommentsServiceResult service_result = {0};
 
     DataResult get_article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = get_article_result.data;

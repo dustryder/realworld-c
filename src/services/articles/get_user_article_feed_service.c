@@ -3,7 +3,7 @@
 
 GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset) {
 
-    GetAllArticleResult result;
+    GetAllArticleResult result = {0};
 
     DataResult article_result = get_all_followed_articles(conn, user_id, limit, offset);
     int article_count_result = get_all_followed_articles_count(conn, user_id);

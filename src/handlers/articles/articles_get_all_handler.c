@@ -19,8 +19,6 @@ void handle_get_all_articles(http_s* h) {
     if (result.status == SERVICE_SUCCESS) {
         response_body = create_many_article_success_response(result.result, result.article_count, result.total_count);
         h->status = HTTP_SUCCESS;
-        free_GetAllArticleResult(result);
-        free(result.result);
     } else if (result.status == SERVICE_NOT_FOUND) {
         response_body = create_many_article_success_response(result.result, 0, 0);
         h->status = HTTP_SUCCESS;
@@ -33,6 +31,8 @@ void handle_get_all_articles(http_s* h) {
 
     free(response_body);
     free_GetAllArticleQuery(qs);
+    free_GetAllArticleResult(result);
+    free(result.result);
 }
 
 void free_GetAllArticleResult(GetAllArticleResult result) {

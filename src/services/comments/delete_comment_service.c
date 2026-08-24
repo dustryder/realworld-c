@@ -5,7 +5,7 @@
 
 CommentsServiceResult delete_comment(PGconn *conn, int article_id, char *slug, int user_id) {
     FIO_LOG_DEBUG("delete_comment: article_id=%d", article_id);
-    CommentsServiceResult service_result;
+    CommentsServiceResult service_result = {0};
 
     DataResult get_article_result = get_article_data_by_slug(conn, slug);
     ArticleData *article_data = get_article_result.data;

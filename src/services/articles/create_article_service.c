@@ -13,7 +13,7 @@ ArticleServiceResult create_article(PGconn *conn, int creator, char* title, char
 
     DataResult insert_article_result = insert_article(conn, slug, title, description, body, creator);
     ArticleData *article_data = insert_article_result.data;
-    ArticleServiceResult service_result;
+    ArticleServiceResult service_result = {0};
 
     if (insert_article_result.status == DATA_SUCCESS) {
 

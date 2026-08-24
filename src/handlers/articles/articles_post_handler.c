@@ -34,11 +34,12 @@ void handle_post_articles(http_s* h) {
       if (result.status == SERVICE_SUCCESS) {
         response_body = create_article_success_response(result.result, true, FORMAT_DATESTAMP);
         h->status = HTTP_CREATED;
-        free_ArticlesServiceResultData(&result.result);
       } else {
         response_body = create_empty_response();
         h->status == HTTP_INTERNAL_SERVER_ERROR;
       }
+
+      free_ArticlesServiceResultData(&result.result);
     }
 
     http_send_body(h, response_body, strlen(response_body));

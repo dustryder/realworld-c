@@ -15,7 +15,6 @@ void handle_delete_favorite(http_s* h) {
     if (result.status == SERVICE_SUCCESS) {
         h->status = HTTP_SUCCESS;
         response_body = create_article_success_response(result.result, true, FORMAT_DATETIMESTAMP);
-        free_ArticlesServiceResultData(&result.result);
     } else if (result.status == SERVICE_NOT_FOUND) {
         response_body = create_failure_body_from_error(result.error);
         h->status = HTTP_NOT_FOUND;
@@ -28,4 +27,5 @@ void handle_delete_favorite(http_s* h) {
 
     free(response_body);
     free(slug);
+    free_ArticlesServiceResultData(&result.result);
 }
