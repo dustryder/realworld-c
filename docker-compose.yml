@@ -9,14 +9,15 @@ services:
       migrations:
         condition: service_completed_successfully
     environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/realworld?sslmode=disable
+      - DATABASE_URL=postgres://postgres:password@db:5432/conduit?sslmode=disable
+      - JWT_SECRET=LSatqj0GuxXGgtRX7LiKu9GM4uyVfUqjS9keNuL574Y
 
   db:
     image: postgres:17.4
     environment: 
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: realworld
+      POSTGRES_DB: conduit
     healthcheck:
       test: pg_isready -U postgres
       interval: 2s
@@ -31,22 +32,8 @@ services:
     volumes:
       - ./db/migrations:/db/migrations
     environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/realworld?sslmode=disable
+      - DATABASE_URL=postgres://postgres:password@db:5432/conduit?sslmode=disable
     command: ["up"]
     depends_on:
       db:
         condition: service_healthy
-
-  test:
-    image: usebruno/cli:latest-debian
-    volumes:
-      - ./tests:/tests
-    # entrypoint: sh -c "/tests/run-api-tests-bruno.sh" 
-    entrypoint: sh -c "/tests/run-api-tests-bruno.sh" 
-    depends_on:
-      db:
-        condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-      api:
-        condition: service_started
