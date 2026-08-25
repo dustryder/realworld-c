@@ -44,8 +44,8 @@ static cJSON *create_article_json(ArticlesServiceResultData result, bool include
     char *updated_at = format == FORMAT_DATESTAMP ? datetimestamp_to_date(result.updatedAt) : datetimestamp_to_datetimestamp(result.updatedAt);
 
     cJSON_AddItemToObject(author_properties, "username", cJSON_CreateString(result.author.username));
-    cJSON_AddItemToObject(author_properties, "bio", cJSON_CreateString(result.author.bio));
-    cJSON_AddItemToObject(author_properties, "image", cJSON_CreateString(result.author.image));
+    cJSON_AddItemToObject(author_properties, "bio", result.author.bio != NULL ? cJSON_CreateString(result.author.bio) : cJSON_CreateNull());
+    cJSON_AddItemToObject(author_properties, "image", result.author.image != NULL ? cJSON_CreateString(result.author.image) : cJSON_CreateNull());
     cJSON_AddItemToObject(author_properties, "following", cJSON_CreateBool(result.author.following));
 
     cJSON_AddItemToObject(article_properties, "slug", cJSON_CreateString(result.slug));
