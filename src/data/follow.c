@@ -4,7 +4,7 @@
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
-static FollowData map_follow_data(const PGresult *res);
+static FollowData *map_follow_data(const PGresult *res);
 static int get_integer_result(const PGresult *res);
 
 DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
@@ -19,7 +19,7 @@ DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_follow_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_follow_data);
 
     PQclear(data_result);
     free(user_id_str);
@@ -39,7 +39,7 @@ DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_follow_data);
+    DataResult result = get_data_result(data_result, NULL);
 
     PQclear(data_result);
     free(user_id_str);
@@ -66,11 +66,11 @@ int get_user_follows_user(PGconn *conn, int user_id, int followed_user_id) {
     return integer_result;
 }
 
-FollowData map_follow_data(const PGresult *res) {
-    FollowData data;
+FollowData *map_follow_data(const PGresult *res) {
+    FollowData *data = malloc(sizeof *data);
 
-    data.user_id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.follow_user_id = strtol(PQgetvalue(res, 0, 1), NULL, 10);
+    data->user_id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+    data->follow_user_id = strtol(PQgetvalue(res, 0, 1), NULL, 10);
 
     return data;
 }

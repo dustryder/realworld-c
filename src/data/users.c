@@ -21,7 +21,7 @@ DataResult get_user_data_by_username(PGconn *conn, char* username) {
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_user_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_user_data);
 
     PQclear(data_result);
 
@@ -39,7 +39,7 @@ DataResult get_user_data_by_id(PGconn *conn, int id) {
 
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
-    DataResult result = get_data_result(data_result, map_user_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_user_data);
 
     PQclear(data_result);
     free(id_str);
@@ -56,7 +56,7 @@ DataResult get_user_by_email(PGconn *conn, char* email) {
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_user_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_user_data);
 
     PQclear(data_result);
     return result;
@@ -72,7 +72,7 @@ DataResult insert_user(PGconn *conn, char* email, char* username, char* password
 
     PGresult *data_result = PQexecParams(conn,command,3,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_user_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_user_data);
     resolve_user_constraints(&result.error);
 
     PQclear(data_result);
@@ -108,9 +108,8 @@ DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, si
     char command[strlen(base_command) + strlen(update_substring)];
     sprintf(command, base_command, update_substring);
 
-    printf("%s\n", command);
-    PGresult *data_result = PQexecParams(conn, command, value_count + 1, NULL, data, NULL, NULL, 0);
-    DataResult result = get_data_result(data_result, map_user_data);
+    PGresult *data_result = PQexecParams(conn, command, value_count + 1, NULL, (const char * const *)data, NULL, NULL, 0);
+    DataResult result = get_data_result(data_result, (Mapper)map_user_data);
 
     PQclear(data_result);
     free(id_str);

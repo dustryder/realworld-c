@@ -19,6 +19,7 @@ ProfileServiceResult follow_user(PGconn *conn, int current_user, char* follow) {
         if (data_result.status == DATA_SUCCESS && user_data_result.status == DATA_SUCCESS) {
             result.status = SERVICE_SUCCESS;
             result.result = map_data_to_profile(user_data, true);
+            free(data_result.data);
         } else if (data_result.status == DATA_DUPLICATE) {
             result.status = SERVICE_DUPLICATE;
             set_error(&result.error, "profile", "already following");

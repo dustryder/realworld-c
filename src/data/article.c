@@ -20,7 +20,7 @@ DataResult insert_article(PGconn *conn, char* slug, char* title, char* descripti
 
     PGresult *data_result = PQexecParams(conn,command,5,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_article_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_article_data);
 
     PQclear(data_result);
     free(created_by_str);
@@ -116,7 +116,7 @@ DataResult get_article_data_by_slug(PGconn *conn, char* slug) {
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_article_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_article_data);
 
     PQclear(data_result);
     return result;
@@ -145,7 +145,7 @@ int get_all_followed_articles_count(PGconn *conn, int user_id) {
 
     data[0] = user_id_str;
 
-    PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,1,NULL,(const char *const *)data,NULL,NULL,0);
 
     int result = get_article_count_result(data_result);
 
@@ -193,9 +193,9 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
         data_count += 1;
     }
 
-    PGresult *data_result = PQexecParams(conn,command,data_count,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,data_count,NULL,(const char * const*)data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_many_article_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_many_article_data);
 
     PQclear(data_result);
     free(user_id_str);
@@ -213,6 +213,7 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
     char *BASE_QUERY = "SELECT * FROM \"article\"";
     char *BASE_LIMIT_QUERY = "LIMIT $%d";
     char *BASE_OFFSET_QUERY = "OFFSET $%d";
+    char *ORDER_BY_QUERY = "ORDER BY created_at DESC";
 
     char *limit_str = number_to_string(limit);
     char *offset_str = number_to_string(offset);
@@ -286,6 +287,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
+    sprintf(command + strlen(command), " %s", ORDER_BY_QUERY);
+
     if (limit != -1) {
         char limit_buffer[MAX_QUERY_BUFFER_SIZE];
         memset(limit_buffer, '\0', sizeof(limit_buffer));
@@ -306,9 +309,9 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
-    PGresult *data_result = PQexecParams(conn,command,data_count,NULL,data,NULL,NULL,0);
+    PGresult *data_result = PQexecParams(conn,command,data_count,NULL,(const char *const *)data,NULL,NULL,0);
 
-    DataResult result = get_data_result(data_result, map_many_article_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_many_article_data);
 
     PQclear(data_result);
     free(limit_str);
@@ -383,9 +386,9 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
     char command[strlen(base_command) + strlen(update_substring)];
     sprintf(command, base_command, update_substring);
 
-    PGresult *data_result = PQexecParams(conn, command, update_count + 1, NULL, data, NULL, NULL, 0);
+    PGresult *data_result = PQexecParams(conn, command, update_count + 1, NULL, (const char * const *)data, NULL, NULL, 0);
 
-    DataResult result = get_data_result(data_result, map_article_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_article_data);
 
     PQclear(data_result);
     return result;

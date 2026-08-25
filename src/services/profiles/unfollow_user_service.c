@@ -15,6 +15,7 @@ ProfileServiceResult unfollow_user(PGconn *conn, int current_user, char* follow)
     } else {
         DataResult data_result = delete_follow(conn, current_user, follow);
 
+
         if (data_result.status == DATA_SUCCESS && user_data_result.status == DATA_SUCCESS) {
             result.status = SERVICE_SUCCESS;
             result.result = map_data_to_profile(user_data_result.data, false);

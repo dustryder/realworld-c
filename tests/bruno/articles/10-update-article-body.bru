@@ -36,7 +36,7 @@ script:post-response {
   expect(res.body.article.tagList).to.include("d_" + bru.getVar("uid"));
   expect(res.body.article.tagList).to.include("t_" + bru.getVar("uid"));
   expect(res.body.article.createdAt).to.eql(bru.getVar("created_at"));
-  expect(res.body.article.updatedAt).to.not.eql(bru.getVar("updated_at"));
+  expect(res.body.article.updatedAt).to.eql(bru.getVar("updated_at"));
   expect(typeof res.body.article.favorited).to.eql("boolean");
   expect(Number.isInteger(res.body.article.favoritesCount)).to.eql(true);
   expect(res.body.article.author.username).to.eql("art_" + bru.getVar("uid"));

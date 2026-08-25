@@ -18,7 +18,7 @@ DataResult insert_comment(PGconn *conn, int article_id, int created_by, char *bo
 
     PGresult *data_result = PQexecParams(conn, command, 3, NULL, data, NULL, NULL, 0);
 
-    DataResult result = get_data_result(data_result, map_comment_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_comment_data);
 
     PQclear(data_result);
     free(created_by_str);
@@ -36,7 +36,7 @@ DataResult get_all_comments_by_article_id(PGconn *conn, int article_id) {
 
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
-    DataResult result = get_data_result(data_result, map_many_comment_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_many_comment_data);
 
     PQclear(data_result);
     free(article_id_str);
@@ -52,7 +52,7 @@ DataResult get_comment_by_id(PGconn *conn, int id) {
 
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
-    DataResult result = get_data_result(data_result, map_comment_data);
+    DataResult result = get_data_result(data_result, (Mapper)map_comment_data);
 
     PQclear(data_result);
     free(id_str);
