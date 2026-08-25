@@ -80,7 +80,6 @@ db_cleanup:
 /* starts a listeninng socket for HTTP connections. */
 void initialize_http_service(void) {
   /* listen for inncoming connections */
-  FIO_LOG_LEVEL = FIO_LOG_LEVEL_DEBUG;
 
   if (http_listen(fio_cli_get("-p"), fio_cli_get("-b"),
                   .on_request = on_http_request,
