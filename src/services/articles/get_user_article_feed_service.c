@@ -21,7 +21,9 @@ GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, 
             int tag_count;
             char** tags = get_tag_by_article_slug(conn, current_record.slug, &tag_count);
             int favorite_count = get_article_favorite_count(conn, current_record.slug);
-            // int user_follows_article = get_user_follows_article(conn, user_id, slug);
+
+            int user_favorites_article = get_user_favorites_article(conn, user_id, current_record.slug);
+            int user_follows_article_creator = get_user_follows_user(conn, user_id, current_record.created_by);
 
             result_data[i] = map_data_to_article(
                 &current_record,
@@ -30,7 +32,7 @@ GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, 
                 tag_count,
                 false,
                 favorite_count,
-                true
+                user_follows_article_creator
             );
 
             free_ArticleData(&current_record);

@@ -7,6 +7,7 @@
 #include "./handlers/comments/comments_handlers.h"
 #include "./lib/router.h"
 #include "./lib/middleware.h"
+#include "./lib/constants.h"
 
 void set_header(http_s *h, char *key, char *value) {
     http_set_header(h, fiobj_str_new(key, strlen(key)), fiobj_str_new(value, strlen(value)));
@@ -19,9 +20,21 @@ PGconn *set_db_connection(http_s *h) {
   return connection;
 }
 
+char *handle_options(http_s *h) {
+  if (strcmp(fiobj_obj2cstr(h->method).data, "OPTIONS") == 0) {
+    set_header(h, "Allow", "OPTIONS, GET, POST, PUT, DELETE");
+    set_header(h, "Access-Control-Allow-Origin", "*");
+    set_header(h, "Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
+
+    h->status = HTTP_NO_CONTENT;
+    http_send_body(h, "", 0);
+  }
+}
+
 static void on_http_request(http_s *h) {
   http_parse_body(h);
   http_parse_query(h);
+  handle_options(h);
 
   PGconn *conn = set_db_connection(h);
   set_header(h, "content-type", "application/json");

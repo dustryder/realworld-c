@@ -2,7 +2,7 @@
 #include "../../data/article.h"
 #include "../../data/tag.h"
 
-GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char *favorited) {
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char *favorited, int user_id) {
     FIO_LOG_DEBUG("query_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
 
     GetAllArticleResult result = {0};
@@ -24,7 +24,9 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
             int tag_count;
             char** tags = get_tag_by_article_slug(conn, current_record.slug, &tag_count);
             int favorite_count = get_article_favorite_count(conn, current_record.slug);
-            // int user_follows_article = get_user_follows_article(conn, user_id, slug);
+
+            int user_favorites_article = user_id != NULL ? get_user_favorites_article(conn, user_id, current_record.slug) : false;
+            int user_follows_article_creator = user_id != NULL ? get_user_follows_user(conn, user_id, current_record.created_by) : false;
 
             result_data[i] = map_data_to_article(
                 &current_record,
@@ -33,7 +35,7 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
                 tag_count,
                 false,
                 favorite_count,
-                false
+                user_follows_article_creator
             );
             free_ArticleData(&current_record);
             free_UserData(user_result.data);

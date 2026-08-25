@@ -26,6 +26,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
 
         int favorite_count = get_article_favorite_count(conn, slug);
         int user_favorites_article = get_user_favorites_article(conn, user_id, slug);
+        int user_follows_article_creator = get_user_follows_user(conn, user_id, article_data->created_by);
 
         result.result = map_data_to_article(
             article_result.data,
@@ -34,7 +35,7 @@ ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
             tag_count,
             user_favorites_article,
             favorite_count,
-            false
+            user_follows_article_creator
         );
 
         free_ArticleData(article_data);

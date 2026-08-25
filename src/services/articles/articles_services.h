@@ -38,7 +38,7 @@ typedef struct {
     ErrorValue error;
 } GetAllArticleResult;
 
-GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char* favorited);
+GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char* favorited, int user_id);
 
 typedef struct {
     ServiceStatus status;

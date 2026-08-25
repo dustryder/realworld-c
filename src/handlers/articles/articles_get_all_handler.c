@@ -14,7 +14,7 @@ void handle_get_all_articles(http_s* h) {
     GetAllArticleQuery qs = parse_GetAllArticleQuery(h->params);
     char *response_body = NULL;
 
-    GetAllArticleResult result = query_articles(h->udata, qs.author, qs.tag, qs.limit, qs.offset, qs.favorited);
+    GetAllArticleResult result = query_articles(h->udata, qs.author, qs.tag, qs.limit, qs.offset, qs.favorited, id);
 
     if (result.status == SERVICE_SUCCESS) {
         response_body = create_many_article_success_response(result.result, result.article_count, result.total_count);
