@@ -9,7 +9,7 @@
 
 static void free_PutUserPayload(PutUserPayload values);
 static void validate_PutUserPayload(PutUserPayload payload, ErrorValue *values, size_t *error_count);
-static PutUserPayload parse_PutUserPayload(FIOBJ *raw_body);
+static PutUserPayload parse_PutUserPayload(FIOBJ raw_body);
 
 void handle_put_user(http_s* h) {
 
@@ -82,7 +82,7 @@ void validate_PutUserPayload(PutUserPayload payload, ErrorValue *values, size_t 
   }
 }
 
-PutUserPayload parse_PutUserPayload(FIOBJ *raw_body) {
+PutUserPayload parse_PutUserPayload(FIOBJ raw_body) {
 
   FIOBJ user_key = fiobj_str_new("user", 4);
 

@@ -108,7 +108,7 @@ OptionalValue parse_optional_string(FIOBJ obj, char* key) {
   return optional_value;
 }
 
-char *parse_path_param(FIOBJ *params, char *key) {
+char *parse_path_param(FIOBJ params, char *key) {
 
     FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
 
@@ -121,7 +121,7 @@ char *parse_path_param(FIOBJ *params, char *key) {
     return value;
 }
 
-int parse_path_param_number(FIOBJ *params, char *key) {
+int parse_path_param_number(FIOBJ params, char *key) {
     FIOBJ fiobj_key = fiobj_str_new(key, strlen(key));
 
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
@@ -133,13 +133,13 @@ int parse_path_param_number(FIOBJ *params, char *key) {
     return value;
 }
 
-int parse_request_user(FIOBJ *params) {
+int parse_request_user(FIOBJ params) {
     FIOBJ fiobj_key = fiobj_str_new("_id", 3);
     FIOBJ fiobj_value = fiobj_hash_get(params, fiobj_key);
 
     if (FIOBJ_TYPE_IS(fiobj_value, FIOBJ_T_NULL)) {
       fiobj_free(fiobj_key);
-      return NULL;
+      return -1;
     }
   
     char* value = fiobj_obj2cstr(fiobj_value).data;
@@ -165,7 +165,7 @@ char *create_failure_body_from_errors(ErrorValue* errors, size_t error_count) {
   cJSON *response_body = cJSON_CreateObject();
   cJSON *error_body = cJSON_CreateObject();
 
-  for (int i = 0; i < error_count; i++) {
+  for (size_t i = 0; i < error_count; i++) {
     ErrorValue current_error = errors[i];
 
     if (cJSON_GetObjectItem(error_body, current_error.property) != NULL) {

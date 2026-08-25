@@ -7,7 +7,7 @@
 #include "../../lib/validate.h"
 
 static void validate_PostUserPayload(PostUserPayload payload, ErrorValue *values, size_t *error_count);
-static PostUserPayload parse_PostUserPayload(FIOBJ *raw_body);
+static PostUserPayload parse_PostUserPayload(FIOBJ raw_body);
 static void free_PostUserPayload(PostUserPayload values);
 
 void handle_post_user(http_s* h) {
@@ -64,7 +64,7 @@ void validate_PostUserPayload(PostUserPayload payload, ErrorValue *values, size_
   not_null_or_empty(payload.password, &values[*error_count], error_count, "password");
 }
 
-PostUserPayload parse_PostUserPayload(FIOBJ *raw_body) {
+PostUserPayload parse_PostUserPayload(FIOBJ raw_body) {
 
   FIOBJ user_key = fiobj_str_new("user", 4);
 

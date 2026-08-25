@@ -27,7 +27,7 @@ typedef struct {
 
 CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char *body);
 CommentsServiceResult delete_comment(PGconn *conn, int article_id, char *slug, int user_id);
-AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug);
+AllCommentsServiceResult get_article_comments(PGconn *conn, char *slug, int user_id);
 
 CommentsServiceResultData map_data_to_comment(
     CommentData *comment_data,

@@ -1,5 +1,6 @@
 #include "comment.h"
 #include <libpq-fe.h>
+#include "../lib/string_helpers.h"
 
 static CommentData *map_comment_data(const PGresult *res);
 static CommentDataRecordset *map_many_comment_data(const PGresult *res);
@@ -10,10 +11,8 @@ DataResult insert_comment(PGconn *conn, int article_id, int created_by, char *bo
                     "($1, $2, $3)"
                     "RETURNING *";
 
-    char created_by_str[20];
-    sprintf(created_by_str, "%d", created_by);
-    char article_id_str[20];
-    sprintf(article_id_str, "%d", article_id);
+    char *created_by_str = number_to_string(created_by);
+    char *article_id_str = number_to_string(article_id);
 
     const char * const data[3] = { article_id_str, created_by_str, body };
 
@@ -22,6 +21,8 @@ DataResult insert_comment(PGconn *conn, int article_id, int created_by, char *bo
     DataResult result = get_data_result(data_result, map_comment_data);
 
     PQclear(data_result);
+    free(created_by_str);
+    free(article_id_str);
     return result;
 }
 
@@ -29,8 +30,7 @@ DataResult get_all_comments_by_article_id(PGconn *conn, int article_id) {
     FIO_LOG_DEBUG("get_all_comments_by_article_id: article_id=%d", article_id);
     char *command = "SELECT * FROM comment WHERE article_id = $1";
 
-    char article_id_str[20];
-    sprintf(article_id_str, "%d", article_id);
+    char *article_id_str = number_to_string(article_id);
 
     const char * const data[1] = { article_id_str };
 
@@ -39,6 +39,7 @@ DataResult get_all_comments_by_article_id(PGconn *conn, int article_id) {
     DataResult result = get_data_result(data_result, map_many_comment_data);
 
     PQclear(data_result);
+    free(article_id_str);
     return result;
 }
 
@@ -46,8 +47,7 @@ DataResult get_comment_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("get_comment_by_id: id=%d", id);
     char *command = "SELECT * FROM comment WHERE id = $1";
 
-    char id_str[20];
-    sprintf(id_str, "%d", id);
+    char *id_str = number_to_string(id);
     const char * const data[1] = { id_str };
 
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
@@ -55,6 +55,7 @@ DataResult get_comment_by_id(PGconn *conn, int id) {
     DataResult result = get_data_result(data_result, map_comment_data);
 
     PQclear(data_result);
+    free(id_str);
     return result;
 }
 
@@ -62,8 +63,7 @@ DataResult delete_comment_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("delete_comment_by_id: id=%d", id);
     char *command = "DELETE FROM comment WHERE id = $1";
 
-    char id_str[20];
-    sprintf(id_str, "%d", id);
+    char *id_str = number_to_string(id);
 
     const char * const data[1] = { id_str };
 
@@ -71,6 +71,7 @@ DataResult delete_comment_by_id(PGconn *conn, int id) {
     DataResult result = get_data_result(data_result, NULL);
 
     PQclear(data_result);
+    free(id_str);
     return result;
 }
 

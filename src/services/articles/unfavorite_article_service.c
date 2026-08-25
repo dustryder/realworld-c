@@ -1,6 +1,8 @@
 #include "articles_services.h"
 #include "../../data/article.h"
 #include "../../lib/mappers.h"
+#include "../../data/follow.h"
+#include "../../data/tag.h"
 
 ArticleServiceResult unfavorite_article(PGconn *conn, int user_id, char *slug) {
     FIO_LOG_DEBUG("unfavorite_article: user_id=%d, slug=%s", user_id, slug);

@@ -5,6 +5,7 @@
 #include "./handlers/articles/articles_handlers.h"
 #include "./handlers/tags/tags_handlers.h"
 #include "./handlers/comments/comments_handlers.h"
+#include "./handlers/user/user_handlers.h"
 #include "./lib/router.h"
 #include "./lib/middleware.h"
 #include "./lib/constants.h"
@@ -20,7 +21,7 @@ PGconn *set_db_connection(http_s *h) {
   return connection;
 }
 
-char *handle_options(http_s *h) {
+void handle_options(http_s *h) {
   if (strcmp(fiobj_obj2cstr(h->method).data, "OPTIONS") == 0) {
     set_header(h, "Allow", "OPTIONS, GET, POST, PUT, DELETE");
     set_header(h, "Access-Control-Allow-Origin", "*");

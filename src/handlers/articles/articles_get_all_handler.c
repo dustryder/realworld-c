@@ -3,7 +3,7 @@
 #include "../../services/articles/articles_services.h"
 #include "../../lib/constants.h"
 
-static GetAllArticleQuery parse_GetAllArticleQuery(FIOBJ *params);
+static GetAllArticleQuery parse_GetAllArticleQuery(FIOBJ params);
 static void free_GetAllArticleQuery(GetAllArticleQuery qs);
 static void free_GetAllArticleResult(GetAllArticleResult result);
 
@@ -49,7 +49,7 @@ void free_GetAllArticleQuery(GetAllArticleQuery qs) {
     free(qs.tag);
 }
 
-GetAllArticleQuery parse_GetAllArticleQuery(FIOBJ *params) {
+GetAllArticleQuery parse_GetAllArticleQuery(FIOBJ params) {
 
     GetAllArticleQuery qs;
 
@@ -68,8 +68,8 @@ GetAllArticleQuery parse_GetAllArticleQuery(FIOBJ *params) {
     qs.author = FIOBJ_TYPE_IS(fio_author, FIOBJ_T_STRING) ? strdup(fiobj_obj2cstr(fio_author).data) : NULL;
     qs.tag = FIOBJ_TYPE_IS(fio_tag, FIOBJ_T_STRING) ? strdup(fiobj_obj2cstr(fio_tag).data) : NULL;
     qs.favorited = FIOBJ_TYPE_IS(fio_favorited, FIOBJ_T_STRING) ? strdup(fiobj_obj2cstr(fio_favorited).data) : NULL;
-    qs.limit = FIOBJ_TYPE_IS(fio_limit, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_limit) : NULL;
-    qs.offset = FIOBJ_TYPE_IS(fio_offset, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_offset) : NULL;
+    qs.limit = FIOBJ_TYPE_IS(fio_limit, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_limit) : -1;
+    qs.offset = FIOBJ_TYPE_IS(fio_offset, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_offset) : -1;
 
     fiobj_free(author_key);
     fiobj_free(tag_key);

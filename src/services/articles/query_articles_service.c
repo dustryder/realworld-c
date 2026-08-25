@@ -1,6 +1,7 @@
 #include "articles_services.h"
 #include "../../data/article.h"
 #include "../../data/tag.h"
+#include "../../data/follow.h"
 
 GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int limit, int offset, char *favorited, int user_id) {
     FIO_LOG_DEBUG("query_articles: author=%s, tag=%s, limit=%d, offset=%d", author, tag, limit, offset);
@@ -10,8 +11,6 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
     int article_count_result = get_all_articles_count(conn);
 
     ArticleDataRecordset *article_data_recordset = article_result.data;
-
-    printf("Article status: %d\n", article_result.status);
 
     if (article_result.status == DATA_SUCCESS) {
         ArticlesServiceResultData *result_data = malloc(article_data_recordset->record_count * sizeof *result_data);
@@ -25,23 +24,23 @@ GetAllArticleResult query_articles(PGconn *conn, char *author, char *tag, int li
             char** tags = get_tag_by_article_slug(conn, current_record.slug, &tag_count);
             int favorite_count = get_article_favorite_count(conn, current_record.slug);
 
-            int user_favorites_article = user_id != NULL ? get_user_favorites_article(conn, user_id, current_record.slug) : false;
-            int user_follows_article_creator = user_id != NULL ? get_user_follows_user(conn, user_id, current_record.created_by) : false;
+            int user_favorites_article = user_id != -1 ? get_user_favorites_article(conn, user_id, current_record.slug) : false;
+            int user_follows_article_creator = user_id != -1 ? get_user_follows_user(conn, user_id, current_record.created_by) : false;
 
             result_data[i] = map_data_to_article(
                 &current_record,
                 user_result.data,
                 tags,
                 tag_count,
-                false,
+                user_favorites_article,
                 favorite_count,
                 user_follows_article_creator
             );
             free_ArticleData(&current_record);
             free_UserData(user_result.data);
 
-            for (int i = 0; i < tag_count; i++) {
-                free(tags[i]);
+            for (int j = 0; j < tag_count; j++) {
+                free(tags[j]);
             }
 
             free(tags);

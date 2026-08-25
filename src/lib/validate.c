@@ -1,4 +1,5 @@
 #include "validate.h"
+#include <string.h>
 
 void is_required(OptionalValue value, ErrorValue *error, size_t *error_count, char* key) {
     if (!value.is_present) {

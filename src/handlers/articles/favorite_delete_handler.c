@@ -1,8 +1,6 @@
 #include "articles_handlers.h"
 #include "../../lib/constants.h"
 
-static void free_article_result(ArticleServiceResult result);
-
 void handle_delete_favorite(http_s* h) {
     FIO_LOG_DEBUG("handle_get_articles");
 

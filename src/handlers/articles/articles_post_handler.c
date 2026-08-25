@@ -3,8 +3,9 @@
 #include "cJSON.h"
 #include "../../services/articles/articles_services.h"
 #include "../../lib/constants.h"
+#include "../../lib/validate.h"
 
-static PostArticlePayload parse_PostArticlePayload(FIOBJ *raw_body);
+static PostArticlePayload parse_PostArticlePayload(FIOBJ raw_body);
 static void free_PostArticlePayload(PostArticlePayload payload);
 static void validate_PostArticlePayload(PostArticlePayload payload, ErrorValue *values, size_t *error_count);
 
@@ -56,11 +57,7 @@ void validate_PostArticlePayload(PostArticlePayload payload, ErrorValue *values,
     (*error_count)++;
   }
 
-  if (payload.title.is_present && (payload.title.value == NULL || strlen(payload.title.value) == 0)) {
-    values[*error_count].property = "title";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
+  not_null_or_empty(payload.title, &values[*error_count], error_count, "title");
 
   if (!(payload.body.is_present)) {
     values[*error_count].property = "body";
@@ -68,11 +65,7 @@ void validate_PostArticlePayload(PostArticlePayload payload, ErrorValue *values,
     (*error_count)++;
   }
 
-  if (payload.body.is_present && (payload.body.value == NULL || strlen(payload.body.value) == 0)) {
-    values[*error_count].property = "body";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
+  not_null_or_empty(payload.body, &values[*error_count], error_count, "body");
 
   if (!(payload.description.is_present)) {
     values[*error_count].property = "description";
@@ -80,11 +73,7 @@ void validate_PostArticlePayload(PostArticlePayload payload, ErrorValue *values,
     (*error_count)++;
   }
 
-  if (payload.description.is_present && (payload.description.value == NULL || strlen(payload.description.value) == 0)) {
-    values[*error_count].property = "description";
-    values[*error_count].message = "can't be blank";
-    (*error_count)++;
-  }
+  not_null_or_empty(payload.description, &values[*error_count], error_count, "description");
 }
 
 void free_PostArticlePayload(PostArticlePayload payload) {
@@ -101,7 +90,7 @@ void free_PostArticlePayload(PostArticlePayload payload) {
   }
 }
 
-PostArticlePayload parse_PostArticlePayload(FIOBJ *raw_body) {
+PostArticlePayload parse_PostArticlePayload(FIOBJ raw_body) {
 
   FIOBJ article_key = fiobj_str_new("article", 7);
 

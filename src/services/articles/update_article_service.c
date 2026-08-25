@@ -4,6 +4,7 @@
 #include "../../data/users.h"
 #include "articles_services.h"
 #include "../../lib/type.h"
+#include "../../data/follow.h"
 
 ArticleServiceResult update_article(
     PGconn *conn,
@@ -63,7 +64,8 @@ ArticleServiceResult update_article(
         char **result_tags = get_tag_by_article_slug(conn, slug, &tag_count);
 
         int favorite_count = get_article_favorite_count(conn, slug);
-        // int user_follows_article = get_user_follows_article(conn, user_id, slug);
+        int user_favorites_article = get_user_favorites_article(conn, id, slug);
+        int user_follows_article_creator = get_user_follows_user(conn, id, article_data->created_by);
 
         result.status = SERVICE_SUCCESS;
         result.result = map_data_to_article(
@@ -71,9 +73,9 @@ ArticleServiceResult update_article(
             user_result.data,
             result_tags,
             tag_count,
-            false,
+            user_favorites_article,
             favorite_count,
-            false
+            user_follows_article_creator
         );
 
         free_ArticleData(article_data);

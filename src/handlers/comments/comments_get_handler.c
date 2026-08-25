@@ -1,14 +1,15 @@
-#include "main.h";
+#include "main.h"
 #include "../../lib/constants.h"
-#include "comments_handlers.h";
+#include "comments_handlers.h"
 #include "../../services/comments/comments_services.h"
 
 void handle_get_comments(http_s *h) {
 
     char *response_body = NULL;
     char *slug = parse_path_param(h->params, "slug");
+    int id = parse_request_user(h->params);
 
-    AllCommentsServiceResult service_result = get_article_comments(h->udata, slug);
+    AllCommentsServiceResult service_result = get_article_comments(h->udata, slug, id);
 
     if (service_result.status == SERVICE_SUCCESS) {
         response_body = create_many_comment_success_response(service_result.result, service_result.result_count);

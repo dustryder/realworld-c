@@ -1,57 +1,56 @@
 #include "follow.h"
 #include "users.h"
+#include "../lib/string_helpers.h"
 #include <libpq-fe.h>
 #include "../lib/db.h"
 
 static FollowData map_follow_data(const PGresult *res);
+static int get_integer_result(const PGresult *res);
 
 DataResult insert_follow(PGconn *conn, int user_id, char* follow_username) {
     FIO_LOG_DEBUG("insert_follow: user_id: %d, follow_username: %s", user_id, follow_username);
 
-    char str[20];
-    sprintf(str, "%d", user_id);
+    char *user_id_str = number_to_string(user_id);
 
     char* command = "INSERT INTO \"follow\" (user_id, user_follow_id) VALUES "
                     "($1, (SELECT id FROM \"user\" WHERE username = $2)) "
                     "RETURNING *";
-    const char * const data[2] = { str, follow_username};
+    const char * const data[2] = { user_id_str, follow_username};
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
 
     PQclear(data_result);
-    
+    free(user_id_str);
     return result;
 }
 
 DataResult delete_follow(PGconn *conn, int user_id, char* follow_username) {
     FIO_LOG_DEBUG("delete_follow: user_id: %d, follow_username: %s", user_id, follow_username);
-    char str[20];
-    sprintf(str, "%d", user_id);
+
+    char *user_id_str = number_to_string(user_id);
 
     char *command = "DELETE FROM \"follow\""
                     "WHERE user_id = $1 AND "
                     "user_follow_id=(SELECT id FROM \"user\" WHERE username = $2)";
 
-    const char * const data[2] = { str, follow_username};
+    const char * const data[2] = { user_id_str, follow_username};
 
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     DataResult result = get_data_result(data_result, map_follow_data);
 
     PQclear(data_result);
-
+    free(user_id_str);
     return result;
 }
 
 int get_user_follows_user(PGconn *conn, int user_id, int followed_user_id) {
     FIO_LOG_DEBUG("get_user_follows_user: user_id: %d, followed_user_id: %d", user_id, followed_user_id);
     
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
-    char followed_user_id_str[20];
-    sprintf(followed_user_id_str, "%d", followed_user_id);
+    char *user_id_str = number_to_string(user_id);
+    char *followed_user_id_str = number_to_string(followed_user_id);
 
     char *command = "SELECT 1 FROM follow WHERE user_id = $1 AND user_follow_id = $2";
 
@@ -62,6 +61,8 @@ int get_user_follows_user(PGconn *conn, int user_id, int followed_user_id) {
     int integer_result = get_integer_result(data_result);
 
     PQclear(data_result);
+    free(user_id_str);
+    free(followed_user_id_str);
     return integer_result;
 }
 

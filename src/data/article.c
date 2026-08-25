@@ -2,14 +2,16 @@
 #include "../lib/http_helpers.h"
 #include <libpq-fe.h>
 #include "../lib/db.h"
+#include "../lib/constants.h"
+#include "../lib/string_helpers.h"
 
 static ArticleData *map_article_data(const PGresult *res);
 static ArticleDataRecordset *map_many_article_data(const PGresult *res);
+static int get_article_count_result(const PGresult *res);
 
 DataResult insert_article(PGconn *conn, char* slug, char* title, char* description, char *body, int created_by) {
     FIO_LOG_DEBUG("insert_article: slug: %s, title: %s, description: %s created_by: %d", slug, title, description, created_by);
-    char created_by_str[20];
-    sprintf(created_by_str, "%d", created_by);
+    char *created_by_str = number_to_string(created_by);
 
     char* command = "INSERT INTO \"article\" (slug, title, description, body, created_by) VALUES "
                     "($1, $2, $3, $4, $5)"
@@ -21,13 +23,13 @@ DataResult insert_article(PGconn *conn, char* slug, char* title, char* descripti
     DataResult result = get_data_result(data_result, map_article_data);
 
     PQclear(data_result);
+    free(created_by_str);
     return result;
 }
 
 void insert_article_favorite(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("insert_article_favorite: user_id=%d, slug=%s", user_id, slug);
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
+    char *user_id_str = number_to_string(user_id);
 
     char *command = "INSERT INTO article_favourite (article_id, user_id) VALUES "
                     "((SELECT id FROM article WHERE slug = $1), $2)";
@@ -36,6 +38,7 @@ void insert_article_favorite(PGconn *conn, int user_id, char* slug) {
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     PQclear(data_result);
+    free(user_id_str);
     return;
 }
 
@@ -56,8 +59,7 @@ int get_article_favorite_count(PGconn *conn, char* slug) {
 
 void delete_article_favorite(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("delete_article_favorite: user_id=%d, slug=%s", user_id, slug);
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
+    char *user_id_str = number_to_string(user_id);
 
     char *command = "DELETE FROM article_favourite "
                     "WHERE article_id = (SELECT id FROM article WHERE slug = $1) AND "
@@ -67,13 +69,13 @@ void delete_article_favorite(PGconn *conn, int user_id, char* slug) {
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     PQclear(data_result);
+    free(user_id_str);
     return;
 }
 
 int get_user_favorites_article(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("get_user_favorites_article: user_id=%d, slug=%s", user_id, slug);
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
+    char *user_id_str = number_to_string(user_id);
 
     char *command = "SELECT 1 FROM article_favourite "
                     "WHERE user_id = $1 AND article_id = (SELECT id FROM article WHERE slug = $2)";
@@ -85,13 +87,13 @@ int get_user_favorites_article(PGconn *conn, int user_id, char* slug) {
     int result = get_article_count_result(data_result);
 
     PQclear(data_result);
+    free(user_id_str);
     return result;
 }
 
 void delete_article_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("delete_article_by_id: id=%d", id);
-    char article_id[20];
-    sprintf(article_id, "%d", id);
+    char *article_id = number_to_string(id);
 
     char* command = "DELETE FROM \"article\" "
                     "WHERE id = $1";
@@ -101,6 +103,7 @@ void delete_article_by_id(PGconn *conn, int id) {
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     PQclear(data_result);
+    free(article_id);
     return;
 }
 
@@ -136,10 +139,10 @@ int get_all_followed_articles_count(PGconn *conn, int user_id) {
     FIO_LOG_DEBUG("get_all_followed_articles_count: user_id=%d", user_id);
 
     char *command = "SELECT COUNT(*) FROM article WHERE created_by IN (SELECT user_follow_id FROM follow WHERE user_id = $1)";
-    char *data[1];
 
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
+    char *data[1];
+    char *user_id_str = number_to_string(user_id);
+
     data[0] = user_id_str;
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
@@ -147,6 +150,7 @@ int get_all_followed_articles_count(PGconn *conn, int user_id) {
     int result = get_article_count_result(data_result);
 
     PQclear(data_result);
+    free(user_id_str);
     return result;
 }
 
@@ -159,21 +163,17 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
     int data_count = 1;
     char *data[3];
 
-    char user_id_str[20];
-    sprintf(user_id_str, "%d", user_id);
-    char limit_str[20];
-    sprintf(limit_str, "%d", limit);
-    char offset_str[20];
-    sprintf(offset_str, "%d", offset);
+    char *user_id_str = number_to_string(user_id);
+    char *limit_str = number_to_string(limit);
+    char *offset_str = number_to_string(offset);
 
     data[0] = user_id_str;
 
-    int command_length = strlen(BASE_QUERY) + strlen(BASE_LIMIT_QUERY) + strlen(BASE_OFFSET_QUERY) + 500;
-    char command[command_length];
-    memset(command, '\0', command_length);
-    sprintf(command, BASE_QUERY);
+    char command[MAX_QUERY_BUFFER_SIZE];
+    memset(command, '\0', sizeof(command));
+    sprintf(command, "%s", BASE_QUERY);
 
-    if (limit != NULL) {
+    if (limit != -1) {
         char limit_buffer[strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 500];
         memset(limit_buffer, '\0', strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 1);
         sprintf(limit_buffer, BASE_LIMIT_QUERY, data_count + 1);
@@ -183,7 +183,7 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
         data_count += 1;
     }
 
-    if (offset != NULL) {
+    if (offset != -1) {
         char offset_buffer[strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 500];
         memset(offset_buffer, '\0', strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 1);
         sprintf(offset_buffer, BASE_OFFSET_QUERY, data_count + 1);
@@ -198,6 +198,9 @@ DataResult get_all_followed_articles(PGconn *conn, int user_id, int limit, int o
     DataResult result = get_data_result(data_result, map_many_article_data);
 
     PQclear(data_result);
+    free(user_id_str);
+    free(limit_str);
+    free(offset_str);
     return result;
 }
 
@@ -211,22 +214,18 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
     char *BASE_LIMIT_QUERY = "LIMIT $%d";
     char *BASE_OFFSET_QUERY = "OFFSET $%d";
 
-    char limit_str[20];
-    sprintf(limit_str, "%d", limit);
+    char *limit_str = number_to_string(limit);
+    char *offset_str = number_to_string(offset);
 
-    char offset_str[20];
-    sprintf(offset_str, "%d", offset);
-
-    int max_command_length = strlen(BASE_AUTHOR_QUERY) + strlen(BASE_TAG_QUERY) + strlen(BASE_QUERY) + strlen(BASE_LIMIT_QUERY) + strlen(BASE_OFFSET_QUERY) + strlen(BASE_FAVORITED_QUERY) + 500;
     char *data[5];
     int data_count = 0;
 
-    char filters[max_command_length];
-    memset(filters, '\0', max_command_length);
-    char command[max_command_length];
-    memset(command, '\0', max_command_length);
+    char filters[MAX_QUERY_BUFFER_SIZE];
+    memset(filters, '\0', sizeof(filters));
+    char command[MAX_QUERY_BUFFER_SIZE];
+    memset(command, '\0', sizeof(command));
 
-    sprintf(command, BASE_QUERY);
+    sprintf(command, "%s", BASE_QUERY);
 
     if (author != NULL) {
 
@@ -238,8 +237,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
             sprintf(command + strlen(command), " %s ", "AND");
         }
 
-        char author_buffer[strlen(BASE_AUTHOR_QUERY) + strlen(author) + 500];
-        memset(author_buffer, '\0', strlen(BASE_AUTHOR_QUERY) + strlen(author) + 1);
+        char author_buffer[MAX_QUERY_BUFFER_SIZE];
+        memset(author_buffer, '\0', sizeof(author_buffer));
 
         sprintf(author_buffer, BASE_AUTHOR_QUERY, data_count + 1);
         sprintf(command + strlen(command), " %s", author_buffer);
@@ -258,8 +257,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
             sprintf(command + strlen(command), " %s ", "AND");
         }
 
-        char tag_buffer[strlen(BASE_TAG_QUERY) + strlen(tag) + 500];
-        memset(tag_buffer, '\0', strlen(BASE_TAG_QUERY) + strlen(tag) + 1);
+        char tag_buffer[MAX_QUERY_BUFFER_SIZE];
+        memset(tag_buffer, '\0', sizeof(tag_buffer));
 
         sprintf(tag_buffer, BASE_TAG_QUERY, data_count + 1);
         sprintf(command + strlen(command), " %s", tag_buffer);
@@ -277,8 +276,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
             sprintf(command + strlen(command), " %s ", "AND");
         }
 
-        char favorited_buffer[strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 500];
-        memset(favorited_buffer, '\0', strlen(BASE_FAVORITED_QUERY) + strlen(favorited) + 1);
+        char favorited_buffer[MAX_QUERY_BUFFER_SIZE];
+        memset(favorited_buffer, '\0', sizeof(favorited_buffer));
 
         sprintf(favorited_buffer, BASE_FAVORITED_QUERY, data_count + 1);
         sprintf(command + strlen(command), " %s", favorited_buffer);
@@ -287,9 +286,9 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
-    if (limit != NULL) {
-        char limit_buffer[strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 500];
-        memset(limit_buffer, '\0', strlen(BASE_LIMIT_QUERY) + strlen(limit_str) + 1);
+    if (limit != -1) {
+        char limit_buffer[MAX_QUERY_BUFFER_SIZE];
+        memset(limit_buffer, '\0', sizeof(limit_buffer));
         sprintf(limit_buffer, BASE_LIMIT_QUERY, data_count + 1);
         sprintf(command + strlen(command), " %s", limit_buffer);
 
@@ -297,9 +296,9 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
         data_count += 1;
     }
 
-    if (offset != NULL) {
-        char offset_buffer[strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 500];
-        memset(offset_buffer, '\0', strlen(BASE_OFFSET_QUERY) + strlen(offset_str) + 1);
+    if (offset != -1) {
+        char offset_buffer[MAX_QUERY_BUFFER_SIZE];
+        memset(offset_buffer, '\0', sizeof(offset_buffer));
         sprintf(offset_buffer, BASE_OFFSET_QUERY, data_count + 1);
         sprintf(command + strlen(command), " %s", offset_buffer);
 
@@ -312,6 +311,8 @@ DataResult get_all_articles(PGconn *conn, char *author, char *tag, int limit, in
     DataResult result = get_data_result(data_result, map_many_article_data);
 
     PQclear(data_result);
+    free(limit_str);
+    free(offset_str);
     return result;
 }
 
@@ -350,14 +351,8 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
     char *data[update_count + 1];
 
     char* update_updated_at = "updated_at = (now() at time zone 'utc')";
-
-    int update_substring_length = strlen(update_updated_at) + 3;
-
-    for (int i = 0; i < update_count; i++) {
-        update_substring_length += strlen(update_values[i].value) + 500;
-    }
     
-    char update_substring[update_substring_length];
+    char update_substring[MAX_QUERY_BUFFER_SIZE];
     memset(update_substring, 0, sizeof(update_substring));
 
     char *base_command = "UPDATE \"article\" "
@@ -367,12 +362,12 @@ DataResult update_article_by_slug(PGconn *conn, char *slug, UpdateValue *update_
 
     data[0] = slug;
 
-    for (int i = 1; i < update_count + 1; i++) {
+    for (size_t i = 1; i < update_count + 1; i++) {
         data[i] = update_values[i - 1].value;
     }
 
-    for (int i = 0; i < update_count; i++) {
-        sprintf(update_substring + strlen(update_substring), "%s = $%d", update_values[i].key, i + 2);
+    for (size_t i = 0; i < update_count; i++) {
+        sprintf(update_substring + strlen(update_substring), "%s = $%ld", update_values[i].key, i + 2);
 
         if (i != update_count - 1) {
             sprintf(update_substring + strlen(update_substring), ",");

@@ -1,7 +1,7 @@
-#include "main.h";
+#include "main.h"
 #include "../../lib/constants.h"
 #include "../../services/comments/comments_services.h"
-#include "comments_handlers.h";
+#include "comments_handlers.h"
 
 void handle_delete_comments(http_s *h) {
     FIO_LOG_DEBUG("handle_delete_comments");

@@ -26,7 +26,6 @@ CommentsServiceResult create_comment(PGconn *conn, char *slug, int user_id, char
         free_ArticleData(article_data);
         free(article_data);
     } else if (get_article_result.status == DATA_NOT_FOUND) {
-        printf("eere\n");
         service_result.status = SERVICE_NOT_FOUND;
         set_error(&service_result.error, "article", "not found");
     }

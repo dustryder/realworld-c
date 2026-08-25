@@ -2,7 +2,7 @@
 #include "articles_handlers.h"
 #include "../../lib/constants.h"
 
-static GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ *params);
+static GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ params);
 
 void handle_get_all_feed(http_s* h) {
     FIO_LOG_DEBUG("handle_get_all_feed");
@@ -32,7 +32,7 @@ void handle_get_all_feed(http_s* h) {
     free(result.result);
 }
 
-GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ *params) {
+GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ params) {
 
     GetAllFeedQuery qs;
 
@@ -42,8 +42,8 @@ GetAllFeedQuery parse_GetAllFeedQuery(FIOBJ *params) {
     FIOBJ fio_limit = fiobj_hash_get(params, limit_key);
     FIOBJ fio_offset = fiobj_hash_get(params, offset_key);
 
-    qs.limit = FIOBJ_TYPE_IS(fio_limit, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_limit) : NULL;
-    qs.offset = FIOBJ_TYPE_IS(fio_offset, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_offset) : NULL;
+    qs.limit = FIOBJ_TYPE_IS(fio_limit, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_limit) : -1;
+    qs.offset = FIOBJ_TYPE_IS(fio_offset, FIOBJ_T_NUMBER) ? fiobj_obj2num(fio_offset) : -1;
 
     fiobj_free(limit_key);
     fiobj_free(offset_key);

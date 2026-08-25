@@ -1,5 +1,7 @@
 #include "articles_services.h"
 #include "../../data/article.h"
+#include "../../data/follow.h"
+#include "../../data/tag.h"
 
 GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, int offset) {
 
@@ -30,7 +32,7 @@ GetAllArticleResult get_user_article_feed(PGconn *conn, int user_id, int limit, 
                 user_result.data,
                 tags,
                 tag_count,
-                false,
+                user_favorites_article,
                 favorite_count,
                 user_follows_article_creator
             );

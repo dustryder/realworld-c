@@ -18,7 +18,7 @@ typedef struct {
 
 ProfileServiceResult follow_user(PGconn *conn, int current_user, char* follow);
 ProfileServiceResult unfollow_user(PGconn *conn, int current_user, char* follow);
-ProfileServiceResult get_profile_by_username(PGconn *conn, char* username);
+ProfileServiceResult get_profile_by_username(PGconn *conn, char* username, int user_id);
 
 ProfileServiceResultData map_data_to_profile(UserData *data_result, bool following);
 void free_ProfileServiceResultData(ProfileServiceResultData *data);

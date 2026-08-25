@@ -8,10 +8,10 @@ void handle_get_profile(http_s* h) {
     FIO_LOG_DEBUG("handle_get_profile");
 
     char *username = parse_path_param(h->params, "username");
-  
+    int id = parse_request_user(h->params);
     char *response_body = NULL;
 
-    ProfileServiceResult result = get_profile_by_username(h->udata, username);
+    ProfileServiceResult result = get_profile_by_username(h->udata, username, id);
 
     if (result.status == SERVICE_SUCCESS) {
       response_body = create_success_profile_response(result.result);

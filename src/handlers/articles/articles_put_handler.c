@@ -4,7 +4,7 @@
 #include "../../lib/constants.h"
 #include "../../lib/type.h"
 
-static PutArticlePayload parse_PutArticlePayload(FIOBJ *raw_body);
+static PutArticlePayload parse_PutArticlePayload(FIOBJ raw_body);
 static void free_PutArticlePayload(PutArticlePayload payload);
 static void validate_PutArticlePayload(PutArticlePayload payload, ErrorValue *values, size_t *error_count);
 
@@ -101,7 +101,7 @@ void free_PutArticlePayload(PutArticlePayload payload) {
   }
 }
 
-PutArticlePayload parse_PutArticlePayload(FIOBJ *raw_body) {
+PutArticlePayload parse_PutArticlePayload(FIOBJ raw_body) {
   FIO_LOG_DEBUG("parse_put_article_body");
 
   FIOBJ article_key = fiobj_str_new("article", 7);

@@ -1,9 +1,9 @@
-#include "main.h";
+#include "main.h"
 #include "../../lib/constants.h"
-#include "comments_handlers.h";
+#include "comments_handlers.h"
 #include "../../services/comments/comments_services.h"
 
-static PostCommentPayload parse_PostCommentPayload(FIOBJ *raw_body);
+static PostCommentPayload parse_PostCommentPayload(FIOBJ raw_body);
 void validate_PostCommentPayload(PostCommentPayload payload, ErrorValue *values, size_t *error_count);
 
 void handle_post_comments(http_s *h) {
@@ -45,7 +45,6 @@ void handle_post_comments(http_s *h) {
 }
 
 void validate_PostCommentPayload(PostCommentPayload payload, ErrorValue *values, size_t *error_count) {
-
   if (strlen(payload.body) == 0) {
     values[*error_count].property = "body";
     values[*error_count].message = "can't be blank";
@@ -53,7 +52,7 @@ void validate_PostCommentPayload(PostCommentPayload payload, ErrorValue *values,
   }
 }
 
-PostCommentPayload parse_PostCommentPayload(FIOBJ *raw_body) {
+PostCommentPayload parse_PostCommentPayload(FIOBJ raw_body) {
 
   FIOBJ comment_key = fiobj_str_new("comment", 7);
 

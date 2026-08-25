@@ -2,6 +2,7 @@
 #include "../../data/article.h"
 #include "../../data/tag.h"
 #include "../../lib/mappers.h"
+#include "../../data/follow.h"
 
 ArticleServiceResult get_article_by_slug(PGconn *conn, int user_id, char* slug) {
     FIO_LOG_DEBUG("get_article_by_slug: user_id=%d, slug=%s", user_id, slug);

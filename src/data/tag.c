@@ -1,8 +1,7 @@
 #include "tag.h"
 #include <libpq-fe.h>
 #include "../lib/db.h"
-
-static TagData map_tag_data(const PGresult *res);
+#include "../lib/string_helpers.h"
 
 void insert_tag(PGconn *conn, char* tag) {
     FIO_LOG_DEBUG("insert_tag: tag: %s", tag);
@@ -13,8 +12,6 @@ void insert_tag(PGconn *conn, char* tag) {
 
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
-    ExecStatusType command_status = PQresultStatus(data_result);
-
     PQclear(data_result);
 
     return;
@@ -22,8 +19,7 @@ void insert_tag(PGconn *conn, char* tag) {
 
 void delete_article_tags(PGconn *conn, int article_id) {
     FIO_LOG_DEBUG("delete_article_tag: article_id=%d", article_id);
-    char article_id_str[20];
-    sprintf(article_id_str, "%d", article_id);
+    char *article_id_str = number_to_string(article_id);
 
     char *command = "DELETE FROM article_tag WHERE article_id = $1";
 
@@ -32,7 +28,7 @@ void delete_article_tags(PGconn *conn, int article_id) {
     PGresult *data_result = PQexecParams(conn,command,1,NULL,data,NULL,NULL,0);
 
     PQclear(data_result);
-
+    free(article_id_str);
     return;
 }
 
@@ -72,8 +68,7 @@ char **get_all_tags_data(PGconn *conn, int *tag_count) {
 
 void insert_article_tag(PGconn *conn, int article_id, char* tag) {
     FIO_LOG_DEBUG("insert_article_tag: article_id: %d, tag: %s", article_id, tag);
-    char article_id_str[20];
-    sprintf(article_id_str, "%d", article_id);
+    char *article_id_str = number_to_string(article_id);
 
     char *command = "INSERT INTO \"article_tag\" (article_id, tag_id) "
                                 "SELECT $2, id "
@@ -87,6 +82,7 @@ void insert_article_tag(PGconn *conn, int article_id, char* tag) {
     PGresult *data_result = PQexecParams(conn,command,2,NULL,data,NULL,NULL,0);
 
     PQclear(data_result);
+    free(article_id_str);
     return;
 }
 
@@ -109,13 +105,4 @@ char **get_tag_names(const PGresult *res, int *tag_count) {
 
         return tags;
     }
-}
-
-TagData map_tag_data(const PGresult *res) {
-    TagData data;
-
-    data.id = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-    data.name = strdup(PQgetvalue(res, 0, 1));
-
-    return data;
 }

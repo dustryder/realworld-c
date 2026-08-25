@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <libpq-fe.h>
 #include "../lib/db.h"
+#include "../lib/constants.h"
+#include "../lib/string_helpers.h"
 
 static UserData *map_user_data(const PGresult *res);
 
@@ -28,19 +30,19 @@ DataResult get_user_data_by_username(PGconn *conn, char* username) {
 
 DataResult get_user_data_by_id(PGconn *conn, int id) {
     FIO_LOG_DEBUG("get_user_data_by_id: id: %d", id);
-    char str[20];
-    sprintf(str, "%d", id);
+    char *id_str = number_to_string(id);
 
     char* command = "SELECT * "
                     "FROM \"user\" "
                     "WHERE id = $1";
-    const char * const data[1] = { str };
+    const char * const data[1] = { id_str };
 
     PGresult *data_result = PQexecParams(conn, command, 1, NULL, data, NULL, NULL, 0);
 
     DataResult result = get_data_result(data_result, map_user_data);
 
     PQclear(data_result);
+    free(id_str);
     return result;
 }
 
@@ -78,26 +80,25 @@ DataResult insert_user(PGconn *conn, char* email, char* username, char* password
 }
 
 DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, size_t value_count) {
-    char string_id[20];
-    sprintf(string_id, "%d", id);
-
-    char *data[value_count + 1];
-    char update_substring[20 * (value_count + 1)];
-    memset(update_substring, 0, sizeof(update_substring));
+    char *id_str = number_to_string(id);
 
     char *base_command = "UPDATE \"user\" "
                          "SET %s"
                          " WHERE id = $1 "
                          "RETURNING *";
 
-    data[0] = string_id;
+    char *data[value_count + 1];
+    char update_substring[MAX_QUERY_BUFFER_SIZE];
+    memset(update_substring, 0, sizeof(update_substring));
 
-    for (int i = 1; i < value_count + 1; i++) {
+    data[0] = id_str;
+
+    for (size_t i = 1; i < value_count + 1; i++) {
         data[i] = update_values[i - 1].value;
     }
 
-    for (int i = 0; i < value_count; i++) {
-        sprintf(update_substring + strlen(update_substring), "%s = $%d", update_values[i].key, i + 2);
+    for (size_t i = 0; i < value_count; i++) {
+        sprintf(update_substring + strlen(update_substring), "%s = $%ld", update_values[i].key, i + 2);
 
         if (i != value_count - 1) {
             sprintf(update_substring + strlen(update_substring), ",");
@@ -107,11 +108,12 @@ DataResult update_user_data(PGconn *conn, int id, UpdateValue *update_values, si
     char command[strlen(base_command) + strlen(update_substring)];
     sprintf(command, base_command, update_substring);
 
+    printf("%s\n", command);
     PGresult *data_result = PQexecParams(conn, command, value_count + 1, NULL, data, NULL, NULL, 0);
-
     DataResult result = get_data_result(data_result, map_user_data);
 
     PQclear(data_result);
+    free(id_str);
     return result;
 }
 
