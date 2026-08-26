@@ -75,6 +75,40 @@ CREATE TABLE public.article_tag (
 
 
 --
+-- Name: comment; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.comment (
+    id integer NOT NULL,
+    article_id integer NOT NULL,
+    created_by integer NOT NULL,
+    body character varying NOT NULL,
+    created_at timestamp without time zone DEFAULT (now() AT TIME ZONE 'utc'::text) NOT NULL,
+    updated_at timestamp without time zone DEFAULT (now() AT TIME ZONE 'utc'::text) NOT NULL
+);
+
+
+--
+-- Name: comment_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.comment_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.comment_id_seq OWNED BY public.comment.id;
+
+
+--
 -- Name: follow; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -165,6 +199,13 @@ ALTER TABLE ONLY public.article ALTER COLUMN id SET DEFAULT nextval('public.arti
 
 
 --
+-- Name: comment id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comment ALTER COLUMN id SET DEFAULT nextval('public.comment_id_seq'::regclass);
+
+
+--
 -- Name: tag id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -195,11 +236,27 @@ ALTER TABLE ONLY public.article
 
 
 --
+-- Name: article article_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article
+    ADD CONSTRAINT article_slug_key UNIQUE (slug);
+
+
+--
 -- Name: article_tag article_tag_article_tag_pk; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.article_tag
     ADD CONSTRAINT article_tag_article_tag_pk PRIMARY KEY (article_id, tag_id);
+
+
+--
+-- Name: comment comment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comment
+    ADD CONSTRAINT comment_pkey PRIMARY KEY (id);
 
 
 --
@@ -287,7 +344,7 @@ ALTER TABLE ONLY public.article_favourite
 --
 
 ALTER TABLE ONLY public.article_tag
-    ADD CONSTRAINT article_tag_article_fk FOREIGN KEY (article_id) REFERENCES public.article(id);
+    ADD CONSTRAINT article_tag_article_fk FOREIGN KEY (article_id) REFERENCES public.article(id) ON DELETE CASCADE;
 
 
 --
@@ -296,6 +353,22 @@ ALTER TABLE ONLY public.article_tag
 
 ALTER TABLE ONLY public.article_tag
     ADD CONSTRAINT article_tag_tag_fk FOREIGN KEY (tag_id) REFERENCES public.tag(id);
+
+
+--
+-- Name: comment fk_comment_article_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comment
+    ADD CONSTRAINT fk_comment_article_id FOREIGN KEY (article_id) REFERENCES public.article(id) ON DELETE CASCADE;
+
+
+--
+-- Name: comment fk_comment_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comment
+    ADD CONSTRAINT fk_comment_user_id FOREIGN KEY (created_by) REFERENCES public."user"(id) ON DELETE CASCADE;
 
 
 --
@@ -331,4 +404,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20260818073320'),
     ('20260818073602'),
     ('20260818073934'),
-    ('20260819160855');
+    ('20260819160855'),
+    ('20260822155231');
