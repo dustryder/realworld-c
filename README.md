@@ -15,33 +15,59 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-Typical 3-tier architecture:
+This uses:
+* [facil.io 7.x](https://github.com/boazsegev/facil.io) for HTTP concerns
+* [libpq](https://packages.debian.org/sid/libpq-dev) for postgres access
+* [libjwt 2.x](https://github.com/benmcollins/libjwt) for jwt handling
+* [cJSON](https://github.com/Davegamble/cjson) for JSON parsing
+* [Unity](https://github.com/throwtheswitch/unity) for unit testing
+* [dotenv-c](https://github.com/Isty001/dotenv-c) for env parsing
 
-HTTP layer
-    |
-    |
-    V
-Application layer
-    |
-    |
-    V
-Persistence layer
+
+It follows typical 3-tier architecture:
+
+Presentation layer -> Application layer -> Persistence layer
+
 
 # Getting started
 
-## Prerequisites
+Note: only tested on debian-based linux
 
-This project uses postgres as a database and will need to be installed. As well as this it uses dbmate to perform database migrations, although frankly you may just as well run the migration scripts directly.
-
-Otherwise:
+## Local
 
 1. Ensure dependencies are installed correctly via:
 
-apt update && apt install -y libpq-dev libjwt-dev
+```
+apt update && apt install -y libpq-dev libjwt-dev postgresql
+```
 
-3. Run make
+If wishing to use dbmate to interact with the database then this will need to be installed via
 
-4. Run the executable in the build folder
+```console
+sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+sudo chmod +x /usr/local/bin/dbmate
+```
 
-Note: this relies on glibc with gnu c extensions
+2. Create an env file and populate it with the correct details using .env.example as a template
 
+3. Apply the migration scripts. If this is done with dbmate, just run
+```console
+dbmate up
+```
+
+Otherwise, just apply the scripts in ./db/migrations
+
+4. Run
+```console
+make && ./build/conduit
+```
+
+## Docker
+
+For this, you'll need to install docker on your system. After that it's as simple as
+
+```console
+docker compose up api // to spin up the entire stack needed for the api
+docker compose up test-api // to spin up the bruno test collection
+docker compose up test-unit // to execute the unit tests
+```

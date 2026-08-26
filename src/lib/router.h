@@ -2,6 +2,7 @@
 #include "main.h"
 #include <stdarg.h>
 
+// Modified from https://github.com/boazsegev/facil.io/issues/100
 bool http_path_matches(http_s *request, char *__route);
 
 typedef bool (*middleware_fn)(http_s *request);
