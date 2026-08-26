@@ -42,7 +42,13 @@ MAIN_ROOT=src
 # Development subfolders under the main development root
 MAIN_SUBFOLDERS=handlers services data lib services/users services/tags services/profiles services/articles services/comments handlers/profiles handlers/user handlers/articles handlers/tags handlers/comments
 
+# Pathing to data access files that are intended to be mocked out
 TEST_MOCK_DAL = src/data/article.c
+
+# Test files
+TEST_ROOT = tests
+
+
 #############################################################################
 # Library Folder Settings
 #############################################################################
@@ -191,12 +197,16 @@ LIBSRC_TEST = $(foreach dir, $(LIBDIR_TEST), $(wildcard $(addsuffix /, $(basenam
 MAINDIR = $(MAIN_ROOT) $(foreach main_root, $(MAIN_ROOT) , $(foreach dir, $(MAIN_SUBFOLDERS), $(addsuffix /,$(basename $(main_root)))$(dir)))
 MAINSRC = $(foreach dir, $(MAINDIR), $(wildcard $(addsuffix /, $(basename $(dir)))*.c*))
 
+TESTDIR = $(TEST_ROOT)
+TESTSRC = $(foreach dir, $(TESTDIR), $(wildcard $(addsuffix /, $(basename $(dir)))*.c*))
+
+
 APPDIR = $(filter-out $(MAIN_ROOT),$(MAINDIR))
 APPSRC = $(foreach dir,$(APPDIR),$(wildcard $(dir)/*.c*))
 APPSRC := $(filter-out $(TEST_MOCK_DAL),$(APPSRC))
 
-FOLDERS = $(LIBDIR) $(MAINDIR) $(LIBDIR_TEST)
-SOURCES = $(LIBSRC) $(MAINSRC) $(LIBSRC_TEST)
+FOLDERS = $(LIBDIR) $(MAINDIR) $(LIBDIR_TEST) $(TESTDIR)
+SOURCES = $(LIBSRC) $(MAINSRC) $(LIBSRC_TEST) $(TESTSRC)
 
 BUILDTREE =$(foreach dir, $(FOLDERS), $(addsuffix /, $(basename $(TMP_ROOT)))$(basename $(dir)))
 
@@ -208,6 +218,7 @@ MAIN_OBJS = $(foreach source, $(MAINSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix 
 LIB_OBJS = $(foreach source, $(LIBSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
 LIB_TEST_OBJS = $(foreach source, $(LIBSRC_TEST), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
 APP_OBJS = $(foreach source, $(APPSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
+TEST_OBJS = $(foreach source, $(TESTSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
 
 OBJS_DEPENDENCY:=$(LIB_OBJS:.o=.d) $(MAIN_OBJS:.o=.d)
 
@@ -695,11 +706,10 @@ test_add_speed_flags:
 	$(eval CFLAGS:=$(CFLAGS) -DDEBUG=1)
 	$(eval LINKER_FLAGS:=-DDEBUG=1 $(LINKER_FLAGS))
 
-
 .PHONY : test/build
-test/build: $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS)
-	@$(CC) -c ./tests/tests.c -o $(TMP_ROOT)/tests.o $(CFLAGS_DEPENDENCY) $(CFLAGS)
-	@$(CCL) -o $(BIN) $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS) $(TMP_ROOT)/tests.o $(OPTIMIZATION) $(LINKER_FLAGS)
+test/build: $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS) $(TEST_OBJS)
+# 	@$(CC) -c ./tests/tests.c -o $(TMP_ROOT)/tests.o $(CFLAGS_DEPENDENCY) $(CFLAGS)
+	@$(CCL) -o $(BIN) $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS) $(TEST_OBJS) $(OPTIMIZATION) $(LINKER_FLAGS)
 
 .PHONY : clean
 clean:
