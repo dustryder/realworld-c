@@ -3,8 +3,7 @@
 #include "../../data/tag.h"
 #include "../../data/users.h"
 #include <ctype.h>
-
-static char* sluggify(char* title, int title_count);
+#include "../../lib/string_helpers.h"
 
 ArticleServiceResult create_article(PGconn *conn, int creator, char* title, char* description, char* body, OptionalArray tags) {
     FIO_LOG_DEBUG("create_article: creator=%d, title=%s, description=%s, body=%s", creator, title, description, body);
@@ -44,31 +43,4 @@ ArticleServiceResult create_article(PGconn *conn, int creator, char* title, char
     free(slug);
 
     return service_result;
-}
-
-char* sluggify(char* title, int title_count) {
-    FIO_LOG_DEBUG("sluggify: title=%s, title_count=%d", title, title_count);
-    int suffix_length = snprintf(NULL, 0, "-%d", title_count);
-    char* result_string = malloc((strlen(title) * sizeof(char)) + suffix_length + 1);
-    int result_string_pointer = 0;
-
-    size_t title_length = strlen(title);
-
-    for (size_t i = 0; i < title_length; i++) {
-        char current_character = title[i];
-
-        if (isalnum(current_character)) {
-            result_string[result_string_pointer] = tolower(current_character);
-            result_string_pointer += 1;
-        } else if (current_character == ' ') {
-            result_string[result_string_pointer] = '-';
-            result_string_pointer += 1;
-        }
-    }
-
-    result_string[result_string_pointer] = '\0';
-
-    sprintf(result_string + strlen(result_string), "-%d", title_count);
-
-    return result_string;
 }

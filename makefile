@@ -42,6 +42,7 @@ MAIN_ROOT=src
 # Development subfolders under the main development root
 MAIN_SUBFOLDERS=handlers services data lib services/users services/tags services/profiles services/articles services/comments handlers/profiles handlers/user handlers/articles handlers/tags handlers/comments
 
+TEST_MOCK_DAL = src/data/article.c
 #############################################################################
 # Library Folder Settings
 #############################################################################
@@ -54,6 +55,8 @@ LIB_PUBLIC_SUBFOLDERS=facil facil/tls facil/fiobj facil/cli facil/http facil/htt
 
 # privately used subfolders in the lib root (this distinction is only relevant for CMake)
 LIB_PRIVATE_SUBFOLDERS=
+
+LIB_TEST=unity
 
 #############################################################################
 # Compiler / Linker Settings
@@ -178,14 +181,22 @@ BIN = $(DEST)/$(NAME)
 LIBDIR_PUB = $(LIB_ROOT) $(foreach dir, $(LIB_PUBLIC_SUBFOLDERS), $(addsuffix /,$(basename $(LIB_ROOT)))$(dir))
 LIBDIR_PRIV = $(foreach dir, $(LIB_PRIVATE_SUBFOLDERS), $(addsuffix /,$(basename $(LIB_ROOT)))$(dir))
 
+LIBDIR_TEST = $(foreach dir, $(LIB_TEST), $(addsuffix /,$(basename $(LIB_ROOT)))$(dir))
+
 LIBDIR = $(LIBDIR_PUB) $(LIBDIR_PRIV)
 LIBSRC = $(foreach dir, $(LIBDIR), $(wildcard $(addsuffix /, $(basename $(dir)))*.c*))
+
+LIBSRC_TEST = $(foreach dir, $(LIBDIR_TEST), $(wildcard $(addsuffix /, $(basename $(dir)))*.c*))
 
 MAINDIR = $(MAIN_ROOT) $(foreach main_root, $(MAIN_ROOT) , $(foreach dir, $(MAIN_SUBFOLDERS), $(addsuffix /,$(basename $(main_root)))$(dir)))
 MAINSRC = $(foreach dir, $(MAINDIR), $(wildcard $(addsuffix /, $(basename $(dir)))*.c*))
 
-FOLDERS = $(LIBDIR) $(MAINDIR)
-SOURCES = $(LIBSRC) $(MAINSRC)
+APPDIR = $(filter-out $(MAIN_ROOT),$(MAINDIR))
+APPSRC = $(foreach dir,$(APPDIR),$(wildcard $(dir)/*.c*))
+APPSRC := $(filter-out $(TEST_MOCK_DAL),$(APPSRC))
+
+FOLDERS = $(LIBDIR) $(MAINDIR) $(LIBDIR_TEST)
+SOURCES = $(LIBSRC) $(MAINSRC) $(LIBSRC_TEST)
 
 BUILDTREE =$(foreach dir, $(FOLDERS), $(addsuffix /, $(basename $(TMP_ROOT)))$(basename $(dir)))
 
@@ -195,6 +206,8 @@ INCLUDE_STR = $(foreach dir,$(INCLUDE),$(addprefix -I, $(dir))) $(foreach dir,$(
 
 MAIN_OBJS = $(foreach source, $(MAINSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
 LIB_OBJS = $(foreach source, $(LIBSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
+LIB_TEST_OBJS = $(foreach source, $(LIBSRC_TEST), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
+APP_OBJS = $(foreach source, $(APPSRC), $(addprefix $(TMP_ROOT)/, $(addsuffix .o, $(basename $(source)))))
 
 OBJS_DEPENDENCY:=$(LIB_OBJS:.o=.d) $(MAIN_OBJS:.o=.d)
 
@@ -636,11 +649,9 @@ $(TMP_ROOT)/%.d: ;
 #############################################################################
 # Tasks - Testing
 #############################################################################
-
-
 .PHONY : test
 test: | clean
-	@DEBUG=1 $(MAKE) test_build_and_run
+	@$(MAKE) test_build_and_run
 	-@rm $(BIN) 2> /dev/null
 	-@rm -R $(TMP_ROOT) 2> /dev/null
 
@@ -676,8 +687,8 @@ test_build_and_run: | create_tree test_add_flags test/build
 
 .PHONY : test_add_flags
 test_add_flags:
-	$(eval CFLAGS:=-coverage $(CFLAGS) -DDEBUG=1 -Werror)
-	$(eval LINKER_FLAGS:=-coverage -DDEBUG=1 $(LINKER_FLAGS))
+	$(eval CFLAGS:=-coverage $(CFLAGS))
+	$(eval LINKER_FLAGS:=-coverage $(LINKER_FLAGS))
 
 .PHONY : test_add_speed_flags
 test_add_speed_flags:
@@ -686,9 +697,9 @@ test_add_speed_flags:
 
 
 .PHONY : test/build
-test/build: $(LIB_OBJS)
+test/build: $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS)
 	@$(CC) -c ./tests/tests.c -o $(TMP_ROOT)/tests.o $(CFLAGS_DEPENDENCY) $(CFLAGS)
-	@$(CCL) -o $(BIN) $(LIB_OBJS) $(TMP_ROOT)/tests.o $(OPTIMIZATION) $(LINKER_FLAGS)
+	@$(CCL) -o $(BIN) $(LIB_TEST_OBJS) $(LIB_OBJS) $(APP_OBJS) $(TMP_ROOT)/tests.o $(OPTIMIZATION) $(LINKER_FLAGS)
 
 .PHONY : clean
 clean:
